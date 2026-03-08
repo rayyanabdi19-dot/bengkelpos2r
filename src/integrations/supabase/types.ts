@@ -143,6 +143,50 @@ export type Database = {
         }
         Relationships: []
       }
+      pembelian: {
+        Row: {
+          catatan: string
+          created_at: string
+          harga_beli: number
+          id: string
+          nama_barang: string
+          qty: number
+          sparepart_id: string | null
+          supplier: string
+          total: number
+        }
+        Insert: {
+          catatan?: string
+          created_at?: string
+          harga_beli?: number
+          id?: string
+          nama_barang: string
+          qty?: number
+          sparepart_id?: string | null
+          supplier?: string
+          total?: number
+        }
+        Update: {
+          catatan?: string
+          created_at?: string
+          harga_beli?: number
+          id?: string
+          nama_barang?: string
+          qty?: number
+          sparepart_id?: string | null
+          supplier?: string
+          total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pembelian_sparepart_id_fkey"
+            columns: ["sparepart_id"]
+            isOneToOne: false
+            referencedRelation: "sparepart"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       servis: {
         Row: {
           created_at: string

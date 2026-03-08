@@ -16,7 +16,19 @@ const menuItems = [
   { title: 'Transaksi Servis', url: '/transaksi', icon: FileText },
   { title: 'Riwayat Transaksi', url: '/riwayat', icon: History },
   { title: 'Scan Sparepart', url: '/scan', icon: ScanBarcode },
-  { title: 'Sparepart', url: '/sparepart', icon: Package },
+];
+
+const sparepartSubmenu = [
+  { title: 'Stok Sparepart', url: '/sparepart' },
+  { title: 'Pembelian Barang', url: '/pembelian' },
+];
+
+const laporanSubmenu = [
+  { title: 'Laporan Umum', url: '/laporan' },
+  { title: 'Laporan Laba', url: '/laporan/laba' },
+];
+
+const bottomMenuItems = [
   { title: 'Layanan', url: '/layanan', icon: ClipboardList },
   { title: 'Booking Servis', url: '/booking', icon: CalendarCheck },
   { title: 'Pelanggan', url: '/pelanggan', icon: Users },
@@ -25,16 +37,14 @@ const menuItems = [
   { title: 'Pengaturan', url: '/pengaturan', icon: Settings },
 ];
 
-const laporanSubmenu = [
-  { title: 'Laporan Umum', url: '/laporan' },
-  { title: 'Laporan Laba', url: '/laporan/laba' },
-];
-
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
   const location = useLocation();
   const { logout, user } = useAuth();
+
+  const isSparepart = location.pathname === '/sparepart' || location.pathname === '/pembelian';
+  const isLaporan = location.pathname.startsWith('/laporan');
 
   return (
     <Sidebar collapsible="icon">
@@ -67,16 +77,60 @@ export function AppSidebar() {
                 </SidebarMenuItem>
               ))}
 
-              {/* Laporan with submenu */}
-              <Collapsible defaultOpen={location.pathname.startsWith('/laporan')} className="group/collapsible">
+              {/* Sparepart with submenu */}
+              <Collapsible defaultOpen={isSparepart} className="group/collapsible-sp">
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
-                    <SidebarMenuButton isActive={location.pathname.startsWith('/laporan')} className="hover:bg-sidebar-accent">
+                    <SidebarMenuButton isActive={isSparepart} className="hover:bg-sidebar-accent">
+                      <Package className="mr-2 h-4 w-4" />
+                      {!collapsed && (
+                        <>
+                          <span className="flex-1">Sparepart</span>
+                          <ChevronDown className="h-4 w-4 transition-transform group-data-[state=open]/collapsible-sp:rotate-180" />
+                        </>
+                      )}
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  {!collapsed && (
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        {sparepartSubmenu.map(sub => (
+                          <SidebarMenuSubItem key={sub.url}>
+                            <SidebarMenuSubButton asChild isActive={location.pathname === sub.url}>
+                              <NavLink to={sub.url} end className="hover:bg-sidebar-accent" activeClassName="text-sidebar-primary font-medium">
+                                {sub.title}
+                              </NavLink>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  )}
+                </SidebarMenuItem>
+              </Collapsible>
+
+              {/* Other menu items */}
+              {bottomMenuItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild isActive={location.pathname === item.url}>
+                    <NavLink to={item.url} end className="hover:bg-sidebar-accent" activeClassName="bg-sidebar-accent text-sidebar-primary font-medium">
+                      <item.icon className="mr-2 h-4 w-4" />
+                      {!collapsed && <span>{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+
+              {/* Laporan with submenu */}
+              <Collapsible defaultOpen={isLaporan} className="group/collapsible-lap">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton isActive={isLaporan} className="hover:bg-sidebar-accent">
                       <BarChart3 className="mr-2 h-4 w-4" />
                       {!collapsed && (
                         <>
                           <span className="flex-1">Laporan</span>
-                          <ChevronDown className="h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                          <ChevronDown className="h-4 w-4 transition-transform group-data-[state=open]/collapsible-lap:rotate-180" />
                         </>
                       )}
                     </SidebarMenuButton>
