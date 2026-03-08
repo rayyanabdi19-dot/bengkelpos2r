@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useKaryawan, useAbsensi } from '@/hooks/useSupabaseData';
+import { supabase } from '@/integrations/supabase/client';
 import { formatRupiah } from '@/lib/format';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Plus, Pencil, Trash2, Search, UserCheck, UserX, CalendarDays, Clock, User } from 'lucide-react';
+import { Loader2, Plus, Pencil, Trash2, Search, UserCheck, UserX, CalendarDays, Clock, User, Camera, X } from 'lucide-react';
 
 interface KaryawanForm {
   nama: string;
@@ -16,9 +17,10 @@ interface KaryawanForm {
   gaji_pokok: number;
   tanggal_masuk: string;
   aktif: boolean;
+  foto_wajah: string;
 }
 
-const emptyForm: KaryawanForm = { nama: '', no_hp: '', jabatan: '', alamat: '', gaji_pokok: 0, tanggal_masuk: '', aktif: true };
+const emptyForm: KaryawanForm = { nama: '', no_hp: '', jabatan: '', alamat: '', gaji_pokok: 0, tanggal_masuk: '', aktif: true, foto_wajah: '' };
 
 export default function KaryawanPage() {
   const { karyawanList, loading, add, update, remove } = useKaryawan();
@@ -29,6 +31,8 @@ export default function KaryawanPage() {
   const [editing, setEditing] = useState<string | null>(null);
   const [form, setForm] = useState<KaryawanForm>(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const filtered = karyawanList.filter(k =>
     k.nama.toLowerCase().includes(search.toLowerCase()) ||
@@ -54,8 +58,34 @@ export default function KaryawanPage() {
 
   const openEdit = (k: any) => {
     setEditing(k.id);
-    setForm({ nama: k.nama, no_hp: k.no_hp, jabatan: k.jabatan, alamat: k.alamat, gaji_pokok: k.gaji_pokok, tanggal_masuk: k.tanggal_masuk, aktif: k.aktif });
+    setForm({ nama: k.nama, no_hp: k.no_hp, jabatan: k.jabatan, alamat: k.alamat, gaji_pokok: k.gaji_pokok, tanggal_masuk: k.tanggal_masuk, aktif: k.aktif, foto_wajah: k.foto_wajah || '' });
     setShowDialog(true);
+  };
+
+  const handleUploadPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast({ title: 'File harus berupa gambar', variant: 'destructive' });
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast({ title: 'Ukuran foto maksimal 2MB', variant: 'destructive' });
+      return;
+    }
+    setUploading(true);
+    const ext = file.name.split('.').pop();
+    const fileName = `${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from('karyawan-photos').upload(fileName, file, { upsert: true });
+    if (error) {
+      toast({ title: 'Gagal upload foto', variant: 'destructive' });
+      setUploading(false);
+      return;
+    }
+    const { data: urlData } = supabase.storage.from('karyawan-photos').getPublicUrl(fileName);
+    setForm(prev => ({ ...prev, foto_wajah: urlData.publicUrl }));
+    setUploading(false);
+    toast({ title: 'Foto berhasil diupload' });
   };
 
   const handleSave = async () => {
@@ -107,9 +137,13 @@ export default function KaryawanPage() {
           return (
             <div key={k.id} className="stat-card flex items-center gap-3">
               <div className="shrink-0">
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                  <User className="w-5 h-5 text-primary" />
-                </div>
+                {k.foto_wajah ? (
+                  <img src={k.foto_wajah} alt={k.nama} className="w-12 h-12 rounded-full object-cover" />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                    <User className="w-5 h-5 text-primary" />
+                  </div>
+                )}
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
@@ -144,6 +178,34 @@ export default function KaryawanPage() {
         <DialogContent className="max-w-lg">
           <DialogHeader><DialogTitle>{editing ? 'Edit Karyawan' : 'Tambah Karyawan'}</DialogTitle></DialogHeader>
           <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
+            {/* Foto Upload */}
+            <div className="flex flex-col items-center gap-2">
+              <div
+                className="w-24 h-24 rounded-full bg-muted flex items-center justify-center overflow-hidden cursor-pointer border-2 border-dashed border-border hover:border-primary transition-colors"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                {uploading ? (
+                  <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                ) : form.foto_wajah ? (
+                  <img src={form.foto_wajah} alt="Foto" className="w-full h-full object-cover" />
+                ) : (
+                  <Camera className="w-8 h-8 text-muted-foreground" />
+                )}
+              </div>
+              <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleUploadPhoto} />
+              <div className="flex items-center gap-2">
+                <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
+                  {uploading ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Camera className="w-3 h-3 mr-1" />}
+                  {form.foto_wajah ? 'Ganti Foto' : 'Upload Foto'}
+                </Button>
+                {form.foto_wajah && (
+                  <Button type="button" variant="ghost" size="sm" onClick={() => setForm(prev => ({ ...prev, foto_wajah: '' }))}>
+                    <X className="w-3 h-3 mr-1" />Hapus
+                  </Button>
+                )}
+              </div>
+            </div>
+
             <div><Label>Nama *</Label><Input value={form.nama} onChange={e => setForm({ ...form, nama: e.target.value })} /></div>
             <div className="grid grid-cols-2 gap-3">
               <div><Label>No. HP</Label><Input value={form.no_hp} onChange={e => setForm({ ...form, no_hp: e.target.value })} /></div>
