@@ -7,13 +7,14 @@ import {
 } from '@/components/ui/sidebar';
 import {
   LayoutDashboard, FileText, ScanBarcode, Package, CalendarCheck,
-  Users, BarChart3, Settings, LogOut, Wrench, ChevronDown, Store, ClipboardList, Bluetooth,
+  Users, BarChart3, Settings, LogOut, Wrench, ChevronDown, Store, ClipboardList, Bluetooth, History,
 } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 const menuItems = [
   { title: 'Dashboard', url: '/', icon: LayoutDashboard },
   { title: 'Transaksi Servis', url: '/transaksi', icon: FileText },
+  { title: 'Riwayat Transaksi', url: '/riwayat', icon: History },
   { title: 'Scan Sparepart', url: '/scan', icon: ScanBarcode },
   { title: 'Sparepart', url: '/sparepart', icon: Package },
   { title: 'Layanan', url: '/layanan', icon: ClipboardList },

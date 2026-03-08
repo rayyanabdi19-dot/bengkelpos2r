@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { useSparepart, useServis, useLayanan } from '@/hooks/useSupabaseData';
+import { useSparepart, useServis, useLayanan, useBengkelProfile } from '@/hooks/useSupabaseData';
+import { useBluetoothPrinter } from '@/hooks/useBluetoothPrinter';
 import { formatRupiah } from '@/lib/format';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Trash2, Printer, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Printer, Loader2, Bluetooth } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import ReceiptView from '@/components/ReceiptView';
@@ -16,6 +17,8 @@ export default function TransaksiPage() {
   const { spareparts } = useSparepart();
   const { add: addServis } = useServis();
   const { getActive } = useLayanan();
+  const { profile } = useBengkelProfile();
+  const btPrinter = useBluetoothPrinter();
   const daftarLayanan = getActive();
   const [form, setForm] = useState({
     namaPelanggan: '', noHp: '', platMotor: '', tipeMotor: '', keluhan: '',
@@ -83,6 +86,15 @@ export default function TransaksiPage() {
     } else {
       toast({ title: 'Error', description: 'Gagal menyimpan transaksi', variant: 'destructive' });
     }
+  };
+
+  const handleBtPrint = async () => {
+    if (!lastServis) return;
+    if (!btPrinter.connected) {
+      const ok = await btPrinter.connect();
+      if (!ok) return;
+    }
+    await btPrinter.printReceipt(lastServis, profile);
   };
 
   return (
@@ -196,9 +208,17 @@ export default function TransaksiPage() {
             <DialogTitle>Struk Transaksi</DialogTitle>
           </DialogHeader>
           {lastServis && <ReceiptView servis={lastServis} />}
-          <Button onClick={() => window.print()} variant="outline" className="w-full">
-            <Printer className="w-4 h-4 mr-2" /> Cetak Struk
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={() => window.print()} variant="outline" className="flex-1">
+              <Printer className="w-4 h-4 mr-2" /> Cetak Browser
+            </Button>
+            <Button onClick={handleBtPrint} disabled={btPrinter.printing} className="flex-1">
+              {btPrinter.printing
+                ? <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                : <Bluetooth className="w-4 h-4 mr-2" />}
+              {btPrinter.connected ? 'Cetak BT' : 'Hubungkan & Cetak'}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
