@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Plus, Trash2, Download } from 'lucide-react';
+import { Loader2, Plus, Trash2, FileText } from 'lucide-react';
 
 interface SlipForm {
   karyawan_id: string;
@@ -56,38 +56,65 @@ export default function GajiPage() {
     }
   };
 
-  const downloadSlip = (slip: any) => {
+  const printPDF = (slip: any) => {
     const k = karyawanList.find(k => k.id === slip.karyawan_id);
-    const content = `
-${profile?.nama || 'BengkelPOS'}
-${profile?.alamat || ''}
-${profile?.telepon ? 'Telp: ' + profile.telepon : ''}
-==========================================
-SLIP GAJI KARYAWAN
-==========================================
-Nama       : ${k?.nama || '-'}
-Jabatan    : ${k?.jabatan || '-'}
-Periode    : ${slip.periode}
-==========================================
+    const logoHtml = profile?.logo_url
+      ? `<img src="${profile.logo_url}" style="height:50px;margin:0 auto 8px;display:block;object-fit:contain;" />`
+      : '';
 
-Gaji Pokok : ${formatRupiah(slip.gaji_pokok)}
-Bonus      : ${formatRupiah(slip.bonus)}
-Potongan   : ${formatRupiah(slip.potongan)}
-------------------------------------------
-TOTAL      : ${formatRupiah(slip.total)}
+    const html = `<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Slip Gaji - ${k?.nama || ''}</title>
+<style>
+  @media print { @page { margin: 20mm; } }
+  body { font-family: 'Segoe UI', Arial, sans-serif; color: #1a1a1a; max-width: 600px; margin: 0 auto; padding: 24px; }
+  .header { text-align: center; border-bottom: 2px solid #222; padding-bottom: 16px; margin-bottom: 20px; }
+  .header h1 { margin: 0; font-size: 18px; }
+  .header p { margin: 2px 0; font-size: 12px; color: #555; }
+  .title { text-align: center; font-size: 16px; font-weight: bold; margin: 16px 0; text-transform: uppercase; letter-spacing: 1px; }
+  .info-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 14px; }
+  .info-row .label { color: #555; }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+  th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #ddd; font-size: 14px; }
+  th { background: #f5f5f5; font-weight: 600; }
+  .total-row td { border-top: 2px solid #222; font-weight: bold; font-size: 16px; }
+  .footer { text-align: center; margin-top: 24px; font-size: 11px; color: #999; border-top: 1px solid #ddd; padding-top: 12px; }
+  .sign { display: flex; justify-content: space-between; margin-top: 48px; }
+  .sign div { text-align: center; width: 40%; }
+  .sign .line { border-top: 1px solid #333; margin-top: 60px; padding-top: 4px; font-size: 13px; }
+</style></head><body>
+  <div class="header">
+    ${logoHtml}
+    <h1>${profile?.nama || 'BengkelPOS'}</h1>
+    ${profile?.alamat ? `<p>${profile.alamat}</p>` : ''}
+    ${profile?.telepon ? `<p>Telp: ${profile.telepon}</p>` : ''}
+  </div>
+  <div class="title">Slip Gaji Karyawan</div>
+  <div style="margin-bottom:16px">
+    <div class="info-row"><span class="label">Nama</span><span>${k?.nama || '-'}</span></div>
+    <div class="info-row"><span class="label">Jabatan</span><span>${k?.jabatan || '-'}</span></div>
+    <div class="info-row"><span class="label">Periode</span><span>${slip.periode}</span></div>
+  </div>
+  <table>
+    <tr><th>Komponen</th><th style="text-align:right">Jumlah</th></tr>
+    <tr><td>Gaji Pokok</td><td style="text-align:right">${formatRupiah(slip.gaji_pokok)}</td></tr>
+    <tr><td>Bonus</td><td style="text-align:right;color:green">${formatRupiah(slip.bonus)}</td></tr>
+    <tr><td>Potongan</td><td style="text-align:right;color:red">- ${formatRupiah(slip.potongan)}</td></tr>
+    <tr class="total-row"><td>Total Diterima</td><td style="text-align:right">${formatRupiah(slip.total)}</td></tr>
+  </table>
+  ${slip.catatan ? `<p style="font-size:13px;color:#555;">Catatan: ${slip.catatan}</p>` : ''}
+  <div class="sign">
+    <div><div class="line">Penerima</div></div>
+    <div><div class="line">Pemilik Bengkel</div></div>
+  </div>
+  <div class="footer">Dicetak pada ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
+</body></html>`;
 
-Catatan: ${slip.catatan || '-'}
-==========================================
-Dicetak: ${new Date().toLocaleDateString('id-ID')}
-    `.trim();
-
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `slip-gaji-${k?.nama || 'karyawan'}-${slip.periode}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
+    const w = window.open('', '_blank');
+    if (w) {
+      w.document.write(html);
+      w.document.close();
+      setTimeout(() => w.print(), 500);
+    }
   };
 
   if (loading) return <div className="flex items-center justify-center h-64"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
@@ -109,7 +136,6 @@ Dicetak: ${new Date().toLocaleDateString('id-ID')}
           const k = karyawanList.find(k => k.id === slip.karyawan_id);
           return (
             <div key={slip.id} className="stat-card">
-              {/* Header Bengkel */}
               <div className="text-center border-b border-border pb-3 mb-3">
                 {profile?.logo_url && <img src={profile.logo_url} alt="Logo" className="h-10 mx-auto mb-1 object-contain" />}
                 <p className="font-bold text-sm">{profile?.nama || 'BengkelPOS'}</p>
@@ -122,8 +148,12 @@ Dicetak: ${new Date().toLocaleDateString('id-ID')}
                   <p className="text-sm text-muted-foreground">{k?.jabatan || '-'} • Periode: {slip.periode}</p>
                 </div>
                 <div className="flex gap-1">
-                  <Button variant="ghost" size="icon" onClick={() => downloadSlip(slip)}><Download className="w-4 h-4 text-primary" /></Button>
-                  <Button variant="ghost" size="icon" onClick={() => handleDelete(slip.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                  <Button variant="ghost" size="icon" onClick={() => printPDF(slip)} title="Cetak PDF">
+                    <FileText className="w-4 h-4 text-primary" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => handleDelete(slip.id)}>
+                    <Trash2 className="w-4 h-4 text-destructive" />
+                  </Button>
                 </div>
               </div>
               <div className="grid grid-cols-4 gap-2 text-sm">
