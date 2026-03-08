@@ -89,6 +89,42 @@ export type Database = {
         }
         Relationships: []
       }
+      karyawan: {
+        Row: {
+          aktif: boolean
+          alamat: string
+          created_at: string
+          gaji_pokok: number
+          id: string
+          jabatan: string
+          nama: string
+          no_hp: string
+          tanggal_masuk: string
+        }
+        Insert: {
+          aktif?: boolean
+          alamat?: string
+          created_at?: string
+          gaji_pokok?: number
+          id?: string
+          jabatan?: string
+          nama: string
+          no_hp?: string
+          tanggal_masuk?: string
+        }
+        Update: {
+          aktif?: boolean
+          alamat?: string
+          created_at?: string
+          gaji_pokok?: number
+          id?: string
+          jabatan?: string
+          nama?: string
+          no_hp?: string
+          tanggal_masuk?: string
+        }
+        Relationships: []
+      }
       layanan: {
         Row: {
           aktif: boolean
@@ -310,6 +346,50 @@ export type Database = {
             columns: ["sparepart_id"]
             isOneToOne: false
             referencedRelation: "sparepart"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      slip_gaji: {
+        Row: {
+          bonus: number
+          catatan: string
+          created_at: string
+          gaji_pokok: number
+          id: string
+          karyawan_id: string
+          periode: string
+          potongan: number
+          total: number
+        }
+        Insert: {
+          bonus?: number
+          catatan?: string
+          created_at?: string
+          gaji_pokok?: number
+          id?: string
+          karyawan_id: string
+          periode: string
+          potongan?: number
+          total?: number
+        }
+        Update: {
+          bonus?: number
+          catatan?: string
+          created_at?: string
+          gaji_pokok?: number
+          id?: string
+          karyawan_id?: string
+          periode?: string
+          potongan?: number
+          total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "slip_gaji_karyawan_id_fkey"
+            columns: ["karyawan_id"]
+            isOneToOne: false
+            referencedRelation: "karyawan"
             referencedColumns: ["id"]
           },
         ]
