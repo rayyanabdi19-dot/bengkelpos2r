@@ -30,7 +30,7 @@ import AbsensiPage from "@/pages/AbsensiPage";
 import BackupPage from "@/pages/BackupPage";
 import PanduanPage from "@/pages/PanduanPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
-import AdminResetCodesPage from "@/pages/AdminResetCodesPage";
+
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -109,7 +109,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/reset-password" element={<ResetPasswordPage />} />
-            <Route path="/admin/reset-codes" element={<AdminResetCodesPage />} />
+            
             <Route path="*" element={<AppRoutes />} />
           </Routes>
         </BrowserRouter>
