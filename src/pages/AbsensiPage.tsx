@@ -309,6 +309,37 @@ export default function AbsensiPage() {
               )}
             </div>
 
+            {/* Scan Feedback Banner */}
+            {scanFeedback && (
+              <div className={`rounded-lg p-4 flex items-center gap-3 animate-fade-in ${
+                scanFeedback.type === 'masuk' ? 'bg-green-100 border border-green-300 dark:bg-green-900/30 dark:border-green-700' :
+                scanFeedback.type === 'pulang' ? 'bg-blue-100 border border-blue-300 dark:bg-blue-900/30 dark:border-blue-700' :
+                scanFeedback.type === 'lengkap' ? 'bg-yellow-100 border border-yellow-300 dark:bg-yellow-900/30 dark:border-yellow-700' :
+                'bg-red-100 border border-red-300 dark:bg-red-900/30 dark:border-red-700'
+              }`}>
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${
+                  scanFeedback.type === 'masuk' ? 'bg-green-500' :
+                  scanFeedback.type === 'pulang' ? 'bg-blue-500' :
+                  scanFeedback.type === 'lengkap' ? 'bg-yellow-500' : 'bg-red-500'
+                }`}>
+                  {scanFeedback.type === 'masuk' && <ArrowUp className="w-6 h-6 text-white" />}
+                  {scanFeedback.type === 'pulang' && <ArrowDown className="w-6 h-6 text-white" />}
+                  {scanFeedback.type === 'lengkap' && <UserCheck className="w-6 h-6 text-white" />}
+                  {scanFeedback.type === 'error' && <ScanBarcode className="w-6 h-6 text-white" />}
+                </div>
+                <div>
+                  <p className="font-bold text-lg">
+                    {scanFeedback.type === 'masuk' && '⬆️ MASUK'}
+                    {scanFeedback.type === 'pulang' && '⬇️ PULANG'}
+                    {scanFeedback.type === 'lengkap' && '✅ SUDAH LENGKAP'}
+                    {scanFeedback.type === 'error' && '❌ GAGAL'}
+                  </p>
+                  <p className="text-sm font-medium">{scanFeedback.nama}</p>
+                  {scanFeedback.waktu && <p className="text-xs text-muted-foreground">Pukul {scanFeedback.waktu}</p>}
+                </div>
+              </div>
+            )}
+
             {/* Manual select + settings */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
