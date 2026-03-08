@@ -6,8 +6,8 @@ import { QRCodeSVG } from 'qrcode.react';
 export default function ReceiptView({ servis }: { servis: Servis }) {
   const { profile } = useBengkelProfile();
 
-  // Generate a link to the bengkel booking/service page
-  const bengkelLink = `${window.location.origin}/booking`;
+  // Use custom QR link from settings, fallback to booking page
+  const qrLink = (profile as any)?.link_qrcode || `${window.location.origin}/booking`;
 
   return (
     <div className="receipt-text bg-card rounded-lg border border-border mx-auto" style={{ width: '100%', maxWidth: '80mm', padding: '3mm', fontSize: '11px', lineHeight: 1.4 }}>
@@ -69,8 +69,8 @@ export default function ReceiptView({ servis }: { servis: Servis }) {
 
         {/* QR Code */}
         <div className="flex flex-col items-center" style={{ marginTop: '1mm' }}>
-          <QRCodeSVG value={bengkelLink} size={64} level="L" />
-          <p style={{ fontSize: '8px', marginTop: '1mm', color: 'hsl(var(--muted-foreground))' }}>Scan untuk booking online</p>
+          <QRCodeSVG value={qrLink} size={64} level="L" />
+          <p style={{ fontSize: '8px', marginTop: '1mm', color: 'hsl(var(--muted-foreground))' }}>Scan untuk layanan bengkel</p>
         </div>
       </div>
     </div>
