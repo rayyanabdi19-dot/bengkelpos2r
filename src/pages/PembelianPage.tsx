@@ -21,6 +21,7 @@ export default function PembelianPage() {
     nama_barang: '',
     qty: 1,
     harga_beli: 0,
+    harga_jual: 0,
     supplier: '',
     catatan: '',
   });
