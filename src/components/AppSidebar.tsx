@@ -18,6 +18,7 @@ const menuItems = [
   { title: 'Sparepart', url: '/sparepart', icon: Package },
   { title: 'Booking Servis', url: '/booking', icon: CalendarCheck },
   { title: 'Pelanggan', url: '/pelanggan', icon: Users },
+  { title: 'Profil Bengkel', url: '/profil', icon: Store },
   { title: 'Pengaturan', url: '/pengaturan', icon: Settings },
 ];
 

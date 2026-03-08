@@ -119,6 +119,7 @@ export default function SparepartPage() {
               <span className="text-xs bg-secondary px-2 py-0.5 rounded-md text-secondary-foreground">{sp.kategori}</span>
             </div>
             <p className="text-lg font-bold text-primary">{formatRupiah(sp.harga)}</p>
+            {sp.hpp > 0 && <p className="text-xs text-muted-foreground">HPP: {formatRupiah(sp.hpp)}</p>}
             <div className="flex items-center justify-between mt-2">
               <div className="flex items-center gap-1">
                 {sp.stok <= sp.stok_minimum && <AlertTriangle className="w-3.5 h-3.5 text-warning" />}
