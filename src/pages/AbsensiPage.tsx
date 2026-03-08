@@ -449,9 +449,21 @@ export default function AbsensiPage() {
                 if (!printContent) return;
                 const w = window.open('', '_blank');
                 if (!w) return;
-                w.document.write(`<html><head><title>QR Code - ${qrKaryawan.nama}</title><style>body{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;margin:0}h2{margin:8px 0 4px}p{margin:0;color:#666}.bengkel-name{font-size:14pt;font-weight:bold;margin-bottom:8px}</style></head><body>${printContent.innerHTML}</body></html>`);
+                w.document.write(`<html><head><title>QR Code - ${qrKaryawan.nama}</title><style>
+                  *{margin:0;padding:0;box-sizing:border-box}
+                  body{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;margin:0;padding:10mm}
+                  img{max-width:25mm;max-height:25mm;border-radius:50%;object-fit:cover}
+                  svg{width:40mm;height:40mm}
+                  p{margin:0;color:#333}
+                  .bengkel-name{font-size:12pt;font-weight:bold;margin-bottom:4mm;color:#666}
+                  @media print{
+                    body{padding:0}
+                    @page{margin:10mm}
+                    svg{width:35mm;height:35mm}
+                  }
+                </style></head><body>${printContent.innerHTML}</body></html>`);
                 w.document.close();
-                w.print();
+                setTimeout(() => w.print(), 300);
               }} className="w-full">
                 <Download className="w-4 h-4 mr-2" />Cetak QR Code
               </Button>
