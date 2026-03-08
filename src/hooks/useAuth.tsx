@@ -96,7 +96,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .select('*')
       .eq('kode', licenseKey.trim().toUpperCase())
       .eq('aktif', true)
-      .is('used_by', null)
       .single();
 
     if (licError || !license) {
@@ -114,11 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .insert({ id: authData.user.id, username, role: 'admin', license_kode: licenseKey.trim().toUpperCase() });
     if (profileError) return { success: false, error: 'Gagal membuat profil: ' + profileError.message };
 
-    // Mark license as used
-    await supabase
-      .from('licenses')
-      .update({ used_by: authData.user.id, used_at: new Date().toISOString(), aktif: false })
-      .eq('id', license.id);
+    // License tetap aktif selamanya (tidak dinonaktifkan)
 
     // Auto login
     const userData: User = { username, role: 'admin' };
