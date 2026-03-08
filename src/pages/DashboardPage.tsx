@@ -1,10 +1,53 @@
 import { useDashboardStats } from '@/hooks/useSupabaseData';
 import { formatRupiah } from '@/lib/format';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Wrench, DollarSign, Package, CalendarCheck, AlertTriangle, Loader2 } from 'lucide-react';
+import { Wrench, DollarSign, Package, CalendarCheck, AlertTriangle, Loader2, Plus, ScanLine, ShoppingCart, Users, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
 
 export default function DashboardPage() {
   const { stats, monthlyData, loading } = useDashboardStats();
+  const navigate = useNavigate();
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  const slides = [
+    {
+      title: 'Selamat Datang di BengkelPOS',
+      description: 'Kelola bengkel motor Anda dengan mudah dan profesional',
+      bg: 'from-primary to-primary/70',
+    },
+    {
+      title: 'Pantau Stok Sparepart',
+      description: 'Notifikasi otomatis saat stok menipis, jangan sampai kehabisan!',
+      bg: 'from-info to-info/70',
+    },
+    {
+      title: 'Laporan Lengkap',
+      description: 'Analisis pendapatan, laba, dan performa bengkel Anda',
+      bg: 'from-success to-success/70',
+    },
+  ];
+
+  const nextSlide = useCallback(() => {
+    setCurrentSlide(prev => (prev + 1) % slides.length);
+  }, [slides.length]);
+
+  const prevSlide = () => {
+    setCurrentSlide(prev => (prev - 1 + slides.length) % slides.length);
+  };
+
+  useEffect(() => {
+    const interval = setInterval(nextSlide, 5000);
+    return () => clearInterval(interval);
+  }, [nextSlide]);
+
+  const quickActions = [
+    { label: 'Servis Baru', icon: Plus, color: 'bg-primary text-primary-foreground', path: '/transaksi' },
+    { label: 'Scan Barcode', icon: ScanLine, color: 'bg-info text-primary-foreground', path: '/scan' },
+    { label: 'Pembelian', icon: ShoppingCart, color: 'bg-warning text-primary-foreground', path: '/pembelian' },
+    { label: 'Pelanggan', icon: Users, color: 'bg-success text-primary-foreground', path: '/pelanggan' },
+  ];
 
   if (loading) {
     return (
@@ -26,6 +69,45 @@ export default function DashboardPage() {
       <div>
         <h1 className="page-header">Dashboard</h1>
         <p className="page-subtitle">Ringkasan aktivitas bengkel hari ini</p>
+      </div>
+
+      {/* Carousel */}
+      <div className="relative rounded-xl overflow-hidden">
+        <div className={`bg-gradient-to-r ${slides[currentSlide].bg} p-6 sm:p-8 text-primary-foreground transition-all duration-500 min-h-[120px] flex flex-col justify-center`}>
+          <h2 className="text-lg sm:text-xl font-bold mb-1">{slides[currentSlide].title}</h2>
+          <p className="text-sm opacity-90">{slides[currentSlide].description}</p>
+        </div>
+        <button onClick={prevSlide} className="absolute left-2 top-1/2 -translate-y-1/2 bg-background/20 hover:bg-background/40 rounded-full p-1 text-primary-foreground transition-colors">
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+        <button onClick={nextSlide} className="absolute right-2 top-1/2 -translate-y-1/2 bg-background/20 hover:bg-background/40 rounded-full p-1 text-primary-foreground transition-colors">
+          <ChevronRight className="w-5 h-5" />
+        </button>
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
+          {slides.map((_, i) => (
+            <button key={i} onClick={() => setCurrentSlide(i)} className={`w-2 h-2 rounded-full transition-all ${i === currentSlide ? 'bg-primary-foreground w-5' : 'bg-primary-foreground/40'}`} />
+          ))}
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div>
+        <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wide">Aksi Cepat</h3>
+        <div className="grid grid-cols-4 gap-3">
+          {quickActions.map((action) => (
+            <Button
+              key={action.label}
+              variant="outline"
+              className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-[1.02] transition-transform"
+              onClick={() => navigate(action.path)}
+            >
+              <div className={`w-10 h-10 rounded-xl ${action.color} flex items-center justify-center`}>
+                <action.icon className="w-5 h-5" />
+              </div>
+              <span className="text-xs font-medium">{action.label}</span>
+            </Button>
+          ))}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
