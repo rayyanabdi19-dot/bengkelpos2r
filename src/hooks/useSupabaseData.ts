@@ -102,6 +102,30 @@ export interface Pembelian {
   created_at: string;
 }
 
+export interface Karyawan {
+  id: string;
+  nama: string;
+  no_hp: string;
+  jabatan: string;
+  alamat: string;
+  gaji_pokok: number;
+  tanggal_masuk: string;
+  aktif: boolean;
+  created_at: string;
+}
+
+export interface SlipGaji {
+  id: string;
+  karyawan_id: string;
+  periode: string;
+  gaji_pokok: number;
+  bonus: number;
+  potongan: number;
+  total: number;
+  catatan: string;
+  created_at: string;
+}
+
 const db = {
   pelanggan: () => supabase.from('pelanggan' as any),
   sparepart: () => supabase.from('sparepart' as any),
@@ -112,6 +136,8 @@ const db = {
   bengkel_profile: () => supabase.from('bengkel_profile' as any),
   layanan: () => supabase.from('layanan' as any),
   pembelian: () => supabase.from('pembelian' as any),
+  karyawan: () => supabase.from('karyawan' as any),
+  slip_gaji: () => supabase.from('slip_gaji' as any),
 };
 
 function useSupabaseTable<T>(tableFn: () => ReturnType<typeof supabase.from>) {

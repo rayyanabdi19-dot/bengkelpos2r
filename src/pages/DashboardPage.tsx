@@ -1,4 +1,4 @@
-import { useDashboardStats, useSparepart } from '@/hooks/useSupabaseData';
+import { useDashboardStats, useSparepart, useBooking } from '@/hooks/useSupabaseData';
 import { formatRupiah } from '@/lib/format';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Wrench, DollarSign, Package, CalendarCheck, AlertTriangle, Loader2, Plus, ScanLine, ShoppingCart, Users, ChevronLeft, ChevronRight, ClipboardList, Search } from 'lucide-react';
