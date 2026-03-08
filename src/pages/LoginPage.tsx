@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useBengkelProfile } from '@/hooks/useSupabaseData';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,6 +8,7 @@ import { Wrench } from 'lucide-react';
 
 export default function LoginPage() {
   const { login } = useAuth();
+  const { profile } = useBengkelProfile();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -23,10 +25,14 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-sm animate-fade-in">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-4">
-            <Wrench className="w-8 h-8 text-primary" />
-          </div>
-          <h1 className="page-header">BengkelPOS</h1>
+          {profile?.logo_url ? (
+            <img src={profile.logo_url} alt="Logo Bengkel" className="w-20 h-20 object-contain mx-auto mb-4 rounded-2xl" />
+          ) : (
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-4">
+              <Wrench className="w-8 h-8 text-primary" />
+            </div>
+          )}
+          <h1 className="page-header">{profile?.nama || 'BengkelPOS'}</h1>
           <p className="page-subtitle mt-1">Sistem Kasir Bengkel Motor</p>
         </div>
         

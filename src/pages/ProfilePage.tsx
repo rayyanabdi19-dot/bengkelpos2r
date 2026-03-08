@@ -1,19 +1,22 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useBengkelProfile } from '@/hooks/useSupabaseData';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Store, Loader2, Save } from 'lucide-react';
+import { Store, Loader2, Save, Upload, Image as ImageIcon } from 'lucide-react';
 
 export default function ProfilePage() {
   const { toast } = useToast();
   const { profile, loading, update } = useBengkelProfile();
   const [form, setForm] = useState({
-    nama: '', alamat: '', telepon: '', pemilik: '', footer_struk: '',
+    nama: '', alamat: '', telepon: '', pemilik: '', footer_struk: '', logo_url: '',
   });
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (profile) {
@@ -23,9 +26,47 @@ export default function ProfilePage() {
         telepon: profile.telepon,
         pemilik: profile.pemilik,
         footer_struk: profile.footer_struk,
+        logo_url: profile.logo_url || '',
       });
     }
   }, [profile]);
+
+  const handleUploadLogo = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast({ title: 'Error', description: 'File harus berupa gambar', variant: 'destructive' });
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast({ title: 'Error', description: 'Ukuran file maksimal 2MB', variant: 'destructive' });
+      return;
+    }
+
+    setUploading(true);
+    const ext = file.name.split('.').pop();
+    const fileName = `logo-${Date.now()}.${ext}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('bengkel-logos')
+      .upload(fileName, file, { upsert: true });
+
+    if (uploadError) {
+      toast({ title: 'Error', description: 'Gagal upload logo', variant: 'destructive' });
+      setUploading(false);
+      return;
+    }
+
+    const { data: urlData } = supabase.storage
+      .from('bengkel-logos')
+      .getPublicUrl(fileName);
+
+    setForm(prev => ({ ...prev, logo_url: urlData.publicUrl }));
+    setUploading(false);
+    toast({ title: 'Berhasil', description: 'Logo berhasil diupload' });
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -53,6 +94,39 @@ export default function ProfilePage() {
         <h3 className="font-semibold flex items-center gap-2">
           <Store className="w-4 h-4 text-primary" /> Informasi Bengkel
         </h3>
+
+        {/* Logo Upload */}
+        <div className="space-y-2">
+          <Label>Logo Bengkel</Label>
+          <div className="flex items-center gap-4">
+            <div className="w-20 h-20 rounded-xl border-2 border-dashed border-border flex items-center justify-center overflow-hidden bg-muted shrink-0">
+              {form.logo_url ? (
+                <img src={form.logo_url} alt="Logo Bengkel" className="w-full h-full object-contain" />
+              ) : (
+                <ImageIcon className="w-8 h-8 text-muted-foreground" />
+              )}
+            </div>
+            <div className="flex-1">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleUploadLogo}
+                className="hidden"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+              >
+                {uploading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Upload className="w-4 h-4 mr-2" />}
+                {uploading ? 'Uploading...' : 'Upload Logo'}
+              </Button>
+              <p className="text-xs text-muted-foreground mt-1">Format: JPG, PNG. Maks 2MB</p>
+            </div>
+          </div>
+        </div>
 
         <div className="space-y-1">
           <Label>Nama Bengkel</Label>
@@ -89,7 +163,10 @@ export default function ProfilePage() {
       <div className="stat-card max-w-lg">
         <h3 className="font-semibold mb-3">Preview Struk Header</h3>
         <div className="text-center text-sm p-4 bg-muted rounded-lg border border-border">
-          <p className="font-bold text-base">🔧 {form.nama || 'Nama Bengkel'}</p>
+          {form.logo_url && (
+            <img src={form.logo_url} alt="Logo" className="w-12 h-12 object-contain mx-auto mb-2" />
+          )}
+          <p className="font-bold text-base">{form.nama || 'Nama Bengkel'}</p>
           <p>{form.alamat || 'Alamat bengkel'}</p>
           <p>Telp: {form.telepon || '-'}</p>
           <div className="border-t border-dashed border-muted-foreground mt-2 pt-2">

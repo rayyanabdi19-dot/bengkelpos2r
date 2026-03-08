@@ -6,14 +6,16 @@ import { QRCodeSVG } from 'qrcode.react';
 export default function ReceiptView({ servis }: { servis: Servis }) {
   const { profile } = useBengkelProfile();
 
-  // Use custom QR link from settings, fallback to booking page
   const qrLink = (profile as any)?.link_qrcode || `${window.location.origin}/booking`;
 
   return (
     <div className="receipt-text bg-card rounded-lg border border-border mx-auto" style={{ width: '100%', maxWidth: '80mm', padding: '3mm', fontSize: '11px', lineHeight: 1.4 }}>
       {/* Header */}
       <div className="text-center" style={{ marginBottom: '2mm' }}>
-        <p style={{ fontSize: '14px', fontWeight: 700 }}>🔧 {profile?.nama || 'BENGKEL POS'}</p>
+        {profile?.logo_url && (
+          <img src={profile.logo_url} alt="Logo" style={{ width: '40px', height: '40px', objectFit: 'contain', margin: '0 auto 2mm' }} />
+        )}
+        <p style={{ fontSize: '14px', fontWeight: 700 }}>{profile?.nama || 'BENGKEL POS'}</p>
         <p style={{ fontSize: '9px' }}>{profile?.alamat || 'Jl. Raya Bengkel No.1'}</p>
         <p style={{ fontSize: '9px' }}>Telp: {profile?.telepon || '021-12345678'}</p>
         <div style={{ borderBottom: '1px dashed hsl(var(--muted-foreground))', paddingBottom: '2mm', marginTop: '1mm' }}>
@@ -66,8 +68,6 @@ export default function ReceiptView({ servis }: { servis: Servis }) {
       {/* Footer */}
       <div className="text-center" style={{ marginTop: '2mm', paddingTop: '2mm', borderTop: '1px dashed hsl(var(--muted-foreground))' }}>
         <p style={{ fontSize: '9px', marginBottom: '2mm' }}>{profile?.footer_struk || 'Terima kasih! Semoga motor Anda selalu prima 🏍️'}</p>
-
-        {/* QR Code */}
         <div className="flex flex-col items-center" style={{ marginTop: '1mm' }}>
           <QRCodeSVG value={qrLink} size={64} level="L" />
           <p style={{ fontSize: '8px', marginTop: '1mm', color: 'hsl(var(--muted-foreground))' }}>Scan untuk layanan bengkel</p>
