@@ -74,7 +74,7 @@ function useSupabaseTable<T>(table: string) {
   const refresh = useCallback(async () => {
     setLoading(true);
     const { data: rows, error } = await supabase
-      .from(table)
+      .from(table as any)
       .select('*')
       .order('created_at', { ascending: false });
     if (!error && rows) setData(rows as T[]);
