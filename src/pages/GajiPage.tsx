@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useKaryawan, useSlipGaji } from '@/hooks/useSupabaseData';
+import { useKaryawan, useSlipGaji, useBengkelProfile } from '@/hooks/useSupabaseData';
 import { formatRupiah } from '@/lib/format';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
