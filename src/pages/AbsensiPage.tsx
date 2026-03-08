@@ -439,13 +439,6 @@ export default function AbsensiPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Photo Preview Dialog (kept for backward compat with old records) */}
-      <Dialog open={!!showPhoto} onOpenChange={() => setShowPhoto(null)}>
-        <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle>Foto Absensi</DialogTitle></DialogHeader>
-          {showPhoto && <img src={showPhoto} alt="Foto absensi" className="w-full rounded-lg" />}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
