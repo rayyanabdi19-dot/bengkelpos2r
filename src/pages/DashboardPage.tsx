@@ -7,9 +7,9 @@ import { useNavigate } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
 
 export default function DashboardPage() {
-  const { stats, monthlyData, loading } = useDashboardStats();
+  const { stats, loading } = useDashboardStats();
   const { spareparts } = useSparepart();
-  const navigate = useNavigate();
+  const { bookings } = useBooking();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [spSearch, setSpSearch] = useState('');
   const [showSpSearch, setShowSpSearch] = useState(false);
