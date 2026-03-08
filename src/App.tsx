@@ -41,6 +41,7 @@ function AppRoutes() {
         <Route path="/laporan/laba" element={<LabaPage />} />
         <Route path="/pengaturan" element={<PengaturanPage />} />
         <Route path="/profil" element={<ProfilePage />} />
+        <Route path="/printer" element={<PrinterPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppLayout>

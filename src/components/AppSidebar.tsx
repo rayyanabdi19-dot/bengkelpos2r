@@ -20,6 +20,7 @@ const menuItems = [
   { title: 'Booking Servis', url: '/booking', icon: CalendarCheck },
   { title: 'Pelanggan', url: '/pelanggan', icon: Users },
   { title: 'Profil Bengkel', url: '/profil', icon: Store },
+  { title: 'Printer Bluetooth', url: '/printer', icon: Bluetooth },
   { title: 'Pengaturan', url: '/pengaturan', icon: Settings },
 ];
 
