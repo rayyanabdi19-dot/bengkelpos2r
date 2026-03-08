@@ -1,6 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useKaryawan, useAbsensi } from '@/hooks/useSupabaseData';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,7 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Camera, CameraOff, UserCheck, Clock, CalendarDays, Image, Download, FileSpreadsheet } from 'lucide-react';
+import { Loader2, ScanBarcode, Camera, CameraOff, UserCheck, Clock, CalendarDays, Download, FileSpreadsheet, QrCode } from 'lucide-react';
+import { Html5Qrcode } from 'html5-qrcode';
+import { QRCodeSVG } from 'qrcode.react';
 import * as XLSX from 'xlsx';
 
 export default function AbsensiPage() {
@@ -17,9 +18,6 @@ export default function AbsensiPage() {
   const { toast } = useToast();
 
   const [selectedKaryawan, setSelectedKaryawan] = useState('');
-  const [showCamera, setShowCamera] = useState(false);
-  const [streaming, setStreaming] = useState(false);
-  const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [filterDate, setFilterDate] = useState(new Date().toISOString().split('T')[0]);
   const [absenType, setAbsenType] = useState<'masuk' | 'keluar'>('masuk');
@@ -30,9 +28,14 @@ export default function AbsensiPage() {
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   });
 
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const streamRef = useRef<MediaStream | null>(null);
+  // Barcode scanner state
+  const [scanning, setScanning] = useState(false);
+  const [scannedName, setScannedName] = useState('');
+  const scannerRef = useRef<Html5Qrcode | null>(null);
+
+  // QR Code dialog
+  const [showQrDialog, setShowQrDialog] = useState(false);
+  const [qrKaryawan, setQrKaryawan] = useState<any>(null);
 
   const activeKaryawan = karyawanList.filter(k => k.aktif);
   const loading = kLoading || aLoading;
@@ -45,13 +48,12 @@ export default function AbsensiPage() {
     const hadir = monthAbsensi.filter(a => a.status === 'hadir').length;
     const izin = monthAbsensi.filter(a => a.status === 'izin').length;
     const sakit = monthAbsensi.filter(a => a.status === 'sakit').length;
-    // Calculate working days in month
     const [year, month] = rekapMonth.split('-').map(Number);
     const daysInMonth = new Date(year, month, 0).getDate();
     let workingDays = 0;
     for (let d = 1; d <= daysInMonth; d++) {
       const day = new Date(year, month - 1, d).getDay();
-      if (day !== 0) workingDays++; // exclude Sunday
+      if (day !== 0) workingDays++;
     }
     const alpha = Math.max(0, workingDays - hadir - izin - sakit);
     return { id: k.id, nama: k.nama, jabatan: k.jabatan, hadir, izin, sakit, alpha, workingDays };
@@ -79,95 +81,67 @@ export default function AbsensiPage() {
     toast({ title: 'Berhasil', description: 'File Excel berhasil diunduh' });
   };
 
-  const startCamera = useCallback(async () => {
-    try {
-      const constraints: MediaStreamConstraints = {
-        video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
-        audio: false
-      };
-      let stream: MediaStream;
-      try {
-        stream = await navigator.mediaDevices.getUserMedia(constraints);
-      } catch {
-        // Fallback: try without specific constraints for older devices
-        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-      }
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.setAttribute('playsinline', 'true');
-        videoRef.current.setAttribute('webkit-playsinline', 'true');
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-      }
-      setStreaming(true);
-      setCapturedImage(null);
-    } catch (err) {
-      console.error('Camera error:', err);
-      toast({ title: 'Gagal mengakses kamera', description: 'Pastikan izin kamera diaktifkan di pengaturan browser/HP', variant: 'destructive' });
+  // Barcode scanner
+  const handleBarcodeFound = useCallback((code: string) => {
+    const karyawan = karyawanList.find(k => k.id === code);
+    if (karyawan) {
+      setSelectedKaryawan(karyawan.id);
+      setScannedName(karyawan.nama);
+      toast({ title: '✅ Karyawan Ditemukan', description: `${karyawan.nama} - ${karyawan.jabatan || 'Staff'}` });
+    } else {
+      setScannedName('');
+      toast({ title: 'Tidak Ditemukan', description: 'QR Code tidak cocok dengan data karyawan', variant: 'destructive' });
     }
-  }, [toast]);
+  }, [karyawanList, toast]);
 
-  const stopCamera = useCallback(() => {
-    streamRef.current?.getTracks().forEach(t => t.stop());
-    streamRef.current = null;
-    if (videoRef.current) videoRef.current.srcObject = null;
-    setStreaming(false);
+  const startScanner = useCallback(async () => {
+    try {
+      const scanner = new Html5Qrcode('absensi-barcode-reader');
+      scannerRef.current = scanner;
+      await scanner.start(
+        { facingMode: 'environment' },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        (decodedText) => {
+          handleBarcodeFound(decodedText);
+          scanner.stop().catch(() => {});
+          setScanning(false);
+        },
+        () => {}
+      );
+      setScanning(true);
+    } catch {
+      toast({ title: 'Error', description: 'Tidak dapat mengakses kamera. Pastikan izin kamera diaktifkan.', variant: 'destructive' });
+    }
+  }, [handleBarcodeFound, toast]);
+
+  const stopScanner = useCallback(async () => {
+    if (scannerRef.current) {
+      try { await scannerRef.current.stop(); } catch {}
+      scannerRef.current = null;
+    }
+    setScanning(false);
   }, []);
 
-  useEffect(() => { return () => { stopCamera(); }; }, [stopCamera]);
-
-  const capturePhoto = () => {
-    if (!videoRef.current || !canvasRef.current) return;
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    ctx.drawImage(video, 0, 0);
-    setCapturedImage(canvas.toDataURL('image/jpeg', 0.8));
-    stopCamera();
-  };
-
-  const dataURLtoBlob = (dataUrl: string) => {
-    const arr = dataUrl.split(',');
-    const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/jpeg';
-    const bstr = atob(arr[1]);
-    const u8arr = new Uint8Array(bstr.length);
-    for (let i = 0; i < bstr.length; i++) u8arr[i] = bstr.charCodeAt(i);
-    return new Blob([u8arr], { type: mime });
-  };
+  useEffect(() => {
+    return () => { stopScanner(); };
+  }, [stopScanner]);
 
   const handleSubmit = async () => {
-    if (!selectedKaryawan) { toast({ title: 'Pilih karyawan terlebih dahulu', variant: 'destructive' }); return; }
-
-    // For izin/sakit, no photo needed
-    const needsPhoto = absenStatus === 'hadir';
-    if (needsPhoto && !capturedImage) { toast({ title: 'Ambil foto wajah terlebih dahulu', variant: 'destructive' }); return; }
+    if (!selectedKaryawan) { toast({ title: 'Scan QR Code atau pilih karyawan terlebih dahulu', variant: 'destructive' }); return; }
 
     setSaving(true);
     const today = new Date().toISOString().split('T')[0];
     const now = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-
-    let fotoUrl = '';
-    if (capturedImage) {
-      const fileName = `${selectedKaryawan}_${today}_${absenType}_${Date.now()}.jpg`;
-      const blob = dataURLtoBlob(capturedImage);
-      const { error: uploadError } = await supabase.storage.from('absensi-foto').upload(fileName, blob, { contentType: 'image/jpeg' });
-      if (uploadError) { toast({ title: 'Gagal upload foto', variant: 'destructive' }); setSaving(false); return; }
-      const { data: urlData } = supabase.storage.from('absensi-foto').getPublicUrl(fileName);
-      fotoUrl = urlData.publicUrl;
-    }
 
     const existing = absensiList.find(a => a.karyawan_id === selectedKaryawan && a.tanggal === today);
 
     let ok = false;
     if (absenStatus === 'izin' || absenStatus === 'sakit') {
       if (existing) { toast({ title: 'Karyawan sudah memiliki catatan absensi hari ini', variant: 'destructive' }); setSaving(false); return; }
-      ok = await add({ karyawan_id: selectedKaryawan, tanggal: today, jam_masuk: '', jam_keluar: '', status: absenStatus, foto_url: fotoUrl, catatan: '' });
+      ok = await add({ karyawan_id: selectedKaryawan, tanggal: today, jam_masuk: '', jam_keluar: '', status: absenStatus, foto_url: '', catatan: '' });
     } else if (absenType === 'masuk') {
       if (existing) { toast({ title: 'Karyawan sudah absen masuk hari ini', variant: 'destructive' }); setSaving(false); return; }
-      ok = await add({ karyawan_id: selectedKaryawan, tanggal: today, jam_masuk: now, jam_keluar: '', status: 'hadir', foto_url: fotoUrl, catatan: '' });
+      ok = await add({ karyawan_id: selectedKaryawan, tanggal: today, jam_masuk: now, jam_keluar: '', status: 'hadir', foto_url: '', catatan: '' });
     } else {
       if (!existing) { toast({ title: 'Karyawan belum absen masuk hari ini', variant: 'destructive' }); setSaving(false); return; }
       if (existing.jam_keluar) { toast({ title: 'Karyawan sudah absen keluar hari ini', variant: 'destructive' }); setSaving(false); return; }
@@ -177,9 +151,8 @@ export default function AbsensiPage() {
     setSaving(false);
     if (ok) {
       toast({ title: `Absen ${absenStatus !== 'hadir' ? absenStatus : absenType} berhasil dicatat` });
-      setCapturedImage(null);
       setSelectedKaryawan('');
-      setShowCamera(false);
+      setScannedName('');
     } else {
       toast({ title: 'Gagal menyimpan absensi', variant: 'destructive' });
     }
@@ -196,13 +169,18 @@ export default function AbsensiPage() {
     }
   };
 
+  const printQrCode = (karyawan: any) => {
+    setQrKaryawan(karyawan);
+    setShowQrDialog(true);
+  };
+
   if (loading) return <div className="flex items-center justify-center h-64"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
 
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
         <h1 className="page-header">Absensi Karyawan</h1>
-        <p className="page-subtitle">Scan wajah untuk pencatatan kehadiran</p>
+        <p className="page-subtitle">Scan QR Code untuk pencatatan kehadiran</p>
       </div>
 
       <Tabs defaultValue="absen">
@@ -210,20 +188,57 @@ export default function AbsensiPage() {
           <TabsTrigger value="absen">Scan Absensi</TabsTrigger>
           <TabsTrigger value="riwayat">Riwayat Harian</TabsTrigger>
           <TabsTrigger value="rekap">Rekap Bulanan</TabsTrigger>
+          <TabsTrigger value="qrcode">QR Karyawan</TabsTrigger>
         </TabsList>
 
         {/* Tab: Scan Absensi */}
         <TabsContent value="absen">
           <div className="stat-card space-y-4">
             <h2 className="font-semibold text-lg flex items-center gap-2">
-              <Camera className="w-5 h-5 text-primary" />Scan Absensi
+              <ScanBarcode className="w-5 h-5 text-primary" />Scan QR Code Absensi
             </h2>
 
+            {/* Barcode Scanner */}
+            <div className="border border-border rounded-lg overflow-hidden bg-muted/30">
+              <div className="flex items-center justify-between p-3 border-b border-border">
+                <h3 className="font-medium text-sm flex items-center gap-2">
+                  <Camera className="w-4 h-4" /> Kamera Scanner
+                </h3>
+                <Button
+                  variant={scanning ? 'destructive' : 'default'}
+                  size="sm"
+                  onClick={scanning ? stopScanner : startScanner}
+                >
+                  {scanning ? <><CameraOff className="w-4 h-4 mr-2" /> Matikan</> : <><Camera className="w-4 h-4 mr-2" /> Scan QR</>}
+                </Button>
+              </div>
+              <div
+                id="absensi-barcode-reader"
+                className={`w-full ${scanning ? 'min-h-[280px]' : 'h-0'}`}
+              />
+              {!scanning && !scannedName && (
+                <div className="flex flex-col items-center justify-center py-8 gap-2">
+                  <ScanBarcode className="w-12 h-12 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">Klik "Scan QR" untuk memulai scan QR Code karyawan</p>
+                </div>
+              )}
+              {scannedName && !scanning && (
+                <div className="flex items-center justify-center py-6 gap-3">
+                  <UserCheck className="w-8 h-8 text-green-500" />
+                  <div>
+                    <p className="font-bold text-lg">{scannedName}</p>
+                    <p className="text-xs text-muted-foreground">Karyawan teridentifikasi via QR Code</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Manual select + settings */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
-                <Label>Pilih Karyawan</Label>
-                <Select value={selectedKaryawan} onValueChange={setSelectedKaryawan}>
-                  <SelectTrigger><SelectValue placeholder="-- Pilih --" /></SelectTrigger>
+                <Label>Karyawan (manual)</Label>
+                <Select value={selectedKaryawan} onValueChange={(v) => { setSelectedKaryawan(v); setScannedName(karyawanList.find(k => k.id === v)?.nama || ''); }}>
+                  <SelectTrigger><SelectValue placeholder="-- Atau pilih manual --" /></SelectTrigger>
                   <SelectContent>
                     {activeKaryawan.map(k => (
                       <SelectItem key={k.id} value={k.id}>{k.nama} - {k.jabatan || 'Staff'}</SelectItem>
@@ -256,48 +271,7 @@ export default function AbsensiPage() {
               )}
             </div>
 
-            {/* Camera - only for hadir */}
-            {absenStatus === 'hadir' && (
-              <div className="border border-border rounded-lg overflow-hidden bg-muted/30">
-                {!showCamera && !capturedImage && (
-                  <div className="flex flex-col items-center justify-center py-12 gap-3">
-                    <Camera className="w-16 h-16 text-muted-foreground" />
-                    <p className="text-muted-foreground text-sm">Klik tombol untuk membuka kamera</p>
-                    <Button onClick={() => { setShowCamera(true); startCamera(); }}><Camera className="w-4 h-4 mr-2" />Buka Kamera</Button>
-                  </div>
-                )}
-                {showCamera && streaming && (
-                  <div className="relative">
-                    <video ref={videoRef} autoPlay playsInline muted webkit-playsinline="true" className="w-full max-h-[400px] object-cover" style={{ transform: 'scaleX(-1)' }} />
-                    <div className="absolute bottom-0 inset-x-0 p-3 flex justify-center gap-2 bg-gradient-to-t from-black/60 to-transparent">
-                      <Button onClick={capturePhoto} size="lg" className="rounded-full"><Camera className="w-5 h-5 mr-2" />Ambil Foto</Button>
-                      <Button onClick={() => { stopCamera(); setShowCamera(false); }} variant="outline" size="lg" className="rounded-full bg-background/80"><CameraOff className="w-5 h-5 mr-2" />Tutup</Button>
-                    </div>
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <div className="w-48 h-60 border-2 border-dashed border-primary/60 rounded-[50%]" />
-                    </div>
-                  </div>
-                )}
-                {capturedImage && (
-                  <div className="relative">
-                    <img src={capturedImage} alt="Captured" className="w-full max-h-[400px] object-cover" style={{ transform: 'scaleX(-1)' }} />
-                    <div className="absolute bottom-0 inset-x-0 p-3 flex justify-center gap-2 bg-gradient-to-t from-black/60 to-transparent">
-                      <Button onClick={() => { setCapturedImage(null); setShowCamera(true); startCamera(); }} variant="outline" className="bg-background/80">Ulangi Foto</Button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {absenStatus !== 'hadir' && (
-              <div className="border border-border rounded-lg p-6 text-center bg-muted/30">
-                <p className="text-muted-foreground">Foto wajah tidak diperlukan untuk status <strong>{absenStatus}</strong></p>
-              </div>
-            )}
-
-            <canvas ref={canvasRef} className="hidden" />
-
-            <Button onClick={handleSubmit} disabled={saving || (absenStatus === 'hadir' && !capturedImage) || !selectedKaryawan} className="w-full" size="lg">
+            <Button onClick={handleSubmit} disabled={saving || !selectedKaryawan} className="w-full" size="lg">
               {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <UserCheck className="w-4 h-4 mr-2" />}
               Simpan Absensi
             </Button>
@@ -317,15 +291,9 @@ export default function AbsensiPage() {
               <div className="grid gap-2">
                 {todayAbsensi.map(a => (
                   <div key={a.id} className="flex items-center gap-3 p-3 rounded-lg border border-border bg-background">
-                    {a.foto_url ? (
-                      <button onClick={() => setShowPhoto(a.foto_url)} className="shrink-0">
-                        <img src={a.foto_url} alt="Foto" className="w-12 h-12 rounded-full object-cover border-2 border-primary/30" style={{ transform: 'scaleX(-1)' }} />
-                      </button>
-                    ) : (
-                      <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center shrink-0">
-                        <Image className="w-5 h-5 text-muted-foreground" />
-                      </div>
-                    )}
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                      <UserCheck className="w-5 h-5 text-primary" />
+                    </div>
                     <div className="min-w-0 flex-1">
                       <p className="font-semibold truncate">{getKaryawanName(a.karyawan_id)}</p>
                       <div className="flex items-center gap-3 text-sm text-muted-foreground">
@@ -388,13 +356,65 @@ export default function AbsensiPage() {
             </div>
           </div>
         </TabsContent>
+
+        {/* Tab: QR Code Karyawan */}
+        <TabsContent value="qrcode">
+          <div className="stat-card space-y-4">
+            <h2 className="font-semibold text-lg flex items-center gap-2">
+              <QrCode className="w-5 h-5 text-primary" />QR Code Karyawan
+            </h2>
+            <p className="text-sm text-muted-foreground">Cetak QR Code untuk masing-masing karyawan. QR Code ini digunakan untuk scan absensi.</p>
+
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {activeKaryawan.map(k => (
+                <div key={k.id} className="border border-border rounded-lg p-4 flex items-center gap-4 bg-background">
+                  <QRCodeSVG value={k.id} size={64} />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold truncate">{k.nama}</p>
+                    <p className="text-xs text-muted-foreground">{k.jabatan || 'Staff'}</p>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={() => printQrCode(k)}>
+                    <QrCode className="w-4 h-4 mr-1" />Cetak
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </TabsContent>
       </Tabs>
 
-      {/* Photo Preview Dialog */}
+      {/* QR Code Print Dialog */}
+      <Dialog open={showQrDialog} onOpenChange={setShowQrDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader><DialogTitle>QR Code Absensi</DialogTitle></DialogHeader>
+          {qrKaryawan && (
+            <div className="flex flex-col items-center gap-4 py-4" id="qr-print-area">
+              <QRCodeSVG value={qrKaryawan.id} size={200} />
+              <div className="text-center">
+                <p className="font-bold text-lg">{qrKaryawan.nama}</p>
+                <p className="text-sm text-muted-foreground">{qrKaryawan.jabatan || 'Staff'}</p>
+              </div>
+              <Button onClick={() => {
+                const printContent = document.getElementById('qr-print-area');
+                if (!printContent) return;
+                const w = window.open('', '_blank');
+                if (!w) return;
+                w.document.write(`<html><head><title>QR Code - ${qrKaryawan.nama}</title><style>body{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;margin:0}h2{margin:8px 0 4px}p{margin:0;color:#666}</style></head><body>${printContent.innerHTML}</body></html>`);
+                w.document.close();
+                w.print();
+              }} className="w-full">
+                <Download className="w-4 h-4 mr-2" />Cetak QR Code
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Photo Preview Dialog (kept for backward compat with old records) */}
       <Dialog open={!!showPhoto} onOpenChange={() => setShowPhoto(null)}>
         <DialogContent className="max-w-md">
           <DialogHeader><DialogTitle>Foto Absensi</DialogTitle></DialogHeader>
-          {showPhoto && <img src={showPhoto} alt="Foto absensi" className="w-full rounded-lg" style={{ transform: 'scaleX(-1)' }} />}
+          {showPhoto && <img src={showPhoto} alt="Foto absensi" className="w-full rounded-lg" />}
         </DialogContent>
       </Dialog>
     </div>
