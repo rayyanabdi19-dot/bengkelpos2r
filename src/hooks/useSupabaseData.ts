@@ -332,7 +332,7 @@ export function useBengkelProfile() {
   const refresh = useCallback(async () => {
     setLoading(true);
     const { data, error } = await db.bengkel_profile().select('*').limit(1).single();
-    if (!error && data) setProfile(data as BengkelProfile);
+    if (!error && data) setProfile(data as any as BengkelProfile);
     setLoading(false);
   }, []);
 

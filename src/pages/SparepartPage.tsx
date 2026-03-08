@@ -150,8 +150,9 @@ export default function SparepartPage() {
               </div>
               <div id="sparepart-barcode-reader" className={`w-full rounded-lg overflow-hidden border border-border bg-muted mt-2 ${scanningBarcode ? 'min-h-[200px]' : 'hidden'}`} />
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1"><Label>Harga</Label><Input type="number" value={form.harga} onChange={e => setForm({ ...form, harga: Number(e.target.value) })} /></div>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="space-y-1"><Label>Harga Jual</Label><Input type="number" value={form.harga} onChange={e => setForm({ ...form, harga: Number(e.target.value) })} /></div>
+              <div className="space-y-1"><Label>HPP (Modal)</Label><Input type="number" value={form.hpp} onChange={e => setForm({ ...form, hpp: Number(e.target.value) })} /></div>
               <div className="space-y-1"><Label>Stok</Label><Input type="number" value={form.stok} onChange={e => setForm({ ...form, stok: Number(e.target.value) })} /></div>
             </div>
             <div className="grid grid-cols-2 gap-3">

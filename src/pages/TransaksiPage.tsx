@@ -51,7 +51,7 @@ export default function TransaksiPage() {
     if (selectedSpareparts.find(s => s.sparepart_id === spId)) {
       setSelectedSpareparts(prev => prev.map(s => s.sparepart_id === spId ? { ...s, qty: s.qty + 1 } : s));
     } else {
-      setSelectedSpareparts(prev => [...prev, { sparepart_id: spId, nama: sp.nama, harga: sp.harga, qty: 1 }]);
+      setSelectedSpareparts(prev => [...prev, { sparepart_id: spId, nama: sp.nama, harga: sp.harga, hpp: sp.hpp, qty: 1 }]);
     }
   };
 
