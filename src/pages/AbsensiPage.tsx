@@ -369,39 +369,54 @@ export default function AbsensiPage() {
                 </h2>
                 <p className="text-sm text-muted-foreground">Cetak QR Code untuk scan absensi karyawan.</p>
               </div>
-              <Button onClick={() => {
-                const w = window.open('', '_blank');
-                if (!w) return;
-                const cards = activeKaryawan.map(k => {
-                  const svgEl = document.getElementById(`qr-svg-${k.id}`);
-                  const svgHtml = svgEl ? svgEl.outerHTML : '';
-                  const fotoHtml = k.foto_wajah
-                    ? `<img src="${k.foto_wajah}" class="photo" />`
-                    : `<div class="photo-placeholder">👤</div>`;
-                  return `<div class="card">${fotoHtml}<div class="qr">${svgHtml}</div><div class="info"><p class="name">${k.nama}</p><p class="role">${k.jabatan || 'Staff'}</p></div></div>`;
-                }).join('');
-                const bengkelName = profile?.nama ? `<h1 class="header">${profile.nama}</h1>` : '';
-                w.document.write(`<html><head><title>QR Code Semua Karyawan</title><style>
-                  *{margin:0;padding:0;box-sizing:border-box}
-                  body{font-family:sans-serif;padding:8mm}
-                  .header{text-align:center;font-size:14pt;margin-bottom:6mm}
-                  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(55mm,1fr));gap:5mm}
-                  .card{border:1px dashed #ccc;border-radius:3mm;padding:4mm;display:flex;flex-direction:column;align-items:center;text-align:center;break-inside:avoid}
-                  .photo{width:15mm;height:15mm;border-radius:50%;object-fit:cover;margin-bottom:2mm}
-                  .photo-placeholder{width:15mm;height:15mm;border-radius:50%;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:8mm;margin-bottom:2mm}
-                  .qr svg{width:25mm;height:25mm}
-                  .name{font-weight:bold;font-size:9pt;margin-top:2mm;word-break:break-word}
-                  .role{font-size:8pt;color:#666;margin-top:1mm}
-                  @media print{
-                    body{padding:5mm}
-                    @page{margin:5mm}
-                  }
-                </style></head><body>${bengkelName}<div class="grid">${cards}</div></body></html>`);
-                w.document.close();
-                setTimeout(() => w.print(), 300);
-              }}>
-                <Download className="w-4 h-4 mr-2" />Cetak Semua QR
-              </Button>
+              <div className="flex items-center gap-2 flex-wrap">
+                <Select value={printSize} onValueChange={v => setPrintSize(v as any)}>
+                  <SelectTrigger className="w-[160px]"><SelectValue placeholder="Ukuran Cetak" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="cr80">🪪 ID Card CR-80</SelectItem>
+                    <SelectItem value="a7">📄 A7 (74×105mm)</SelectItem>
+                    <SelectItem value="a8">📋 A8 (52×74mm)</SelectItem>
+                    <SelectItem value="custom">📐 Custom 60×90mm</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button onClick={() => {
+                  const sizes: Record<string, { w: string; h: string; qr: string; photo: string; nameSize: string; roleSize: string; pad: string }> = {
+                    cr80: { w: '85.6mm', h: '53.98mm', qr: '22mm', photo: '14mm', nameSize: '9pt', roleSize: '7pt', pad: '3mm' },
+                    a7: { w: '74mm', h: '105mm', qr: '30mm', photo: '18mm', nameSize: '10pt', roleSize: '8pt', pad: '4mm' },
+                    a8: { w: '52mm', h: '74mm', qr: '20mm', photo: '12mm', nameSize: '8pt', roleSize: '7pt', pad: '3mm' },
+                    custom: { w: '60mm', h: '90mm', qr: '25mm', photo: '15mm', nameSize: '9pt', roleSize: '7pt', pad: '3mm' },
+                  };
+                  const s = sizes[printSize];
+                  const w = window.open('', '_blank');
+                  if (!w) return;
+                  const cards = activeKaryawan.map(k => {
+                    const svgEl = document.getElementById(`qr-svg-${k.id}`);
+                    const svgHtml = svgEl ? svgEl.outerHTML : '';
+                    const fotoHtml = k.foto_wajah
+                      ? `<img src="${k.foto_wajah}" class="photo" />`
+                      : `<div class="photo-placeholder">👤</div>`;
+                    return `<div class="card">${fotoHtml}<div class="qr">${svgHtml}</div><div class="info"><p class="name">${k.nama}</p><p class="role">${k.jabatan || 'Staff'}</p></div></div>`;
+                  }).join('');
+                  const bengkelName = profile?.nama ? `<h1 class="header">${profile.nama}</h1>` : '';
+                  w.document.write(`<html><head><title>QR Code Semua Karyawan</title><style>
+                    *{margin:0;padding:0;box-sizing:border-box}
+                    body{font-family:sans-serif;padding:5mm;display:flex;flex-direction:column;align-items:center}
+                    .header{text-align:center;font-size:12pt;margin-bottom:5mm}
+                    .grid{display:flex;flex-wrap:wrap;gap:4mm;justify-content:center}
+                    .card{width:${s.w};height:${s.h};border:1px solid #ccc;border-radius:2mm;padding:${s.pad};display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;break-inside:avoid;overflow:hidden}
+                    .photo{width:${s.photo};height:${s.photo};border-radius:50%;object-fit:cover}
+                    .photo-placeholder{width:${s.photo};height:${s.photo};border-radius:50%;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:calc(${s.photo} * 0.5)}
+                    .qr svg{width:${s.qr};height:${s.qr}}
+                    .name{font-weight:bold;font-size:${s.nameSize};margin-top:1.5mm;word-break:break-word;line-height:1.2}
+                    .role{font-size:${s.roleSize};color:#666;margin-top:0.5mm}
+                    @media print{body{padding:0}@page{margin:3mm}}
+                  </style></head><body>${bengkelName}<div class="grid">${cards}</div></body></html>`);
+                  w.document.close();
+                  setTimeout(() => w.print(), 300);
+                }}>
+                  <Download className="w-4 h-4 mr-2" />Cetak Semua QR
+                </Button>
+              </div>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
