@@ -37,6 +37,7 @@ function AppRoutes() {
         <Route path="/riwayat" element={<RiwayatPage />} />
         <Route path="/scan" element={<ScanPage />} />
         <Route path="/sparepart" element={<SparepartPage />} />
+        <Route path="/pembelian" element={<PembelianPage />} />
         <Route path="/layanan" element={<LayananPage />} />
         <Route path="/booking" element={<BookingPage />} />
         <Route path="/pelanggan" element={<PelangganPage />} />

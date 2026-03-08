@@ -90,7 +90,18 @@ export interface Booking {
   created_at: string;
 }
 
-// Helper: typed from() calls
+export interface Pembelian {
+  id: string;
+  sparepart_id: string | null;
+  nama_barang: string;
+  qty: number;
+  harga_beli: number;
+  total: number;
+  supplier: string;
+  catatan: string;
+  created_at: string;
+}
+
 const db = {
   pelanggan: () => supabase.from('pelanggan' as any),
   sparepart: () => supabase.from('sparepart' as any),
@@ -100,6 +111,7 @@ const db = {
   booking: () => supabase.from('booking' as any),
   bengkel_profile: () => supabase.from('bengkel_profile' as any),
   layanan: () => supabase.from('layanan' as any),
+  pembelian: () => supabase.from('pembelian' as any),
 };
 
 function useSupabaseTable<T>(tableFn: () => ReturnType<typeof supabase.from>) {
@@ -206,6 +218,46 @@ export function useBooking() {
   };
 
   return { bookings: data, loading, refresh, add, updateStatus };
+}
+
+// Pembelian
+export function usePembelian() {
+  const { data, loading, refresh } = useSupabaseTable<Pembelian>(db.pembelian);
+
+  const add = async (p: Omit<Pembelian, 'id' | 'created_at'>, updateStok = true) => {
+    const { error } = await db.pembelian().insert({
+      ...p,
+      total: p.harga_beli * p.qty,
+    } as any);
+    if (error) return false;
+
+    // Auto-update sparepart stock
+    if (updateStok && p.sparepart_id) {
+      const { data: current } = await db.sparepart()
+        .select('stok, hpp')
+        .eq('id', p.sparepart_id)
+        .single();
+      if (current) {
+        await db.sparepart()
+          .update({
+            stok: (current as any).stok + p.qty,
+            hpp: p.harga_beli, // update HPP to latest purchase price
+          } as any)
+          .eq('id', p.sparepart_id);
+      }
+    }
+
+    await refresh();
+    return true;
+  };
+
+  const remove = async (id: string) => {
+    const { error } = await db.pembelian().delete().eq('id', id);
+    if (!error) await refresh();
+    return !error;
+  };
+
+  return { pembelianList: data, loading, refresh, add, remove };
 }
 
 // Servis with joined details
