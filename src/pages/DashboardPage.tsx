@@ -1,6 +1,6 @@
 import { useDashboardStats, useSparepart, useBooking } from '@/hooks/useSupabaseData';
 import { formatRupiah } from '@/lib/format';
-import { Wrench, DollarSign, Package, CalendarCheck, AlertTriangle, Loader2, Plus, ScanLine, ShoppingCart, Users, ChevronLeft, ChevronRight, ClipboardList, Search, Clock } from 'lucide-react';
+import { Wrench, DollarSign, Package, CalendarCheck, AlertTriangle, Loader2, Plus, ScanLine, ShoppingCart, Users, ChevronLeft, ChevronRight, ClipboardList, Search, Clock, UserCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
