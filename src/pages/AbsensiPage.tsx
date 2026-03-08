@@ -121,7 +121,10 @@ export default function AbsensiPage() {
     const karyawan = karyawanList.find(k => k.id === code);
     if (!karyawan) {
       setScannedName('');
+      playBeep('error');
+      setScanFeedback({ type: 'error', nama: 'Tidak dikenal', waktu: '' });
       toast({ title: 'Tidak Ditemukan', description: 'QR Code tidak cocok dengan data karyawan', variant: 'destructive' });
+      setTimeout(() => setScanFeedback(null), 3000);
       return;
     }
 
@@ -133,22 +136,30 @@ export default function AbsensiPage() {
     const existing = absensiList.find(a => a.karyawan_id === karyawan.id && a.tanggal === today);
 
     if (!existing) {
-      // Belum absen hari ini → catat masuk
       const ok = await add({ karyawan_id: karyawan.id, tanggal: today, jam_masuk: now, jam_keluar: '', status: 'hadir', foto_url: '', catatan: '' });
       if (ok) {
+        playBeep('success');
+        setScanFeedback({ type: 'masuk', nama: karyawan.nama, waktu: now });
         toast({ title: '⬆️ Absen Masuk Berhasil', description: `${karyawan.nama} — ${now}` });
       } else {
+        playBeep('error');
+        setScanFeedback({ type: 'error', nama: karyawan.nama, waktu: now });
         toast({ title: 'Gagal mencatat absen masuk', variant: 'destructive' });
       }
     } else if (existing.jam_masuk && !existing.jam_keluar) {
-      // Sudah masuk, belum pulang → catat pulang
       const ok = await update(existing.id, { jam_keluar: now });
       if (ok) {
+        playBeep('success');
+        setScanFeedback({ type: 'pulang', nama: karyawan.nama, waktu: now });
         toast({ title: '⬇️ Absen Pulang Berhasil', description: `${karyawan.nama} — ${now}` });
       } else {
+        playBeep('error');
+        setScanFeedback({ type: 'error', nama: karyawan.nama, waktu: now });
         toast({ title: 'Gagal mencatat absen pulang', variant: 'destructive' });
       }
     } else if (existing.jam_keluar) {
+      playBeep('error');
+      setScanFeedback({ type: 'lengkap', nama: karyawan.nama, waktu: '' });
       toast({ title: 'Sudah Lengkap', description: `${karyawan.nama} sudah absen masuk & pulang hari ini` });
     } else {
       toast({ title: `${karyawan.nama} sudah memiliki catatan absensi hari ini` });
@@ -156,7 +167,8 @@ export default function AbsensiPage() {
 
     setSelectedKaryawan('');
     setScannedName('');
-  }, [karyawanList, absensiList, toast, add, update]);
+    setTimeout(() => setScanFeedback(null), 4000);
+  }, [karyawanList, absensiList, toast, add, update, playBeep]);
 
   const startScanner = useCallback(async () => {
     try {
