@@ -67,7 +67,7 @@ export default function SparepartPage() {
 
   const openEdit = (sp: Sparepart) => {
     setEditing(sp);
-    setForm({ nama: sp.nama, barcode: sp.barcode, harga: sp.harga, stok: sp.stok, stok_minimum: sp.stok_minimum, kategori: sp.kategori });
+    setForm({ nama: sp.nama, barcode: sp.barcode, harga: sp.harga, hpp: sp.hpp, stok: sp.stok, stok_minimum: sp.stok_minimum, kategori: sp.kategori });
     setShowDialog(true);
   };
 
