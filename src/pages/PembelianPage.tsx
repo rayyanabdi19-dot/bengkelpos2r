@@ -165,7 +165,7 @@ export default function PembelianPage() {
                   if (e.target.value) {
                     handleSparepartSelect(e.target.value);
                   } else {
-                    setForm({ ...form, sparepart_id: null, nama_barang: '' });
+                    setForm({ ...form, sparepart_id: null, nama_barang: '', harga_jual: 0 });
                   }
                 }}
               >
