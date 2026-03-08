@@ -24,7 +24,7 @@ export default function LabaPage() {
     return sum + (s.spareparts?.reduce((a, sp) => a + ((sp.hpp > 0 ? sp.hpp : sp.harga * 0.7) * sp.qty), 0) || 0);
   }, 0);
   const totalHPPLayanan = filteredServis.reduce((sum, s) => {
-    return sum + (s.layanan?.reduce((a, l) => a + (l.harga * 0.3), 0) || 0);
+    return sum + (s.layanan?.reduce((a, l) => a + (l.hpp > 0 ? l.hpp : l.harga * 0.3), 0) || 0);
   }, 0);
   const totalHPP = totalHPPSparepart + totalHPPLayanan;
 
