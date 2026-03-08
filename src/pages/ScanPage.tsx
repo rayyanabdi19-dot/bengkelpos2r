@@ -116,9 +116,16 @@ export default function ScanPage() {
       <div className="stat-card max-w-lg">
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-semibold text-sm">Kamera Scanner</h3>
-          <Button variant={scanning ? 'destructive' : 'default'} size="sm" onClick={scanning ? stopScanner : startScanner}>
-            {scanning ? <><CameraOff className="w-4 h-4 mr-2" /> Matikan Kamera</> : <><Camera className="w-4 h-4 mr-2" /> Aktifkan Kamera</>}
-          </Button>
+          <div className="flex gap-2">
+            {scanning && torchSupported && (
+              <Button variant={torchOn ? 'secondary' : 'outline'} size="sm" onClick={toggleTorch}>
+                {torchOn ? <><FlashlightOff className="w-4 h-4 mr-2" /> Matikan Flash</> : <><Flashlight className="w-4 h-4 mr-2" /> Nyalakan Flash</>}
+              </Button>
+            )}
+            <Button variant={scanning ? 'destructive' : 'default'} size="sm" onClick={scanning ? stopScanner : startScanner}>
+              {scanning ? <><CameraOff className="w-4 h-4 mr-2" /> Matikan</> : <><Camera className="w-4 h-4 mr-2" /> Aktifkan Kamera</>}
+            </Button>
+          </div>
         </div>
         <div id="barcode-reader" className={`w-full rounded-lg overflow-hidden border border-border bg-muted ${scanning ? 'min-h-[250px]' : 'h-0'}`} />
         {!scanning && <p className="text-xs text-muted-foreground mt-2">Klik "Aktifkan Kamera" untuk mulai scan barcode menggunakan kamera HP.</p>}
