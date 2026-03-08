@@ -93,7 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   // Register with license key
-  const register = async (email: string, username: string, password: string, licenseKey: string) => {
+  const register = async (email: string, username: string, password: string, licenseKey: string, noHp: string) => {
     // Validate license key
     const { data: license, error: licError } = await supabase
       .from('licenses')
@@ -111,10 +111,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (signUpError) return { success: false, error: signUpError.message };
     if (!authData.user) return { success: false, error: 'Gagal membuat akun' };
 
-    // Create profile
+    // Create profile with phone
     const { error: profileError } = await supabase
       .from('profiles')
-      .insert({ id: authData.user.id, username, role: 'admin', license_kode: licenseKey.trim().toUpperCase() });
+      .insert({ id: authData.user.id, username, role: 'admin', license_kode: licenseKey.trim().toUpperCase(), no_hp: noHp.trim() });
     if (profileError) return { success: false, error: 'Gagal membuat profil: ' + profileError.message };
 
     // License tetap aktif selamanya (tidak dinonaktifkan)
