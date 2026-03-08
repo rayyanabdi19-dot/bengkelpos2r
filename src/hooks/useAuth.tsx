@@ -9,6 +9,9 @@ interface AuthContextType {
   loginWithSupabase: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   register: (email: string, username: string, password: string, licenseKey: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
+  isDemoUser: boolean;
+  trialDaysLeft: number | null;
+  isTrialExpired: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
