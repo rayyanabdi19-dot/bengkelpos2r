@@ -119,16 +119,6 @@ export default function ScanPage() {
         </div>
       )}
 
-      <div className="stat-card max-w-lg">
-        <h4 className="font-semibold mb-2 text-sm">Barcode Demo:</h4>
-        <div className="flex flex-wrap gap-2">
-          {spareparts.slice(0, 5).map(sp => (
-            <button key={sp.id} onClick={() => setBarcode(sp.barcode)} className="text-xs font-mono px-2 py-1 rounded bg-muted hover:bg-secondary transition-colors">
-              {sp.barcode}
-            </button>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }
