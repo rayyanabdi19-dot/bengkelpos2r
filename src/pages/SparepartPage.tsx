@@ -15,7 +15,7 @@ export default function SparepartPage() {
   const [search, setSearch] = useState('');
   const [showDialog, setShowDialog] = useState(false);
   const [editing, setEditing] = useState<Sparepart | null>(null);
-  const [form, setForm] = useState({ nama: '', barcode: '', harga: 0, stok: 0, stok_minimum: 5, kategori: '' });
+  const [form, setForm] = useState({ nama: '', barcode: '', harga: 0, hpp: 0, stok: 0, stok_minimum: 5, kategori: '' });
   const [saving, setSaving] = useState(false);
   const [scanningBarcode, setScanningBarcode] = useState(false);
   const scannerRef = useRef<Html5Qrcode | null>(null);
@@ -61,13 +61,13 @@ export default function SparepartPage() {
 
   const openAdd = () => {
     setEditing(null);
-    setForm({ nama: '', barcode: '', harga: 0, stok: 0, stok_minimum: 5, kategori: '' });
+    setForm({ nama: '', barcode: '', harga: 0, hpp: 0, stok: 0, stok_minimum: 5, kategori: '' });
     setShowDialog(true);
   };
 
   const openEdit = (sp: Sparepart) => {
     setEditing(sp);
-    setForm({ nama: sp.nama, barcode: sp.barcode, harga: sp.harga, stok: sp.stok, stok_minimum: sp.stok_minimum, kategori: sp.kategori });
+    setForm({ nama: sp.nama, barcode: sp.barcode, harga: sp.harga, hpp: sp.hpp, stok: sp.stok, stok_minimum: sp.stok_minimum, kategori: sp.kategori });
     setShowDialog(true);
   };
 
@@ -119,6 +119,7 @@ export default function SparepartPage() {
               <span className="text-xs bg-secondary px-2 py-0.5 rounded-md text-secondary-foreground">{sp.kategori}</span>
             </div>
             <p className="text-lg font-bold text-primary">{formatRupiah(sp.harga)}</p>
+            {sp.hpp > 0 && <p className="text-xs text-muted-foreground">HPP: {formatRupiah(sp.hpp)}</p>}
             <div className="flex items-center justify-between mt-2">
               <div className="flex items-center gap-1">
                 {sp.stok <= sp.stok_minimum && <AlertTriangle className="w-3.5 h-3.5 text-warning" />}
@@ -150,8 +151,9 @@ export default function SparepartPage() {
               </div>
               <div id="sparepart-barcode-reader" className={`w-full rounded-lg overflow-hidden border border-border bg-muted mt-2 ${scanningBarcode ? 'min-h-[200px]' : 'hidden'}`} />
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1"><Label>Harga</Label><Input type="number" value={form.harga} onChange={e => setForm({ ...form, harga: Number(e.target.value) })} /></div>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="space-y-1"><Label>Harga Jual</Label><Input type="number" value={form.harga} onChange={e => setForm({ ...form, harga: Number(e.target.value) })} /></div>
+              <div className="space-y-1"><Label>HPP (Modal)</Label><Input type="number" value={form.hpp} onChange={e => setForm({ ...form, hpp: Number(e.target.value) })} /></div>
               <div className="space-y-1"><Label>Stok</Label><Input type="number" value={form.stok} onChange={e => setForm({ ...form, stok: Number(e.target.value) })} /></div>
             </div>
             <div className="grid grid-cols-2 gap-3">

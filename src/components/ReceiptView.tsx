@@ -1,13 +1,16 @@
 import type { Servis } from '@/hooks/useSupabaseData';
+import { useBengkelProfile } from '@/hooks/useSupabaseData';
 import { formatRupiah, formatDateTime } from '@/lib/format';
 
 export default function ReceiptView({ servis }: { servis: Servis }) {
+  const { profile } = useBengkelProfile();
+
   return (
     <div className="receipt-text bg-card p-4 rounded-lg border border-border max-w-sm mx-auto">
       <div className="text-center mb-3">
-        <p className="font-bold text-base">🔧 BENGKEL POS</p>
-        <p>Jl. Raya Bengkel No.1</p>
-        <p>Telp: 021-12345678</p>
+        <p className="font-bold text-base">🔧 {profile?.nama || 'BENGKEL POS'}</p>
+        <p>{profile?.alamat || 'Jl. Raya Bengkel No.1'}</p>
+        <p>Telp: {profile?.telepon || '021-12345678'}</p>
         <p className="border-b border-dashed border-muted-foreground pb-2 mt-1">
           {formatDateTime(servis.created_at)}
         </p>
@@ -52,8 +55,7 @@ export default function ReceiptView({ servis }: { servis: Servis }) {
       </div>
 
       <div className="text-center mt-3 pt-2 border-t border-dashed border-muted-foreground">
-        <p>Terima kasih!</p>
-        <p>Semoga motor Anda selalu prima 🏍️</p>
+        <p>{profile?.footer_struk || 'Terima kasih! Semoga motor Anda selalu prima 🏍️'}</p>
       </div>
     </div>
   );

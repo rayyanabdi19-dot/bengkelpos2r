@@ -19,12 +19,12 @@ export default function LabaPage() {
   // Calculate revenue
   const totalPendapatan = filteredServis.reduce((sum, s) => sum + s.total_biaya, 0);
 
-  // Calculate cost (HPP) - sparepart cost estimation (50% margin assumed for layanan)
+  // Calculate cost (HPP) - use actual hpp from servis_sparepart, fallback to 70% for layanan
   const totalHPPSparepart = filteredServis.reduce((sum, s) => {
-    return sum + (s.spareparts?.reduce((a, sp) => a + (sp.harga * sp.qty * 0.7), 0) || 0); // 70% HPP
+    return sum + (s.spareparts?.reduce((a, sp) => a + ((sp.hpp > 0 ? sp.hpp : sp.harga * 0.7) * sp.qty), 0) || 0);
   }, 0);
   const totalHPPLayanan = filteredServis.reduce((sum, s) => {
-    return sum + (s.layanan?.reduce((a, l) => a + (l.harga * 0.3), 0) || 0); // 30% cost for labor
+    return sum + (s.layanan?.reduce((a, l) => a + (l.harga * 0.3), 0) || 0);
   }, 0);
   const totalHPP = totalHPPSparepart + totalHPPLayanan;
 
@@ -41,7 +41,7 @@ export default function LabaPage() {
       if (!days[day]) days[day] = { pendapatan: 0, hpp: 0, laba: 0 };
       days[day].pendapatan += s.total_biaya;
 
-      const hppSp = s.spareparts?.reduce((a, sp) => a + sp.harga * sp.qty * 0.7, 0) || 0;
+      const hppSp = s.spareparts?.reduce((a, sp) => a + ((sp.hpp > 0 ? sp.hpp : sp.harga * 0.7) * sp.qty), 0) || 0;
       const hppLy = s.layanan?.reduce((a, l) => a + l.harga * 0.3, 0) || 0;
       days[day].hpp += hppSp + hppLy;
       days[day].laba += s.total_biaya - hppSp - hppLy;
@@ -70,7 +70,7 @@ export default function LabaPage() {
       const k = s.created_at.substring(0, 7);
       if (months[k] !== undefined) {
         months[k].pendapatan += s.total_biaya;
-        const hppSp = s.spareparts?.reduce((a, sp) => a + sp.harga * sp.qty * 0.7, 0) || 0;
+        const hppSp = s.spareparts?.reduce((a, sp) => a + ((sp.hpp > 0 ? sp.hpp : sp.harga * 0.7) * sp.qty), 0) || 0;
         const hppLy = s.layanan?.reduce((a, l) => a + l.harga * 0.3, 0) || 0;
         months[k].laba += s.total_biaya - hppSp - hppLy;
       }

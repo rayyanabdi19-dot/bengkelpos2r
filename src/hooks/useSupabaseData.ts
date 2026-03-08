@@ -16,10 +16,23 @@ export interface Sparepart {
   nama: string;
   barcode: string;
   harga: number;
+  hpp: number;
   stok: number;
   stok_minimum: number;
   kategori: string;
   created_at: string;
+}
+
+export interface BengkelProfile {
+  id: string;
+  nama: string;
+  alamat: string;
+  telepon: string;
+  logo_url: string;
+  pemilik: string;
+  footer_struk: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Servis {
@@ -50,6 +63,7 @@ export interface ServisSparepart {
   sparepart_id: string | null;
   nama: string;
   harga: number;
+  hpp: number;
   qty: number;
 }
 
@@ -73,6 +87,7 @@ const db = {
   servis_layanan: () => supabase.from('servis_layanan' as any),
   servis_sparepart: () => supabase.from('servis_sparepart' as any),
   booking: () => supabase.from('booking' as any),
+  bengkel_profile: () => supabase.from('bengkel_profile' as any),
 };
 
 function useSupabaseTable<T>(tableFn: () => ReturnType<typeof supabase.from>) {
@@ -190,7 +205,7 @@ export function useServis() {
       status: string;
     },
     layanan: { nama: string; harga: number }[],
-    spareparts: { sparepart_id: string; nama: string; harga: number; qty: number }[]
+    spareparts: { sparepart_id: string; nama: string; harga: number; hpp: number; qty: number }[]
   ) => {
     const { data: newServis, error } = await db.servis()
       .insert(servisData as any)
@@ -213,6 +228,7 @@ export function useServis() {
           sparepart_id: sp.sparepart_id,
           nama: sp.nama,
           harga: sp.harga,
+          hpp: sp.hpp,
           qty: sp.qty,
         })) as any
       );
@@ -306,4 +322,28 @@ export function useDashboardStats() {
   })();
 
   return { stats, monthlyData, loading };
+}
+
+// Bengkel Profile
+export function useBengkelProfile() {
+  const [profile, setProfile] = useState<BengkelProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    const { data, error } = await db.bengkel_profile().select('*').limit(1).single();
+    if (!error && data) setProfile(data as any as BengkelProfile);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { refresh(); }, [refresh]);
+
+  const update = async (p: Partial<BengkelProfile>) => {
+    if (!profile) return false;
+    const { error } = await db.bengkel_profile().update({ ...p, updated_at: new Date().toISOString() } as any).eq('id', profile.id);
+    if (!error) await refresh();
+    return !error;
+  };
+
+  return { profile, loading, refresh, update };
 }
