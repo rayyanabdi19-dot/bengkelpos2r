@@ -96,7 +96,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .select('*')
       .eq('kode', licenseKey.trim().toUpperCase())
       .eq('aktif', true)
-      .is('used_by', null)
       .single();
 
     if (licError || !license) {
