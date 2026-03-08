@@ -35,6 +35,7 @@ const pengaturanSubmenu = [
   { title: 'Backup Data', url: '/pengaturan/backup' },
   { title: 'Panduan Penggunaan', url: '/pengaturan/panduan' },
   { title: 'Install Aplikasi', url: '/install' },
+  { title: 'Helpdesk / Bantuan', url: 'https://wa.me/6282186371356', external: true },
 ];
 
 const karyawanSubmenu = [
