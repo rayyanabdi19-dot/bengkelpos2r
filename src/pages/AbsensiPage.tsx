@@ -341,13 +341,20 @@ export default function AbsensiPage() {
                 <h3 className="font-medium text-sm flex items-center gap-2">
                   <Camera className="w-4 h-4" /> Kamera Scanner
                 </h3>
-                <Button
-                  variant={scanning ? 'destructive' : 'default'}
-                  size="sm"
-                  onClick={scanning ? stopScanner : startScanner}
-                >
-                  {scanning ? <><CameraOff className="w-4 h-4 mr-2" /> Matikan</> : <><Camera className="w-4 h-4 mr-2" /> Scan QR</>}
-                </Button>
+                <div className="flex gap-2">
+                  {scanning && torchSupported && (
+                    <Button variant={torchOn ? 'secondary' : 'outline'} size="sm" onClick={toggleTorch}>
+                      {torchOn ? <><FlashlightOff className="w-4 h-4 mr-2" /> Matikan Flash</> : <><Flashlight className="w-4 h-4 mr-2" /> Nyalakan Flash</>}
+                    </Button>
+                  )}
+                  <Button
+                    variant={scanning ? 'destructive' : 'default'}
+                    size="sm"
+                    onClick={scanning ? stopScanner : startScanner}
+                  >
+                    {scanning ? <><CameraOff className="w-4 h-4 mr-2" /> Matikan</> : <><Camera className="w-4 h-4 mr-2" /> Scan QR</>}
+                  </Button>
+                </div>
               </div>
               <div
                 id="absensi-barcode-reader"
