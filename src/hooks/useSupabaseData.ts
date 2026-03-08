@@ -224,27 +224,44 @@ export function useBooking() {
 export function usePembelian() {
   const { data, loading, refresh } = useSupabaseTable<Pembelian>(db.pembelian);
 
-  const add = async (p: Omit<Pembelian, 'id' | 'created_at'>, updateStok = true) => {
+  const add = async (p: Omit<Pembelian, 'id' | 'created_at'>) => {
+    let sparepartId = p.sparepart_id;
+
+    // If no sparepart linked, auto-create a new sparepart entry
+    if (!sparepartId) {
+      const { data: newSp, error: spErr } = await db.sparepart().insert({
+        nama: p.nama_barang,
+        barcode: '',
+        harga: p.harga_beli,
+        hpp: p.harga_beli,
+        stok: 0,
+        stok_minimum: 0,
+        kategori: '',
+      } as any).select().single();
+      if (spErr || !newSp) return false;
+      sparepartId = (newSp as any).id;
+    }
+
+    // Record the purchase
     const { error } = await db.pembelian().insert({
       ...p,
+      sparepart_id: sparepartId,
       total: p.harga_beli * p.qty,
     } as any);
     if (error) return false;
 
-    // Auto-update sparepart stock
-    if (updateStok && p.sparepart_id) {
-      const { data: current } = await db.sparepart()
-        .select('stok, hpp')
-        .eq('id', p.sparepart_id)
-        .single();
-      if (current) {
-        await db.sparepart()
-          .update({
-            stok: (current as any).stok + p.qty,
-            hpp: p.harga_beli, // update HPP to latest purchase price
-          } as any)
-          .eq('id', p.sparepart_id);
-      }
+    // Auto-update sparepart stock & HPP
+    const { data: current } = await db.sparepart()
+      .select('stok')
+      .eq('id', sparepartId)
+      .single();
+    if (current) {
+      await db.sparepart()
+        .update({
+          stok: (current as any).stok + p.qty,
+          hpp: p.harga_beli,
+        } as any)
+        .eq('id', sparepartId);
     }
 
     await refresh();
