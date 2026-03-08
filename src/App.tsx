@@ -10,6 +10,7 @@ import DashboardPage from "@/pages/DashboardPage";
 import TransaksiPage from "@/pages/TransaksiPage";
 import ScanPage from "@/pages/ScanPage";
 import SparepartPage from "@/pages/SparepartPage";
+import LayananPage from "@/pages/LayananPage";
 import BookingPage from "@/pages/BookingPage";
 import PelangganPage from "@/pages/PelangganPage";
 import LaporanPage from "@/pages/LaporanPage";
