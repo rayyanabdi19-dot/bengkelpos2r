@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ScanBarcode, Camera, CameraOff, UserCheck, CalendarDays, Download, FileSpreadsheet, QrCode, LogOut, ArrowUp, ArrowDown } from 'lucide-react';
+import { Loader2, ScanBarcode, Camera, CameraOff, UserCheck, CalendarDays, Download, FileSpreadsheet, QrCode, LogOut, ArrowUp, ArrowDown, Flashlight, FlashlightOff } from 'lucide-react';
 import { Html5Qrcode } from 'html5-qrcode';
 import { QRCodeSVG } from 'qrcode.react';
 import * as XLSX from 'xlsx';
@@ -32,7 +32,10 @@ export default function AbsensiPage() {
   // Barcode scanner state
   const [scanning, setScanning] = useState(false);
   const [scannedName, setScannedName] = useState('');
+  const [torchOn, setTorchOn] = useState(false);
+  const [torchSupported, setTorchSupported] = useState(false);
   const scannerRef = useRef<Html5Qrcode | null>(null);
+  const trackRef = useRef<MediaStreamTrack | null>(null);
 
   // QR Code dialog
   const [showQrDialog, setShowQrDialog] = useState(false);
@@ -181,10 +184,27 @@ export default function AbsensiPage() {
           handleBarcodeFound(decodedText);
           scanner.stop().catch(() => {});
           setScanning(false);
+          setTorchOn(false);
+          trackRef.current = null;
+          setTorchSupported(false);
         },
         () => {}
       );
       setScanning(true);
+
+      // Check torch support
+      try {
+        const videoElement = document.querySelector('#absensi-barcode-reader video') as HTMLVideoElement;
+        if (videoElement?.srcObject) {
+          const stream = videoElement.srcObject as MediaStream;
+          const track = stream.getVideoTracks()[0];
+          const capabilities = track.getCapabilities?.() as any;
+          if (capabilities?.torch) {
+            trackRef.current = track;
+            setTorchSupported(true);
+          }
+        }
+      } catch {}
     } catch {
       toast({ title: 'Error', description: 'Tidak dapat mengakses kamera. Pastikan izin kamera diaktifkan.', variant: 'destructive' });
     }
@@ -195,8 +215,21 @@ export default function AbsensiPage() {
       try { await scannerRef.current.stop(); } catch {}
       scannerRef.current = null;
     }
+    trackRef.current = null;
     setScanning(false);
+    setTorchOn(false);
+    setTorchSupported(false);
   }, []);
+
+  const toggleTorch = useCallback(async () => {
+    if (!trackRef.current) return;
+    try {
+      await (trackRef.current as any).applyConstraints({ advanced: [{ torch: !torchOn }] });
+      setTorchOn(prev => !prev);
+    } catch {
+      toast({ title: 'Error', description: 'Gagal mengaktifkan lampu senter.', variant: 'destructive' });
+    }
+  }, [torchOn, toast]);
 
   useEffect(() => {
     return () => { stopScanner(); };
@@ -308,13 +341,20 @@ export default function AbsensiPage() {
                 <h3 className="font-medium text-sm flex items-center gap-2">
                   <Camera className="w-4 h-4" /> Kamera Scanner
                 </h3>
-                <Button
-                  variant={scanning ? 'destructive' : 'default'}
-                  size="sm"
-                  onClick={scanning ? stopScanner : startScanner}
-                >
-                  {scanning ? <><CameraOff className="w-4 h-4 mr-2" /> Matikan</> : <><Camera className="w-4 h-4 mr-2" /> Scan QR</>}
-                </Button>
+                <div className="flex gap-2">
+                  {scanning && torchSupported && (
+                    <Button variant={torchOn ? 'secondary' : 'outline'} size="sm" onClick={toggleTorch}>
+                      {torchOn ? <><FlashlightOff className="w-4 h-4 mr-2" /> Matikan Flash</> : <><Flashlight className="w-4 h-4 mr-2" /> Nyalakan Flash</>}
+                    </Button>
+                  )}
+                  <Button
+                    variant={scanning ? 'destructive' : 'default'}
+                    size="sm"
+                    onClick={scanning ? stopScanner : startScanner}
+                  >
+                    {scanning ? <><CameraOff className="w-4 h-4 mr-2" /> Matikan</> : <><Camera className="w-4 h-4 mr-2" /> Scan QR</>}
+                  </Button>
+                </div>
               </div>
               <div
                 id="absensi-barcode-reader"
