@@ -228,6 +228,7 @@ export function useServis() {
           sparepart_id: sp.sparepart_id,
           nama: sp.nama,
           harga: sp.harga,
+          hpp: sp.hpp,
           qty: sp.qty,
         })) as any
       );
