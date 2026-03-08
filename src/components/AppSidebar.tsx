@@ -225,11 +225,19 @@ export function AppSidebar() {
                       <SidebarMenuSub>
                         {pengaturanSubmenu.map(sub => (
                           <SidebarMenuSubItem key={sub.url}>
-                            <SidebarMenuSubButton asChild isActive={location.pathname === sub.url}>
-                              <NavLink to={sub.url} end className="hover:bg-sidebar-accent" activeClassName="text-sidebar-primary font-medium">
-                                {sub.title}
-                              </NavLink>
-                            </SidebarMenuSubButton>
+                            {'external' in sub && sub.external ? (
+                              <SidebarMenuSubButton asChild>
+                                <a href={sub.url} target="_blank" rel="noopener noreferrer" className="hover:bg-sidebar-accent">
+                                  {sub.title}
+                                </a>
+                              </SidebarMenuSubButton>
+                            ) : (
+                              <SidebarMenuSubButton asChild isActive={location.pathname === sub.url}>
+                                <NavLink to={sub.url} end className="hover:bg-sidebar-accent" activeClassName="text-sidebar-primary font-medium">
+                                  {sub.title}
+                                </NavLink>
+                              </SidebarMenuSubButton>
+                            )}
                           </SidebarMenuSubItem>
                         ))}
                       </SidebarMenuSub>
