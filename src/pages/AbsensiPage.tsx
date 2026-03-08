@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ScanBarcode, Camera, CameraOff, UserCheck, Clock, CalendarDays, Download, FileSpreadsheet, QrCode, LogOut } from 'lucide-react';
+import { Loader2, ScanBarcode, Camera, CameraOff, UserCheck, CalendarDays, Download, FileSpreadsheet, QrCode, LogOut, ArrowUp, ArrowDown } from 'lucide-react';
 import { Html5Qrcode } from 'html5-qrcode';
 import { QRCodeSVG } from 'qrcode.react';
 import * as XLSX from 'xlsx';
@@ -39,8 +39,41 @@ export default function AbsensiPage() {
   const [qrKaryawan, setQrKaryawan] = useState<any>(null);
   const [printSize, setPrintSize] = useState<'cr80' | 'a7' | 'a8' | 'custom'>('cr80');
 
+  const [scanFeedback, setScanFeedback] = useState<{ type: 'masuk' | 'pulang' | 'lengkap' | 'error'; nama: string; waktu: string } | null>(null);
+
   const activeKaryawan = karyawanList.filter(k => k.aktif);
   const loading = kLoading || aLoading;
+
+  // Sound feedback using Web Audio API
+  const playBeep = useCallback((type: 'success' | 'error') => {
+    try {
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      gain.gain.value = 0.3;
+      if (type === 'success') {
+        osc.frequency.value = 880;
+        osc.start();
+        osc.stop(ctx.currentTime + 0.15);
+        setTimeout(() => {
+          const osc2 = ctx.createOscillator();
+          const gain2 = ctx.createGain();
+          osc2.connect(gain2);
+          gain2.connect(ctx.destination);
+          gain2.gain.value = 0.3;
+          osc2.frequency.value = 1320;
+          osc2.start();
+          osc2.stop(ctx.currentTime + 0.2);
+        }, 150);
+      } else {
+        osc.frequency.value = 300;
+        osc.start();
+        osc.stop(ctx.currentTime + 0.4);
+      }
+    } catch {}
+  }, []);
 
   const todayAbsensi = absensiList.filter(a => a.tanggal === filterDate);
 
@@ -88,7 +121,10 @@ export default function AbsensiPage() {
     const karyawan = karyawanList.find(k => k.id === code);
     if (!karyawan) {
       setScannedName('');
+      playBeep('error');
+      setScanFeedback({ type: 'error', nama: 'Tidak dikenal', waktu: '' });
       toast({ title: 'Tidak Ditemukan', description: 'QR Code tidak cocok dengan data karyawan', variant: 'destructive' });
+      setTimeout(() => setScanFeedback(null), 3000);
       return;
     }
 
@@ -100,22 +136,30 @@ export default function AbsensiPage() {
     const existing = absensiList.find(a => a.karyawan_id === karyawan.id && a.tanggal === today);
 
     if (!existing) {
-      // Belum absen hari ini → catat masuk
       const ok = await add({ karyawan_id: karyawan.id, tanggal: today, jam_masuk: now, jam_keluar: '', status: 'hadir', foto_url: '', catatan: '' });
       if (ok) {
+        playBeep('success');
+        setScanFeedback({ type: 'masuk', nama: karyawan.nama, waktu: now });
         toast({ title: '⬆️ Absen Masuk Berhasil', description: `${karyawan.nama} — ${now}` });
       } else {
+        playBeep('error');
+        setScanFeedback({ type: 'error', nama: karyawan.nama, waktu: now });
         toast({ title: 'Gagal mencatat absen masuk', variant: 'destructive' });
       }
     } else if (existing.jam_masuk && !existing.jam_keluar) {
-      // Sudah masuk, belum pulang → catat pulang
       const ok = await update(existing.id, { jam_keluar: now });
       if (ok) {
+        playBeep('success');
+        setScanFeedback({ type: 'pulang', nama: karyawan.nama, waktu: now });
         toast({ title: '⬇️ Absen Pulang Berhasil', description: `${karyawan.nama} — ${now}` });
       } else {
+        playBeep('error');
+        setScanFeedback({ type: 'error', nama: karyawan.nama, waktu: now });
         toast({ title: 'Gagal mencatat absen pulang', variant: 'destructive' });
       }
     } else if (existing.jam_keluar) {
+      playBeep('error');
+      setScanFeedback({ type: 'lengkap', nama: karyawan.nama, waktu: '' });
       toast({ title: 'Sudah Lengkap', description: `${karyawan.nama} sudah absen masuk & pulang hari ini` });
     } else {
       toast({ title: `${karyawan.nama} sudah memiliki catatan absensi hari ini` });
@@ -123,7 +167,8 @@ export default function AbsensiPage() {
 
     setSelectedKaryawan('');
     setScannedName('');
-  }, [karyawanList, absensiList, toast, add, update]);
+    setTimeout(() => setScanFeedback(null), 4000);
+  }, [karyawanList, absensiList, toast, add, update, playBeep]);
 
   const startScanner = useCallback(async () => {
     try {
@@ -264,6 +309,37 @@ export default function AbsensiPage() {
               )}
             </div>
 
+            {/* Scan Feedback Banner */}
+            {scanFeedback && (
+              <div className={`rounded-lg p-4 flex items-center gap-3 animate-fade-in ${
+                scanFeedback.type === 'masuk' ? 'bg-green-100 border border-green-300 dark:bg-green-900/30 dark:border-green-700' :
+                scanFeedback.type === 'pulang' ? 'bg-blue-100 border border-blue-300 dark:bg-blue-900/30 dark:border-blue-700' :
+                scanFeedback.type === 'lengkap' ? 'bg-yellow-100 border border-yellow-300 dark:bg-yellow-900/30 dark:border-yellow-700' :
+                'bg-red-100 border border-red-300 dark:bg-red-900/30 dark:border-red-700'
+              }`}>
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${
+                  scanFeedback.type === 'masuk' ? 'bg-green-500' :
+                  scanFeedback.type === 'pulang' ? 'bg-blue-500' :
+                  scanFeedback.type === 'lengkap' ? 'bg-yellow-500' : 'bg-red-500'
+                }`}>
+                  {scanFeedback.type === 'masuk' && <ArrowUp className="w-6 h-6 text-white" />}
+                  {scanFeedback.type === 'pulang' && <ArrowDown className="w-6 h-6 text-white" />}
+                  {scanFeedback.type === 'lengkap' && <UserCheck className="w-6 h-6 text-white" />}
+                  {scanFeedback.type === 'error' && <ScanBarcode className="w-6 h-6 text-white" />}
+                </div>
+                <div>
+                  <p className="font-bold text-lg">
+                    {scanFeedback.type === 'masuk' && '⬆️ MASUK'}
+                    {scanFeedback.type === 'pulang' && '⬇️ PULANG'}
+                    {scanFeedback.type === 'lengkap' && '✅ SUDAH LENGKAP'}
+                    {scanFeedback.type === 'error' && '❌ GAGAL'}
+                  </p>
+                  <p className="text-sm font-medium">{scanFeedback.nama}</p>
+                  {scanFeedback.waktu && <p className="text-xs text-muted-foreground">Pukul {scanFeedback.waktu}</p>}
+                </div>
+              </div>
+            )}
+
             {/* Manual select + settings */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
@@ -319,41 +395,76 @@ export default function AbsensiPage() {
             {todayAbsensi.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">Belum ada data absensi pada tanggal ini</div>
             ) : (
-              <div className="grid gap-2">
-                {todayAbsensi.map(a => (
-                  <div key={a.id} className="flex items-center gap-3 p-3 rounded-lg border border-border bg-background">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                      <UserCheck className="w-5 h-5 text-primary" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="font-semibold truncate">{getKaryawanName(a.karyawan_id)}</p>
-                      <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                        {a.jam_masuk && <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> Masuk: {a.jam_masuk}</span>}
-                        {a.jam_keluar && <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> Keluar: {a.jam_keluar}</span>}
+              <div className="grid gap-3">
+                {todayAbsensi.map(a => {
+                  const nama = getKaryawanName(a.karyawan_id);
+                  const karyawan = karyawanList.find(k => k.id === a.karyawan_id);
+                  const hasCheckedOut = a.status === 'hadir' && a.jam_masuk && a.jam_keluar;
+                  const isWorking = a.status === 'hadir' && a.jam_masuk && !a.jam_keluar;
+                  return (
+                    <div key={a.id} className="rounded-lg border border-border bg-background overflow-hidden">
+                      {/* Header row */}
+                      <div className="flex items-center gap-3 p-3">
+                        <div className="w-10 h-10 rounded-full overflow-hidden bg-primary/10 flex items-center justify-center shrink-0">
+                          {karyawan?.foto_wajah ? (
+                            <img src={karyawan.foto_wajah} alt={nama} className="w-full h-full object-cover" />
+                          ) : (
+                            <UserCheck className="w-5 h-5 text-primary" />
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-semibold truncate">{nama}</p>
+                          <p className="text-xs text-muted-foreground">{karyawan?.jabatan || 'Staff'}</p>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          {isWorking && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-orange-600 border-orange-300 hover:bg-orange-50 dark:hover:bg-orange-900/20"
+                              onClick={async () => {
+                                const now = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                                const ok = await update(a.id, { jam_keluar: now });
+                                if (ok) toast({ title: `Absen pulang ${nama} berhasil dicatat` });
+                                else toast({ title: 'Gagal menyimpan absensi pulang', variant: 'destructive' });
+                              }}
+                            >
+                              <LogOut className="w-4 h-4 mr-1" /> Pulang
+                            </Button>
+                          )}
+                          <span className={`text-xs px-2 py-1 rounded-full font-medium ${getStatusBadge(a.status)}`}>
+                            {a.status}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      {a.status === 'hadir' && a.jam_masuk && !a.jam_keluar && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-orange-600 border-orange-300 hover:bg-orange-50 dark:hover:bg-orange-900/20"
-                          onClick={async () => {
-                            const now = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                            const ok = await update(a.id, { jam_keluar: now });
-                            if (ok) toast({ title: `Absen pulang ${getKaryawanName(a.karyawan_id)} berhasil dicatat` });
-                            else toast({ title: 'Gagal menyimpan absensi pulang', variant: 'destructive' });
-                          }}
-                        >
-                          <LogOut className="w-4 h-4 mr-1" /> Pulang
-                        </Button>
+                      {/* Timeline masuk/pulang */}
+                      {a.status === 'hadir' && (
+                        <div className="border-t border-border px-3 py-2 bg-muted/20 grid grid-cols-2 gap-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center shrink-0">
+                              <ArrowUp className="w-3.5 h-3.5 text-white" />
+                            </div>
+                            <div>
+                              <p className="text-[10px] uppercase font-semibold text-green-600 dark:text-green-400">Masuk</p>
+                              <p className="text-sm font-mono font-bold">{a.jam_masuk || '-'}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${hasCheckedOut ? 'bg-blue-500' : 'bg-muted-foreground/30'}`}>
+                              <ArrowDown className="w-3.5 h-3.5 text-white" />
+                            </div>
+                            <div>
+                              <p className="text-[10px] uppercase font-semibold text-blue-600 dark:text-blue-400">Pulang</p>
+                              <p className={`text-sm font-mono font-bold ${hasCheckedOut ? '' : 'text-muted-foreground'}`}>
+                                {a.jam_keluar || 'Belum'}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
                       )}
-                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${getStatusBadge(a.status)}`}>
-                        {a.status}
-                      </span>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
