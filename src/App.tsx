@@ -108,6 +108,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <MaintenanceNotification />
       <AuthProvider>
         <BrowserRouter>
           <Routes>
