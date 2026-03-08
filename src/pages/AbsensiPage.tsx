@@ -39,8 +39,41 @@ export default function AbsensiPage() {
   const [qrKaryawan, setQrKaryawan] = useState<any>(null);
   const [printSize, setPrintSize] = useState<'cr80' | 'a7' | 'a8' | 'custom'>('cr80');
 
+  const [scanFeedback, setScanFeedback] = useState<{ type: 'masuk' | 'pulang' | 'lengkap' | 'error'; nama: string; waktu: string } | null>(null);
+
   const activeKaryawan = karyawanList.filter(k => k.aktif);
   const loading = kLoading || aLoading;
+
+  // Sound feedback using Web Audio API
+  const playBeep = useCallback((type: 'success' | 'error') => {
+    try {
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      gain.gain.value = 0.3;
+      if (type === 'success') {
+        osc.frequency.value = 880;
+        osc.start();
+        osc.stop(ctx.currentTime + 0.15);
+        setTimeout(() => {
+          const osc2 = ctx.createOscillator();
+          const gain2 = ctx.createGain();
+          osc2.connect(gain2);
+          gain2.connect(ctx.destination);
+          gain2.gain.value = 0.3;
+          osc2.frequency.value = 1320;
+          osc2.start();
+          osc2.stop(ctx.currentTime + 0.2);
+        }, 150);
+      } else {
+        osc.frequency.value = 300;
+        osc.start();
+        osc.stop(ctx.currentTime + 0.4);
+      }
+    } catch {}
+  }, []);
 
   const todayAbsensi = absensiList.filter(a => a.tanggal === filterDate);
 
