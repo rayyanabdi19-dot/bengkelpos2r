@@ -217,6 +217,12 @@ export default function LoginPage() {
                   </div>
 
                   <div className="space-y-2">
+                    <Label htmlFor="regPhone">Nomor HP *</Label>
+                    <Input id="regPhone" type="tel" value={regPhone} onChange={e => setRegPhone(e.target.value)} placeholder="08xxxxxxxxxx" />
+                    <p className="text-xs text-muted-foreground">Digunakan untuk reset password via WhatsApp</p>
+                  </div>
+
+                  <div className="space-y-2">
                     <Label htmlFor="regPassword">Password *</Label>
                     <div className="relative">
                       <Input id="regPassword" type={showRegPassword ? 'text' : 'password'} value={regPassword} onChange={e => setRegPassword(e.target.value)} placeholder="Minimal 6 karakter" />
