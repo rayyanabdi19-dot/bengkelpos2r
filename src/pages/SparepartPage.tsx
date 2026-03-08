@@ -140,7 +140,16 @@ export default function SparepartPage() {
           <DialogHeader><DialogTitle>{editing ? 'Edit' : 'Tambah'} Sparepart</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div className="space-y-1"><Label>Nama</Label><Input value={form.nama} onChange={e => setForm({ ...form, nama: e.target.value })} /></div>
-            <div className="space-y-1"><Label>Barcode</Label><Input value={form.barcode} onChange={e => setForm({ ...form, barcode: e.target.value })} /></div>
+            <div className="space-y-1">
+              <Label>Barcode</Label>
+              <div className="flex gap-2">
+                <Input value={form.barcode} onChange={e => setForm({ ...form, barcode: e.target.value })} className="font-mono" placeholder="Scan atau ketik barcode" />
+                <Button type="button" variant={scanningBarcode ? 'destructive' : 'outline'} size="icon" onClick={scanningBarcode ? stopBarcodeScanner : startBarcodeScanner}>
+                  {scanningBarcode ? <CameraOff className="w-4 h-4" /> : <Camera className="w-4 h-4" />}
+                </Button>
+              </div>
+              <div id="sparepart-barcode-reader" className={`w-full rounded-lg overflow-hidden border border-border bg-muted mt-2 ${scanningBarcode ? 'min-h-[200px]' : 'hidden'}`} />
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1"><Label>Harga</Label><Input type="number" value={form.harga} onChange={e => setForm({ ...form, harga: Number(e.target.value) })} /></div>
               <div className="space-y-1"><Label>Stok</Label><Input type="number" value={form.stok} onChange={e => setForm({ ...form, stok: Number(e.target.value) })} /></div>
