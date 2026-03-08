@@ -7,8 +7,14 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Pencil, Trash2, AlertTriangle, Search, Loader2, Camera, CameraOff } from 'lucide-react';
+import { Plus, Pencil, Trash2, AlertTriangle, Search, Loader2, Camera, CameraOff, MoreVertical } from 'lucide-react';
 import { Html5Qrcode } from 'html5-qrcode';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export default function SparepartPage() {
   const { toast } = useToast();
@@ -108,14 +114,15 @@ export default function SparepartPage() {
         <Input placeholder="Cari nama atau barcode..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
       </div>
 
-      <div className="rounded-lg border border-border bg-card">
+      {/* Desktop Table */}
+      <div className="hidden md:block rounded-lg border border-border bg-card">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead className="w-[40px]">No</TableHead>
               <TableHead>Nama</TableHead>
-              <TableHead className="hidden sm:table-cell">Barcode</TableHead>
-              <TableHead className="hidden md:table-cell">Kategori</TableHead>
+              <TableHead>Barcode</TableHead>
+              <TableHead>Kategori</TableHead>
               <TableHead className="text-right">HPP</TableHead>
               <TableHead className="text-right">Harga Jual</TableHead>
               <TableHead className="text-center">Stok</TableHead>
@@ -134,8 +141,8 @@ export default function SparepartPage() {
                 <TableRow key={sp.id}>
                   <TableCell className="text-muted-foreground">{idx + 1}</TableCell>
                   <TableCell className="font-medium">{sp.nama}</TableCell>
-                  <TableCell className="hidden sm:table-cell font-mono text-xs text-muted-foreground">{sp.barcode || '-'}</TableCell>
-                  <TableCell className="hidden md:table-cell">
+                  <TableCell className="font-mono text-xs text-muted-foreground">{sp.barcode || '-'}</TableCell>
+                  <TableCell>
                     {sp.kategori ? (
                       <span className="text-xs bg-secondary px-2 py-0.5 rounded-md text-secondary-foreground">{sp.kategori}</span>
                     ) : '-'}
@@ -159,6 +166,62 @@ export default function SparepartPage() {
             )}
           </TableBody>
         </Table>
+      </div>
+
+      {/* Mobile Card List */}
+      <div className="md:hidden space-y-3">
+        {filtered.length === 0 ? (
+          <div className="text-center text-muted-foreground py-8 stat-card">Belum ada data sparepart</div>
+        ) : (
+          filtered.map((sp, idx) => (
+            <div key={sp.id} className="stat-card">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xs text-muted-foreground">{idx + 1}.</span>
+                    <h4 className="font-semibold truncate">{sp.nama}</h4>
+                  </div>
+                  {sp.barcode && <p className="text-xs text-muted-foreground font-mono mb-1">{sp.barcode}</p>}
+                  {sp.kategori && (
+                    <span className="text-xs bg-secondary px-2 py-0.5 rounded-md text-secondary-foreground">{sp.kategori}</span>
+                  )}
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+                      <MoreVertical className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => openEdit(sp)}>
+                      <Pencil className="w-3.5 h-3.5 mr-2" /> Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleDelete(sp.id)} className="text-destructive">
+                      <Trash2 className="w-3.5 h-3.5 mr-2" /> Hapus
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+              <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-border">
+                <div>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wide">HPP</p>
+                  <p className="text-sm font-medium">{formatRupiah(sp.hpp)}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Harga Jual</p>
+                  <p className="text-sm font-semibold text-primary">{formatRupiah(sp.harga)}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Stok</p>
+                  <p className={`text-sm font-medium inline-flex items-center gap-1 ${sp.stok <= sp.stok_minimum ? 'text-warning' : ''}`}>
+                    {sp.stok <= sp.stok_minimum && <AlertTriangle className="w-3 h-3" />}
+                    {sp.stok}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
       </div>
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
