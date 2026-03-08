@@ -24,6 +24,7 @@ const emptyForm: SlipForm = { karyawan_id: '', periode: '', gaji_pokok: 0, bonus
 export default function GajiPage() {
   const { karyawanList, loading: kLoading } = useKaryawan();
   const { slipList, loading: sLoading, add, remove } = useSlipGaji();
+  const { profile } = useBengkelProfile();
   const { toast } = useToast();
   const [showDialog, setShowDialog] = useState(false);
   const [form, setForm] = useState<SlipForm>(emptyForm);
