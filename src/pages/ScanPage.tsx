@@ -1,22 +1,23 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { sparepartStore, type Sparepart } from '@/lib/store';
 import { formatRupiah } from '@/lib/format';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ScanBarcode, Camera, X } from 'lucide-react';
+import { ScanBarcode, Camera, CameraOff, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Html5Qrcode } from 'html5-qrcode';
 
 export default function ScanPage() {
   const { toast } = useToast();
   const [barcode, setBarcode] = useState('');
   const [result, setResult] = useState<Sparepart | null>(null);
   const [scanning, setScanning] = useState(false);
+  const scannerRef = useRef<Html5Qrcode | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Manual barcode entry
-  const handleSearch = () => {
-    if (!barcode.trim()) return;
-    const sp = sparepartStore.getByBarcode(barcode.trim());
+  const handleFound = useCallback((code: string) => {
+    const sp = sparepartStore.getByBarcode(code);
+    setBarcode(code);
     if (sp) {
       setResult(sp);
       toast({ title: 'Ditemukan', description: sp.nama });
@@ -24,6 +25,45 @@ export default function ScanPage() {
       setResult(null);
       toast({ title: 'Tidak Ditemukan', description: 'Sparepart dengan barcode tersebut tidak ada', variant: 'destructive' });
     }
+  }, [toast]);
+
+  const startScanner = useCallback(async () => {
+    try {
+      const scanner = new Html5Qrcode('barcode-reader');
+      scannerRef.current = scanner;
+      await scanner.start(
+        { facingMode: 'environment' },
+        { fps: 10, qrbox: { width: 250, height: 150 } },
+        (decodedText) => {
+          handleFound(decodedText);
+          scanner.stop().catch(() => {});
+          setScanning(false);
+        },
+        () => {}
+      );
+      setScanning(true);
+    } catch (err) {
+      toast({ title: 'Error', description: 'Tidak dapat mengakses kamera. Pastikan izin kamera diaktifkan.', variant: 'destructive' });
+    }
+  }, [handleFound, toast]);
+
+  const stopScanner = useCallback(async () => {
+    if (scannerRef.current) {
+      try {
+        await scannerRef.current.stop();
+      } catch {}
+      scannerRef.current = null;
+    }
+    setScanning(false);
+  }, []);
+
+  useEffect(() => {
+    return () => { stopScanner(); };
+  }, [stopScanner]);
+
+  const handleSearch = () => {
+    if (!barcode.trim()) return;
+    handleFound(barcode.trim());
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -34,10 +74,33 @@ export default function ScanPage() {
     <div className="space-y-6 animate-fade-in">
       <div>
         <h1 className="page-header">Scan Barcode</h1>
-        <p className="page-subtitle">Scan barcode sparepart untuk menambahkan ke transaksi</p>
+        <p className="page-subtitle">Scan barcode sparepart menggunakan kamera atau input manual</p>
       </div>
 
+      {/* Camera Scanner */}
       <div className="stat-card max-w-lg">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-semibold text-sm">Kamera Scanner</h3>
+          <Button
+            variant={scanning ? 'destructive' : 'default'}
+            size="sm"
+            onClick={scanning ? stopScanner : startScanner}
+          >
+            {scanning ? <><CameraOff className="w-4 h-4 mr-2" /> Matikan Kamera</> : <><Camera className="w-4 h-4 mr-2" /> Aktifkan Kamera</>}
+          </Button>
+        </div>
+        <div
+          id="barcode-reader"
+          className={`w-full rounded-lg overflow-hidden border border-border bg-muted ${scanning ? 'min-h-[250px]' : 'h-0'}`}
+        />
+        {!scanning && (
+          <p className="text-xs text-muted-foreground mt-2">Klik "Aktifkan Kamera" untuk mulai scan barcode menggunakan kamera HP.</p>
+        )}
+      </div>
+
+      {/* Manual Input */}
+      <div className="stat-card max-w-lg">
+        <h3 className="font-semibold text-sm mb-3">Input Manual</h3>
         <div className="flex gap-2">
           <Input
             ref={inputRef}
@@ -51,12 +114,12 @@ export default function ScanPage() {
             <ScanBarcode className="w-4 h-4 mr-2" /> Cari
           </Button>
         </div>
-
         <p className="text-xs text-muted-foreground mt-2">
-          Gunakan barcode scanner atau ketik barcode manual, lalu tekan Enter.
+          Gunakan barcode scanner USB atau ketik barcode manual, lalu tekan Enter.
         </p>
       </div>
 
+      {/* Result */}
       {result && (
         <div className="stat-card max-w-lg animate-fade-in">
           <div className="flex justify-between items-start">
