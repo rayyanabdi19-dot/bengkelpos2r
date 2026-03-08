@@ -22,7 +22,7 @@ export default function AbsensiPage() {
   const [filterDate, setFilterDate] = useState(new Date().toISOString().split('T')[0]);
   const [absenType, setAbsenType] = useState<'masuk' | 'keluar'>('masuk');
   const [absenStatus, setAbsenStatus] = useState<'hadir' | 'izin' | 'sakit'>('hadir');
-  const [showPhoto, setShowPhoto] = useState<string | null>(null);
+  const [showPhoto] = useState<string | null>(null);
   const [rekapMonth, setRekapMonth] = useState(() => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
