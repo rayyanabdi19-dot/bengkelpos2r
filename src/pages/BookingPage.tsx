@@ -1,33 +1,30 @@
 import { useState } from 'react';
-import { bookingStore, type Booking } from '@/lib/store';
+import { useBooking } from '@/hooks/useSupabaseData';
 import { formatDate } from '@/lib/format';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { CalendarCheck, Check, X } from 'lucide-react';
+import { CalendarCheck, Check, X, Loader2 } from 'lucide-react';
 
 export default function BookingPage() {
   const { toast } = useToast();
-  const [bookings, setBookings] = useState(bookingStore.getAll());
-  const [form, setForm] = useState({ nama: '', noWa: '', platMotor: '', keluhan: '', tanggal: '', jam: '' });
+  const { bookings, loading, add, updateStatus } = useBooking();
+  const [form, setForm] = useState({ nama: '', no_wa: '', plat_motor: '', keluhan: '', tanggal: '', jam: '' });
+  const [saving, setSaving] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.nama || !form.noWa || !form.tanggal || !form.jam) {
+    if (!form.nama || !form.no_wa || !form.tanggal || !form.jam) {
       toast({ title: 'Error', description: 'Lengkapi semua field wajib', variant: 'destructive' });
       return;
     }
-    bookingStore.add({ ...form, status: 'menunggu' });
-    setBookings(bookingStore.getAll());
-    setForm({ nama: '', noWa: '', platMotor: '', keluhan: '', tanggal: '', jam: '' });
+    setSaving(true);
+    await add({ ...form, status: 'menunggu' });
+    setSaving(false);
+    setForm({ nama: '', no_wa: '', plat_motor: '', keluhan: '', tanggal: '', jam: '' });
     toast({ title: 'Berhasil', description: 'Booking berhasil ditambahkan' });
-  };
-
-  const updateStatus = (id: string, status: Booking['status']) => {
-    bookingStore.update(id, { status });
-    setBookings(bookingStore.getAll());
   };
 
   const statusColor: Record<string, string> = {
@@ -37,6 +34,10 @@ export default function BookingPage() {
     dibatalkan: 'bg-destructive/10 text-destructive',
   };
 
+  if (loading) {
+    return <div className="flex items-center justify-center h-64"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
+  }
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
@@ -45,31 +46,32 @@ export default function BookingPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Form */}
         <div className="stat-card space-y-3">
           <h3 className="font-semibold flex items-center gap-2"><CalendarCheck className="w-4 h-4 text-primary" /> Booking Baru</h3>
           <form onSubmit={handleSubmit} className="space-y-3">
             <div className="space-y-1"><Label>Nama *</Label><Input value={form.nama} onChange={e => setForm({ ...form, nama: e.target.value })} /></div>
-            <div className="space-y-1"><Label>No. WhatsApp *</Label><Input value={form.noWa} onChange={e => setForm({ ...form, noWa: e.target.value })} /></div>
-            <div className="space-y-1"><Label>Plat Motor</Label><Input value={form.platMotor} onChange={e => setForm({ ...form, platMotor: e.target.value })} /></div>
+            <div className="space-y-1"><Label>No. WhatsApp *</Label><Input value={form.no_wa} onChange={e => setForm({ ...form, no_wa: e.target.value })} /></div>
+            <div className="space-y-1"><Label>Plat Motor</Label><Input value={form.plat_motor} onChange={e => setForm({ ...form, plat_motor: e.target.value })} /></div>
             <div className="space-y-1"><Label>Keluhan</Label><Textarea value={form.keluhan} onChange={e => setForm({ ...form, keluhan: e.target.value })} rows={2} /></div>
             <div className="grid grid-cols-2 gap-2">
               <div className="space-y-1"><Label>Tanggal *</Label><Input type="date" value={form.tanggal} onChange={e => setForm({ ...form, tanggal: e.target.value })} /></div>
               <div className="space-y-1"><Label>Jam *</Label><Input type="time" value={form.jam} onChange={e => setForm({ ...form, jam: e.target.value })} /></div>
             </div>
-            <Button type="submit" className="w-full">Tambah Booking</Button>
+            <Button type="submit" className="w-full" disabled={saving}>
+              {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+              Tambah Booking
+            </Button>
           </form>
         </div>
 
-        {/* Booking List */}
         <div className="lg:col-span-2 space-y-3">
           {bookings.length === 0 && <p className="text-muted-foreground text-sm">Belum ada booking.</p>}
-          {bookings.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).map(b => (
+          {bookings.map(b => (
             <div key={b.id} className="stat-card">
               <div className="flex justify-between items-start mb-2">
                 <div>
                   <h4 className="font-semibold">{b.nama}</h4>
-                  <p className="text-xs text-muted-foreground">{b.noWa} • {b.platMotor}</p>
+                  <p className="text-xs text-muted-foreground">{b.no_wa} • {b.plat_motor}</p>
                 </div>
                 <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusColor[b.status]}`}>{b.status}</span>
               </div>

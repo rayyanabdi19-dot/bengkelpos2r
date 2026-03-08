@@ -33,7 +33,6 @@ export interface Servis {
   total_biaya: number;
   status: string;
   created_at: string;
-  // Joined data
   layanan?: ServisLayanan[];
   spareparts?: ServisSparepart[];
 }
@@ -66,20 +65,29 @@ export interface Booking {
   created_at: string;
 }
 
-// Generic hook for fetching data
-function useSupabaseTable<T>(table: string) {
+// Helper: typed from() calls
+const db = {
+  pelanggan: () => supabase.from('pelanggan' as any),
+  sparepart: () => supabase.from('sparepart' as any),
+  servis: () => supabase.from('servis' as any),
+  servis_layanan: () => supabase.from('servis_layanan' as any),
+  servis_sparepart: () => supabase.from('servis_sparepart' as any),
+  booking: () => supabase.from('booking' as any),
+};
+
+function useSupabaseTable<T>(tableFn: () => ReturnType<typeof supabase.from>) {
   const [data, setData] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
     setLoading(true);
-    const { data: rows, error } = await supabase
-      .from(table as any)
+    const { data: rows, error } = await tableFn()
       .select('*')
       .order('created_at', { ascending: false });
     if (!error && rows) setData(rows as T[]);
     setLoading(false);
-  }, [table]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => { refresh(); }, [refresh]);
 
@@ -88,10 +96,10 @@ function useSupabaseTable<T>(table: string) {
 
 // Pelanggan
 export function usePelanggan() {
-  const { data, loading, refresh } = useSupabaseTable<Pelanggan>('pelanggan');
+  const { data, loading, refresh } = useSupabaseTable<Pelanggan>(db.pelanggan);
 
   const add = async (p: Omit<Pelanggan, 'id' | 'created_at'>) => {
-    const { error } = await supabase.from('pelanggan').insert(p);
+    const { error } = await db.pelanggan().insert(p as any);
     if (!error) await refresh();
     return !error;
   };
@@ -101,28 +109,27 @@ export function usePelanggan() {
 
 // Sparepart
 export function useSparepart() {
-  const { data, loading, refresh } = useSupabaseTable<Sparepart>('sparepart');
+  const { data, loading, refresh } = useSupabaseTable<Sparepart>(db.sparepart);
 
   const add = async (sp: Omit<Sparepart, 'id' | 'created_at'>) => {
-    const { error } = await supabase.from('sparepart').insert(sp);
+    const { error } = await db.sparepart().insert(sp as any);
     if (!error) await refresh();
     return !error;
   };
 
   const update = async (id: string, sp: Partial<Sparepart>) => {
-    const { error } = await supabase.from('sparepart').update(sp).eq('id', id);
+    const { error } = await db.sparepart().update(sp as any).eq('id', id);
     if (!error) await refresh();
     return !error;
   };
 
   const remove = async (id: string) => {
-    const { error } = await supabase.from('sparepart').delete().eq('id', id);
+    const { error } = await db.sparepart().delete().eq('id', id);
     if (!error) await refresh();
     return !error;
   };
 
   const getByBarcode = (barcode: string) => data.find(s => s.barcode === barcode);
-
   const getLowStock = () => data.filter(s => s.stok <= s.stok_minimum);
 
   return { spareparts: data, loading, refresh, add, update, remove, getByBarcode, getLowStock };
@@ -130,16 +137,16 @@ export function useSparepart() {
 
 // Booking
 export function useBooking() {
-  const { data, loading, refresh } = useSupabaseTable<Booking>('booking');
+  const { data, loading, refresh } = useSupabaseTable<Booking>(db.booking);
 
   const add = async (b: Omit<Booking, 'id' | 'created_at'>) => {
-    const { error } = await supabase.from('booking').insert(b);
+    const { error } = await db.booking().insert(b as any);
     if (!error) await refresh();
     return !error;
   };
 
   const updateStatus = async (id: string, status: string) => {
-    const { error } = await supabase.from('booking').update({ status }).eq('id', id);
+    const { error } = await db.booking().update({ status } as any).eq('id', id);
     if (!error) await refresh();
     return !error;
   };
@@ -154,16 +161,17 @@ export function useServis() {
 
   const refresh = useCallback(async () => {
     setLoading(true);
-    const { data: rows, error } = await supabase
-      .from('servis')
-      .select('*, servis_layanan(*), servis_sparepart(*)')
-      .order('created_at', { ascending: false });
+    const { data: rows, error } = await db.servis()
+      .select('*, servis_layanan(*), servis_sparepart(*)');
     if (!error && rows) {
-      setServisList(rows.map((r: any) => ({
-        ...r,
-        layanan: r.servis_layanan || [],
-        spareparts: r.servis_sparepart || [],
-      })));
+      const sorted = (rows as any[])
+        .map(r => ({
+          ...r,
+          layanan: r.servis_layanan || [],
+          spareparts: r.servis_sparepart || [],
+        }))
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      setServisList(sorted);
     }
     setLoading(false);
   }, []);
@@ -184,84 +192,69 @@ export function useServis() {
     layanan: { nama: string; harga: number }[],
     spareparts: { sparepart_id: string; nama: string; harga: number; qty: number }[]
   ) => {
-    // Insert servis
-    const { data: newServis, error } = await supabase
-      .from('servis')
-      .insert(servisData)
+    const { data: newServis, error } = await db.servis()
+      .insert(servisData as any)
       .select()
       .single();
     if (error || !newServis) return null;
 
     const servisId = (newServis as any).id;
 
-    // Insert layanan
     if (layanan.length > 0) {
-      await supabase.from('servis_layanan').insert(
-        layanan.map(l => ({ servis_id: servisId, nama: l.nama, harga: l.harga }))
+      await db.servis_layanan().insert(
+        layanan.map(l => ({ servis_id: servisId, nama: l.nama, harga: l.harga })) as any
       );
     }
 
-    // Insert spareparts & reduce stock
     if (spareparts.length > 0) {
-      await supabase.from('servis_sparepart').insert(
+      await db.servis_sparepart().insert(
         spareparts.map(sp => ({
           servis_id: servisId,
           sparepart_id: sp.sparepart_id,
           nama: sp.nama,
           harga: sp.harga,
           qty: sp.qty,
-        }))
+        })) as any
       );
-      // Reduce stock
       for (const sp of spareparts) {
-        const { data: current } = await supabase
-          .from('sparepart')
+        const { data: current } = await db.sparepart()
           .select('stok')
           .eq('id', sp.sparepart_id)
           .single();
         if (current) {
-          await supabase
-            .from('sparepart')
-            .update({ stok: Math.max(0, (current as any).stok - sp.qty) })
+          await db.sparepart()
+            .update({ stok: Math.max(0, (current as any).stok - sp.qty) } as any)
             .eq('id', sp.sparepart_id);
         }
       }
     }
 
-    // Also add pelanggan if not exists
+    // Auto-create or link pelanggan
     if (servisData.nama_pelanggan && servisData.plat_motor) {
-      const { data: existing } = await supabase
-        .from('pelanggan')
+      const { data: existing } = await db.pelanggan()
         .select('id')
         .eq('plat_motor', servisData.plat_motor)
         .maybeSingle();
       if (!existing) {
-        const { data: newPel } = await supabase
-          .from('pelanggan')
+        const { data: newPel } = await db.pelanggan()
           .insert({
             nama: servisData.nama_pelanggan,
             no_hp: servisData.no_hp,
             plat_motor: servisData.plat_motor,
             tipe_motor: servisData.tipe_motor,
-          })
+          } as any)
           .select()
           .single();
         if (newPel) {
-          await supabase
-            .from('servis')
-            .update({ pelanggan_id: (newPel as any).id })
-            .eq('id', servisId);
+          await db.servis().update({ pelanggan_id: (newPel as any).id } as any).eq('id', servisId);
         }
       } else {
-        await supabase
-          .from('servis')
-          .update({ pelanggan_id: (existing as any).id })
-          .eq('id', servisId);
+        await db.servis().update({ pelanggan_id: (existing as any).id } as any).eq('id', servisId);
       }
     }
 
     await refresh();
-    return { ...newServis, layanan, spareparts } as Servis;
+    return { ...(newServis as any), layanan, spareparts } as Servis;
   };
 
   const getToday = () => {
