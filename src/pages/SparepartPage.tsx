@@ -61,7 +61,7 @@ export default function SparepartPage() {
 
   const openAdd = () => {
     setEditing(null);
-    setForm({ nama: '', barcode: '', harga: 0, stok: 0, stok_minimum: 5, kategori: '' });
+    setForm({ nama: '', barcode: '', harga: 0, hpp: 0, stok: 0, stok_minimum: 5, kategori: '' });
     setShowDialog(true);
   };
 
