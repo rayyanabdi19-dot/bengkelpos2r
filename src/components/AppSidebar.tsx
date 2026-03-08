@@ -35,6 +35,11 @@ const pengaturanSubmenu = [
   { title: 'Install Aplikasi', url: '/install' },
 ];
 
+const karyawanSubmenu = [
+  { title: 'Data Karyawan', url: '/karyawan' },
+  { title: 'Gaji Karyawan', url: '/karyawan/gaji' },
+];
+
 const bottomMenuItems = [
   { title: 'Layanan', url: '/layanan', icon: ClipboardList },
   { title: 'Booking Servis', url: '/booking', icon: CalendarCheck },
