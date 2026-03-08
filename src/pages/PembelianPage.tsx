@@ -182,7 +182,7 @@ export default function PembelianPage() {
               <Input value={form.nama_barang} onChange={e => setForm({ ...form, nama_barang: e.target.value })} placeholder="Nama sparepart" />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               <div className="space-y-1">
                 <Label>Jumlah *</Label>
                 <Input type="number" min={1} value={form.qty} onChange={e => setForm({ ...form, qty: Number(e.target.value) })} />
@@ -190,6 +190,10 @@ export default function PembelianPage() {
               <div className="space-y-1">
                 <Label>Harga Beli/pcs</Label>
                 <Input type="number" min={0} value={form.harga_beli} onChange={e => setForm({ ...form, harga_beli: Number(e.target.value) })} />
+              </div>
+              <div className="space-y-1">
+                <Label>Harga Jual/pcs</Label>
+                <Input type="number" min={0} value={form.harga_jual} onChange={e => setForm({ ...form, harga_jual: Number(e.target.value) })} />
               </div>
             </div>
 
