@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useSparepart, useServis } from '@/hooks/useSupabaseData';
+import { useSparepart, useServis, useLayanan } from '@/hooks/useSupabaseData';
 import { formatRupiah } from '@/lib/format';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,25 +11,16 @@ import { useToast } from '@/hooks/use-toast';
 import ReceiptView from '@/components/ReceiptView';
 import type { Servis } from '@/hooks/useSupabaseData';
 
-const daftarLayanan = [
-  { nama: 'Ganti Oli', harga: 20000 },
-  { nama: 'Tune Up', harga: 50000 },
-  { nama: 'Ganti Kampas Rem', harga: 25000 },
-  { nama: 'Service CVT', harga: 75000 },
-  { nama: 'Ganti Ban', harga: 15000 },
-  { nama: 'Balancing', harga: 20000 },
-  { nama: 'Service Injeksi', harga: 100000 },
-  { nama: 'Spooring', harga: 30000 },
-];
-
 export default function TransaksiPage() {
   const { toast } = useToast();
   const { spareparts } = useSparepart();
   const { add: addServis } = useServis();
+  const { getActive } = useLayanan();
+  const daftarLayanan = getActive();
   const [form, setForm] = useState({
     namaPelanggan: '', noHp: '', platMotor: '', tipeMotor: '', keluhan: '',
   });
-  const [selectedLayanan, setSelectedLayanan] = useState<{ nama: string; harga: number }[]>([]);
+  const [selectedLayanan, setSelectedLayanan] = useState<{ nama: string; harga: number; hpp: number }[]>([]);
   const [selectedSpareparts, setSelectedSpareparts] = useState<{ sparepart_id: string; nama: string; harga: number; hpp: number; qty: number }[]>([]);
   const [showReceipt, setShowReceipt] = useState(false);
   const [lastServis, setLastServis] = useState<Servis | null>(null);
@@ -39,7 +30,7 @@ export default function TransaksiPage() {
   const totalSparepart = selectedSpareparts.reduce((s, sp) => s + sp.harga * sp.qty, 0);
   const totalBiaya = totalLayanan + totalSparepart;
 
-  const toggleLayanan = (l: { nama: string; harga: number }) => {
+  const toggleLayanan = (l: { nama: string; harga: number; hpp: number }) => {
     setSelectedLayanan(prev =>
       prev.find(x => x.nama === l.nama) ? prev.filter(x => x.nama !== l.nama) : [...prev, l]
     );

@@ -71,7 +71,7 @@ export default function LabaPage() {
       if (months[k] !== undefined) {
         months[k].pendapatan += s.total_biaya;
         const hppSp = s.spareparts?.reduce((a, sp) => a + ((sp.hpp > 0 ? sp.hpp : sp.harga * 0.7) * sp.qty), 0) || 0;
-        const hppLy = s.layanan?.reduce((a, l) => a + l.harga * 0.3, 0) || 0;
+        const hppLy = s.layanan?.reduce((a, l) => a + (l.hpp > 0 ? l.hpp : l.harga * 0.3), 0) || 0;
         months[k].laba += s.total_biaya - hppSp - hppLy;
       }
     });

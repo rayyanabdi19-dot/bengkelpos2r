@@ -243,7 +243,7 @@ export function useServis() {
       total_biaya: number;
       status: string;
     },
-    layanan: { nama: string; harga: number }[],
+    layanan: { nama: string; harga: number; hpp: number }[],
     spareparts: { sparepart_id: string; nama: string; harga: number; hpp: number; qty: number }[]
   ) => {
     const { data: newServis, error } = await db.servis()
@@ -256,7 +256,7 @@ export function useServis() {
 
     if (layanan.length > 0) {
       await db.servis_layanan().insert(
-        layanan.map(l => ({ servis_id: servisId, nama: l.nama, harga: l.harga })) as any
+        layanan.map(l => ({ servis_id: servisId, nama: l.nama, harga: l.harga, hpp: l.hpp })) as any
       );
     }
 
