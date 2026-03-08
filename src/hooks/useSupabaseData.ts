@@ -111,6 +111,7 @@ export interface Karyawan {
   gaji_pokok: number;
   tanggal_masuk: string;
   aktif: boolean;
+  foto_wajah: string;
   created_at: string;
 }
 

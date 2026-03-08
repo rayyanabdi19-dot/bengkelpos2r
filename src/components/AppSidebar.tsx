@@ -32,6 +32,8 @@ const laporanSubmenu = [
 const pengaturanSubmenu = [
   { title: 'Umum', url: '/pengaturan' },
   { title: 'Printer Bluetooth', url: '/printer' },
+  { title: 'Backup Data', url: '/pengaturan/backup' },
+  { title: 'Panduan Penggunaan', url: '/pengaturan/panduan' },
   { title: 'Install Aplikasi', url: '/install' },
 ];
 
@@ -58,7 +60,7 @@ export function AppSidebar() {
   const isSparepart = location.pathname === '/sparepart' || location.pathname === '/pembelian';
   const isKaryawan = location.pathname.startsWith('/karyawan');
   const isLaporan = location.pathname.startsWith('/laporan');
-  const isPengaturan = location.pathname === '/pengaturan' || location.pathname === '/printer' || location.pathname === '/install';
+  const isPengaturan = location.pathname === '/pengaturan' || location.pathname === '/printer' || location.pathname === '/install' || location.pathname.startsWith('/pengaturan/');
 
   return (
     <Sidebar collapsible="icon">

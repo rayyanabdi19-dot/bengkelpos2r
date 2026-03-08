@@ -138,6 +138,7 @@ export type Database = {
           aktif: boolean
           alamat: string
           created_at: string
+          foto_wajah: string
           gaji_pokok: number
           id: string
           jabatan: string
@@ -149,6 +150,7 @@ export type Database = {
           aktif?: boolean
           alamat?: string
           created_at?: string
+          foto_wajah?: string
           gaji_pokok?: number
           id?: string
           jabatan?: string
@@ -160,6 +162,7 @@ export type Database = {
           aktif?: boolean
           alamat?: string
           created_at?: string
+          foto_wajah?: string
           gaji_pokok?: number
           id?: string
           jabatan?: string

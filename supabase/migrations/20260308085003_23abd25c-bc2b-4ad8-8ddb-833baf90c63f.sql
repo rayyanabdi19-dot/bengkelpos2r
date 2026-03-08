@@ -1,0 +1,1 @@
+ALTER TABLE public.karyawan ADD COLUMN IF NOT EXISTS foto_wajah text NOT NULL DEFAULT '';
