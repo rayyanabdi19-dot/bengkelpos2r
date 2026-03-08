@@ -70,7 +70,7 @@ export default function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) 
     setGeneratedCode(code);
 
     // Open WhatsApp to admin with the code info
-    const adminPhone = '6285123456789'; // Replace with actual admin phone
+    const adminPhone = '6282186371356';
     const message = encodeURIComponent(
       `🔐 *Reset Password BengkelPOS*\n\nUser: ${profile.username}\nNo HP: ${phone}\nKode OTP: ${code}\n\nKode ini berlaku 15 menit.\nMohon kirimkan kode OTP di atas kepada user yang bersangkutan.`
     );
