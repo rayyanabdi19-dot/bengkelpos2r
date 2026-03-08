@@ -3,7 +3,7 @@ import { useSparepart, type Sparepart } from '@/hooks/useSupabaseData';
 import { formatRupiah } from '@/lib/format';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ScanBarcode, Camera, CameraOff, X, Loader2 } from 'lucide-react';
+import { ScanBarcode, Camera, CameraOff, X, Loader2, Flashlight, FlashlightOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Html5Qrcode } from 'html5-qrcode';
 
@@ -13,7 +13,10 @@ export default function ScanPage() {
   const [barcode, setBarcode] = useState('');
   const [result, setResult] = useState<Sparepart | null>(null);
   const [scanning, setScanning] = useState(false);
+  const [torchOn, setTorchOn] = useState(false);
+  const [torchSupported, setTorchSupported] = useState(false);
   const scannerRef = useRef<Html5Qrcode | null>(null);
+  const trackRef = useRef<MediaStreamTrack | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFound = useCallback((code: string) => {
@@ -39,10 +42,27 @@ export default function ScanPage() {
           handleFound(decodedText);
           scanner.stop().catch(() => {});
           setScanning(false);
+          setTorchOn(false);
+          trackRef.current = null;
+          setTorchSupported(false);
         },
         () => {}
       );
       setScanning(true);
+
+      // Check torch support
+      try {
+        const videoElement = document.querySelector('#barcode-reader video') as HTMLVideoElement;
+        if (videoElement?.srcObject) {
+          const stream = videoElement.srcObject as MediaStream;
+          const track = stream.getVideoTracks()[0];
+          const capabilities = track.getCapabilities?.() as any;
+          if (capabilities?.torch) {
+            trackRef.current = track;
+            setTorchSupported(true);
+          }
+        }
+      } catch {}
     } catch {
       toast({ title: 'Error', description: 'Tidak dapat mengakses kamera.', variant: 'destructive' });
     }
@@ -53,8 +73,21 @@ export default function ScanPage() {
       try { await scannerRef.current.stop(); } catch {}
       scannerRef.current = null;
     }
+    trackRef.current = null;
     setScanning(false);
+    setTorchOn(false);
+    setTorchSupported(false);
   }, []);
+
+  const toggleTorch = useCallback(async () => {
+    if (!trackRef.current) return;
+    try {
+      await (trackRef.current as any).applyConstraints({ advanced: [{ torch: !torchOn }] });
+      setTorchOn(prev => !prev);
+    } catch {
+      toast({ title: 'Error', description: 'Gagal mengaktifkan lampu senter.', variant: 'destructive' });
+    }
+  }, [torchOn, toast]);
 
   useEffect(() => {
     return () => { stopScanner(); };
@@ -83,9 +116,16 @@ export default function ScanPage() {
       <div className="stat-card max-w-lg">
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-semibold text-sm">Kamera Scanner</h3>
-          <Button variant={scanning ? 'destructive' : 'default'} size="sm" onClick={scanning ? stopScanner : startScanner}>
-            {scanning ? <><CameraOff className="w-4 h-4 mr-2" /> Matikan Kamera</> : <><Camera className="w-4 h-4 mr-2" /> Aktifkan Kamera</>}
-          </Button>
+          <div className="flex gap-2">
+            {scanning && torchSupported && (
+              <Button variant={torchOn ? 'secondary' : 'outline'} size="sm" onClick={toggleTorch}>
+                {torchOn ? <><FlashlightOff className="w-4 h-4 mr-2" /> Matikan Flash</> : <><Flashlight className="w-4 h-4 mr-2" /> Nyalakan Flash</>}
+              </Button>
+            )}
+            <Button variant={scanning ? 'destructive' : 'default'} size="sm" onClick={scanning ? stopScanner : startScanner}>
+              {scanning ? <><CameraOff className="w-4 h-4 mr-2" /> Matikan</> : <><Camera className="w-4 h-4 mr-2" /> Aktifkan Kamera</>}
+            </Button>
+          </div>
         </div>
         <div id="barcode-reader" className={`w-full rounded-lg overflow-hidden border border-border bg-muted ${scanning ? 'min-h-[250px]' : 'h-0'}`} />
         {!scanning && <p className="text-xs text-muted-foreground mt-2">Klik "Aktifkan Kamera" untuk mulai scan barcode menggunakan kamera HP.</p>}
