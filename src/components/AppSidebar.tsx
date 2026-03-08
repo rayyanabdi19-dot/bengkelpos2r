@@ -1,4 +1,5 @@
 import { useAuth } from '@/hooks/useAuth';
+import { useBengkelProfile } from '@/hooks/useSupabaseData';
 import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
 import {
@@ -43,6 +44,7 @@ export function AppSidebar() {
   const collapsed = state === 'collapsed';
   const location = useLocation();
   const { logout, user } = useAuth();
+  const { profile } = useBengkelProfile();
 
   const isSparepart = location.pathname === '/sparepart' || location.pathname === '/pembelian';
   const isLaporan = location.pathname.startsWith('/laporan');
@@ -52,12 +54,16 @@ export function AppSidebar() {
       <SidebarContent className="flex flex-col h-full">
         {/* Logo */}
         <div className="p-4 flex items-center gap-3 border-b border-sidebar-border">
-          <div className="w-9 h-9 rounded-lg bg-sidebar-primary flex items-center justify-center shrink-0">
-            <Wrench className="w-5 h-5 text-sidebar-primary-foreground" />
-          </div>
+          {profile?.logo_url ? (
+            <img src={profile.logo_url} alt="Logo" className="w-9 h-9 rounded-lg object-contain shrink-0" />
+          ) : (
+            <div className="w-9 h-9 rounded-lg bg-sidebar-primary flex items-center justify-center shrink-0">
+              <Wrench className="w-5 h-5 text-sidebar-primary-foreground" />
+            </div>
+          )}
           {!collapsed && (
             <div className="overflow-hidden">
-              <h2 className="text-sm font-bold text-sidebar-accent-foreground truncate">BengkelPOS</h2>
+              <h2 className="text-sm font-bold text-sidebar-accent-foreground truncate">{profile?.nama || 'BengkelPOS'}</h2>
               <p className="text-xs text-sidebar-foreground truncate">{user?.role === 'admin' ? 'Administrator' : 'Kasir'}</p>
             </div>
           )}
