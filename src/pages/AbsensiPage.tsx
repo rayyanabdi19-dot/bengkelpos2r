@@ -303,9 +303,26 @@ export default function AbsensiPage() {
                         {a.jam_keluar && <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> Keluar: {a.jam_keluar}</span>}
                       </div>
                     </div>
-                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${getStatusBadge(a.status)}`}>
-                      {a.status}
-                    </span>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {a.status === 'hadir' && a.jam_masuk && !a.jam_keluar && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-orange-600 border-orange-300 hover:bg-orange-50 dark:hover:bg-orange-900/20"
+                          onClick={async () => {
+                            const now = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                            const ok = await update(a.id, { jam_keluar: now });
+                            if (ok) toast({ title: `Absen pulang ${getKaryawanName(a.karyawan_id)} berhasil dicatat` });
+                            else toast({ title: 'Gagal menyimpan absensi pulang', variant: 'destructive' });
+                          }}
+                        >
+                          <LogOut className="w-4 h-4 mr-1" /> Pulang
+                        </Button>
+                      )}
+                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${getStatusBadge(a.status)}`}>
+                        {a.status}
+                      </span>
+                    </div>
                   </div>
                 ))}
               </div>
