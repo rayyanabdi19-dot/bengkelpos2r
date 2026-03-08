@@ -126,6 +126,38 @@ export function AppSidebar() {
                 </SidebarMenuItem>
               </Collapsible>
 
+              {/* Karyawan with submenu */}
+              <Collapsible defaultOpen={isKaryawan} className="group/collapsible-kar">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton isActive={isKaryawan} className="hover:bg-sidebar-accent">
+                      <UserCog className="mr-2 h-4 w-4" />
+                      {!collapsed && (
+                        <>
+                          <span className="flex-1">Karyawan</span>
+                          <ChevronDown className="h-4 w-4 transition-transform group-data-[state=open]/collapsible-kar:rotate-180" />
+                        </>
+                      )}
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  {!collapsed && (
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        {karyawanSubmenu.map(sub => (
+                          <SidebarMenuSubItem key={sub.url}>
+                            <SidebarMenuSubButton asChild isActive={location.pathname === sub.url}>
+                              <NavLink to={sub.url} end className="hover:bg-sidebar-accent" activeClassName="text-sidebar-primary font-medium">
+                                {sub.title}
+                              </NavLink>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  )}
+                </SidebarMenuItem>
+              </Collapsible>
+
               {/* Other menu items */}
               {bottomMenuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
