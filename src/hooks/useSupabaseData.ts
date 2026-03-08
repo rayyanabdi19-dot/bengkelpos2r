@@ -126,6 +126,18 @@ export interface SlipGaji {
   created_at: string;
 }
 
+export interface Absensi {
+  id: string;
+  karyawan_id: string;
+  tanggal: string;
+  jam_masuk: string;
+  jam_keluar: string;
+  status: string;
+  foto_url: string;
+  catatan: string;
+  created_at: string;
+}
+
 const db = {
   pelanggan: () => supabase.from('pelanggan' as any),
   sparepart: () => supabase.from('sparepart' as any),
