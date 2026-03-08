@@ -41,7 +41,7 @@ export default function LabaPage() {
       if (!days[day]) days[day] = { pendapatan: 0, hpp: 0, laba: 0 };
       days[day].pendapatan += s.total_biaya;
 
-      const hppSp = s.spareparts?.reduce((a, sp) => a + sp.harga * sp.qty * 0.7, 0) || 0;
+      const hppSp = s.spareparts?.reduce((a, sp) => a + ((sp.hpp > 0 ? sp.hpp : sp.harga * 0.7) * sp.qty), 0) || 0;
       const hppLy = s.layanan?.reduce((a, l) => a + l.harga * 0.3, 0) || 0;
       days[day].hpp += hppSp + hppLy;
       days[day].laba += s.total_biaya - hppSp - hppLy;
