@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
+import { useStockNotification } from "@/hooks/useStockNotification";
 import AppLayout from "@/components/AppLayout";
 import LoginPage from "@/pages/LoginPage";
 import DashboardPage from "@/pages/DashboardPage";
@@ -20,12 +21,14 @@ import PengaturanPage from "@/pages/PengaturanPage";
 import ProfilePage from "@/pages/ProfilePage";
 import PrinterPage from "@/pages/PrinterPage";
 import RiwayatPage from "@/pages/RiwayatPage";
+import InstallPage from "@/pages/InstallPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
 
 function AppRoutes() {
   const { user } = useAuth();
+  useStockNotification();
 
   if (!user) return <LoginPage />;
 
@@ -46,6 +49,7 @@ function AppRoutes() {
         <Route path="/pengaturan" element={<PengaturanPage />} />
         <Route path="/profil" element={<ProfilePage />} />
         <Route path="/printer" element={<PrinterPage />} />
+        <Route path="/install" element={<InstallPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppLayout>

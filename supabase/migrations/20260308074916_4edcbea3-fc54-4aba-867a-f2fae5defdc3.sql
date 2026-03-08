@@ -1,0 +1,1 @@
+ALTER TABLE public.bengkel_profile ADD COLUMN link_qrcode text NOT NULL DEFAULT '';

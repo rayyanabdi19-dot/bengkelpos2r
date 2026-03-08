@@ -7,7 +7,7 @@ import {
 } from '@/components/ui/sidebar';
 import {
   LayoutDashboard, FileText, ScanBarcode, Package, CalendarCheck,
-  Users, BarChart3, Settings, LogOut, Wrench, ChevronDown, Store, ClipboardList, Bluetooth, History,
+  Users, BarChart3, Settings, LogOut, Wrench, ChevronDown, Store, ClipboardList, Bluetooth, History, Download,
 } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
@@ -35,6 +35,7 @@ const bottomMenuItems = [
   { title: 'Profil Bengkel', url: '/profil', icon: Store },
   { title: 'Printer Bluetooth', url: '/printer', icon: Bluetooth },
   { title: 'Pengaturan', url: '/pengaturan', icon: Settings },
+  { title: 'Install Aplikasi', url: '/install', icon: Download },
 ];
 
 export function AppSidebar() {
