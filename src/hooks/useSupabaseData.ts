@@ -16,10 +16,23 @@ export interface Sparepart {
   nama: string;
   barcode: string;
   harga: number;
+  hpp: number;
   stok: number;
   stok_minimum: number;
   kategori: string;
   created_at: string;
+}
+
+export interface BengkelProfile {
+  id: string;
+  nama: string;
+  alamat: string;
+  telepon: string;
+  logo_url: string;
+  pemilik: string;
+  footer_struk: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Servis {
