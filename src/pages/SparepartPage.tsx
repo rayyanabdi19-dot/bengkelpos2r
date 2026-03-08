@@ -1,54 +1,59 @@
 import { useState } from 'react';
-import { sparepartStore, type Sparepart } from '@/lib/store';
+import { useSparepart, type Sparepart } from '@/hooks/useSupabaseData';
 import { formatRupiah } from '@/lib/format';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Pencil, Trash2, AlertTriangle, Search } from 'lucide-react';
+import { Plus, Pencil, Trash2, AlertTriangle, Search, Loader2 } from 'lucide-react';
 
 export default function SparepartPage() {
   const { toast } = useToast();
-  const [items, setItems] = useState(sparepartStore.getAll());
+  const { spareparts, loading, add, update, remove } = useSparepart();
   const [search, setSearch] = useState('');
   const [showDialog, setShowDialog] = useState(false);
   const [editing, setEditing] = useState<Sparepart | null>(null);
-  const [form, setForm] = useState({ nama: '', barcode: '', harga: 0, stok: 0, stokMinimum: 5, kategori: '' });
+  const [form, setForm] = useState({ nama: '', barcode: '', harga: 0, stok: 0, stok_minimum: 5, kategori: '' });
+  const [saving, setSaving] = useState(false);
 
-  const filtered = items.filter(i =>
+  const filtered = spareparts.filter(i =>
     i.nama.toLowerCase().includes(search.toLowerCase()) || i.barcode.includes(search)
   );
 
   const openAdd = () => {
     setEditing(null);
-    setForm({ nama: '', barcode: '', harga: 0, stok: 0, stokMinimum: 5, kategori: '' });
+    setForm({ nama: '', barcode: '', harga: 0, stok: 0, stok_minimum: 5, kategori: '' });
     setShowDialog(true);
   };
 
   const openEdit = (sp: Sparepart) => {
     setEditing(sp);
-    setForm({ nama: sp.nama, barcode: sp.barcode, harga: sp.harga, stok: sp.stok, stokMinimum: sp.stokMinimum, kategori: sp.kategori });
+    setForm({ nama: sp.nama, barcode: sp.barcode, harga: sp.harga, stok: sp.stok, stok_minimum: sp.stok_minimum, kategori: sp.kategori });
     setShowDialog(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.nama) { toast({ title: 'Error', description: 'Nama wajib diisi', variant: 'destructive' }); return; }
+    setSaving(true);
     if (editing) {
-      sparepartStore.update(editing.id, form);
+      await update(editing.id, form);
     } else {
-      sparepartStore.add(form);
+      await add(form);
     }
-    setItems(sparepartStore.getAll());
+    setSaving(false);
     setShowDialog(false);
     toast({ title: 'Berhasil', description: editing ? 'Sparepart diupdate' : 'Sparepart ditambahkan' });
   };
 
-  const handleDelete = (id: string) => {
-    sparepartStore.delete(id);
-    setItems(sparepartStore.getAll());
+  const handleDelete = async (id: string) => {
+    await remove(id);
     toast({ title: 'Dihapus', description: 'Sparepart berhasil dihapus' });
   };
+
+  if (loading) {
+    return <div className="flex items-center justify-center h-64"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -78,8 +83,8 @@ export default function SparepartPage() {
             <p className="text-lg font-bold text-primary">{formatRupiah(sp.harga)}</p>
             <div className="flex items-center justify-between mt-2">
               <div className="flex items-center gap-1">
-                {sp.stok <= sp.stokMinimum && <AlertTriangle className="w-3.5 h-3.5 text-warning" />}
-                <span className={`text-sm ${sp.stok <= sp.stokMinimum ? 'text-warning font-medium' : 'text-muted-foreground'}`}>
+                {sp.stok <= sp.stok_minimum && <AlertTriangle className="w-3.5 h-3.5 text-warning" />}
+                <span className={`text-sm ${sp.stok <= sp.stok_minimum ? 'text-warning font-medium' : 'text-muted-foreground'}`}>
                   Stok: {sp.stok}
                 </span>
               </div>
@@ -103,10 +108,13 @@ export default function SparepartPage() {
               <div className="space-y-1"><Label>Stok</Label><Input type="number" value={form.stok} onChange={e => setForm({ ...form, stok: Number(e.target.value) })} /></div>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1"><Label>Stok Minimum</Label><Input type="number" value={form.stokMinimum} onChange={e => setForm({ ...form, stokMinimum: Number(e.target.value) })} /></div>
+              <div className="space-y-1"><Label>Stok Minimum</Label><Input type="number" value={form.stok_minimum} onChange={e => setForm({ ...form, stok_minimum: Number(e.target.value) })} /></div>
               <div className="space-y-1"><Label>Kategori</Label><Input value={form.kategori} onChange={e => setForm({ ...form, kategori: e.target.value })} /></div>
             </div>
-            <Button onClick={handleSave} className="w-full">Simpan</Button>
+            <Button onClick={handleSave} className="w-full" disabled={saving}>
+              {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+              Simpan
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

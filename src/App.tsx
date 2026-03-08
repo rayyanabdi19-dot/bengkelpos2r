@@ -4,7 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
-import { seedDemoData } from "@/lib/store";
 import AppLayout from "@/components/AppLayout";
 import LoginPage from "@/pages/LoginPage";
 import DashboardPage from "@/pages/DashboardPage";
@@ -16,9 +15,6 @@ import PelangganPage from "@/pages/PelangganPage";
 import LaporanPage from "@/pages/LaporanPage";
 import PengaturanPage from "@/pages/PengaturanPage";
 import NotFound from "@/pages/NotFound";
-
-// Seed demo data on first load
-seedDemoData();
 
 const queryClient = new QueryClient();
 

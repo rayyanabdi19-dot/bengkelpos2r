@@ -14,7 +14,220 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      booking: {
+        Row: {
+          created_at: string
+          id: string
+          jam: string
+          keluhan: string
+          nama: string
+          no_wa: string
+          plat_motor: string
+          status: string
+          tanggal: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          jam?: string
+          keluhan?: string
+          nama: string
+          no_wa?: string
+          plat_motor?: string
+          status?: string
+          tanggal: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          jam?: string
+          keluhan?: string
+          nama?: string
+          no_wa?: string
+          plat_motor?: string
+          status?: string
+          tanggal?: string
+        }
+        Relationships: []
+      }
+      pelanggan: {
+        Row: {
+          created_at: string
+          id: string
+          nama: string
+          no_hp: string
+          plat_motor: string
+          tipe_motor: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          nama: string
+          no_hp?: string
+          plat_motor: string
+          tipe_motor?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nama?: string
+          no_hp?: string
+          plat_motor?: string
+          tipe_motor?: string
+        }
+        Relationships: []
+      }
+      servis: {
+        Row: {
+          created_at: string
+          id: string
+          keluhan: string
+          nama_pelanggan: string
+          no_hp: string
+          pelanggan_id: string | null
+          plat_motor: string
+          status: string
+          tipe_motor: string
+          total_biaya: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          keluhan?: string
+          nama_pelanggan: string
+          no_hp?: string
+          pelanggan_id?: string | null
+          plat_motor: string
+          status?: string
+          tipe_motor?: string
+          total_biaya?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          keluhan?: string
+          nama_pelanggan?: string
+          no_hp?: string
+          pelanggan_id?: string | null
+          plat_motor?: string
+          status?: string
+          tipe_motor?: string
+          total_biaya?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "servis_pelanggan_id_fkey"
+            columns: ["pelanggan_id"]
+            isOneToOne: false
+            referencedRelation: "pelanggan"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      servis_layanan: {
+        Row: {
+          harga: number
+          id: string
+          nama: string
+          servis_id: string
+        }
+        Insert: {
+          harga?: number
+          id?: string
+          nama: string
+          servis_id: string
+        }
+        Update: {
+          harga?: number
+          id?: string
+          nama?: string
+          servis_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "servis_layanan_servis_id_fkey"
+            columns: ["servis_id"]
+            isOneToOne: false
+            referencedRelation: "servis"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      servis_sparepart: {
+        Row: {
+          harga: number
+          id: string
+          nama: string
+          qty: number
+          servis_id: string
+          sparepart_id: string | null
+        }
+        Insert: {
+          harga?: number
+          id?: string
+          nama: string
+          qty?: number
+          servis_id: string
+          sparepart_id?: string | null
+        }
+        Update: {
+          harga?: number
+          id?: string
+          nama?: string
+          qty?: number
+          servis_id?: string
+          sparepart_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "servis_sparepart_servis_id_fkey"
+            columns: ["servis_id"]
+            isOneToOne: false
+            referencedRelation: "servis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servis_sparepart_sparepart_id_fkey"
+            columns: ["sparepart_id"]
+            isOneToOne: false
+            referencedRelation: "sparepart"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sparepart: {
+        Row: {
+          barcode: string
+          created_at: string
+          harga: number
+          id: string
+          kategori: string
+          nama: string
+          stok: number
+          stok_minimum: number
+        }
+        Insert: {
+          barcode?: string
+          created_at?: string
+          harga?: number
+          id?: string
+          kategori?: string
+          nama: string
+          stok?: number
+          stok_minimum?: number
+        }
+        Update: {
+          barcode?: string
+          created_at?: string
+          harga?: number
+          id?: string
+          kategori?: string
+          nama?: string
+          stok?: number
+          stok_minimum?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

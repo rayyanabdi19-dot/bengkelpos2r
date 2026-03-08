@@ -1,22 +1,20 @@
 import { useState, useMemo } from 'react';
-import { servisStore, sparepartStore } from '@/lib/store';
+import { useServis, useSparepart } from '@/hooks/useSupabaseData';
 import { formatRupiah, formatDate } from '@/lib/format';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { FileDown, Calendar } from 'lucide-react';
+import { FileDown, Calendar, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 const COLORS = ['hsl(217, 91%, 50%)', 'hsl(150, 60%, 40%)', 'hsl(38, 92%, 50%)', 'hsl(0, 72%, 51%)', 'hsl(270, 60%, 55%)'];
 
 export default function LaporanPage() {
-  const allServis = servisStore.getAll();
+  const { servisList, loading } = useServis();
   const [filterDate, setFilterDate] = useState(new Date().toISOString().split('T')[0]);
 
-  // Daily report
-  const todayServis = allServis.filter(s => s.createdAt.startsWith(filterDate));
-  const totalHarian = todayServis.reduce((s, r) => s + r.totalBiaya, 0);
+  const todayServis = servisList.filter(s => s.created_at.startsWith(filterDate));
+  const totalHarian = todayServis.reduce((s, r) => s + r.total_biaya, 0);
 
-  // Monthly revenue
   const monthlyData = useMemo(() => {
     const months: Record<string, number> = {};
     const names = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
@@ -24,27 +22,29 @@ export default function LaporanPage() {
       const d = new Date(); d.setMonth(d.getMonth() - i);
       months[`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`] = 0;
     }
-    allServis.forEach(s => { const k = s.createdAt.substring(0,7); if (months[k] !== undefined) months[k] += s.totalBiaya; });
+    servisList.forEach(s => { const k = s.created_at.substring(0,7); if (months[k] !== undefined) months[k] += s.total_biaya; });
     return Object.entries(months).map(([k, v]) => ({ bulan: names[parseInt(k.split('-')[1])-1], pendapatan: v }));
-  }, [allServis]);
+  }, [servisList]);
 
-  // Top spareparts
   const sparepartSales = useMemo(() => {
     const map: Record<string, number> = {};
-    allServis.forEach(s => s.detail.spareparts.forEach(sp => {
+    servisList.forEach(s => s.spareparts?.forEach(sp => {
       map[sp.nama] = (map[sp.nama] || 0) + sp.qty;
     }));
     return Object.entries(map).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([nama, qty]) => ({ nama, qty }));
-  }, [allServis]);
+  }, [servisList]);
 
-  // Export CSV
   const exportCSV = () => {
     const headers = 'Tanggal,Pelanggan,Plat,Total\n';
-    const rows = todayServis.map(s => `${formatDate(s.createdAt)},${s.namaPelanggan},${s.platMotor},${s.totalBiaya}`).join('\n');
+    const rows = todayServis.map(s => `${formatDate(s.created_at)},${s.nama_pelanggan},${s.plat_motor},${s.total_biaya}`).join('\n');
     const blob = new Blob([headers + rows], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href = url; a.download = `laporan-${filterDate}.csv`; a.click();
   };
+
+  if (loading) {
+    return <div className="flex items-center justify-center h-64"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -56,7 +56,6 @@ export default function LaporanPage() {
         <Button variant="outline" onClick={exportCSV}><FileDown className="w-4 h-4 mr-2" /> Export CSV</Button>
       </div>
 
-      {/* Daily */}
       <div className="stat-card">
         <div className="flex items-center gap-3 mb-4 flex-wrap">
           <Calendar className="w-4 h-4 text-primary" />
@@ -75,8 +74,8 @@ export default function LaporanPage() {
               </tr></thead>
               <tbody>{todayServis.map(s => (
                 <tr key={s.id} className="border-b border-border/50">
-                  <td className="py-2">{s.namaPelanggan}</td><td className="py-2">{s.platMotor}</td>
-                  <td className="py-2 text-right font-medium">{formatRupiah(s.totalBiaya)}</td>
+                  <td className="py-2">{s.nama_pelanggan}</td><td className="py-2">{s.plat_motor}</td>
+                  <td className="py-2 text-right font-medium">{formatRupiah(s.total_biaya)}</td>
                 </tr>
               ))}</tbody>
             </table>
@@ -84,7 +83,6 @@ export default function LaporanPage() {
         )}
       </div>
 
-      {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="stat-card">
           <h3 className="font-semibold mb-4">Pendapatan Bulanan</h3>

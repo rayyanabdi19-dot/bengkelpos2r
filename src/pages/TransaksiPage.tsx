@@ -1,15 +1,15 @@
 import { useState } from 'react';
-import { sparepartStore, servisStore, type LayananServis } from '@/lib/store';
+import { useSparepart, useServis } from '@/hooks/useSupabaseData';
 import { formatRupiah } from '@/lib/format';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Trash2, Printer } from 'lucide-react';
+import { Plus, Trash2, Printer, Loader2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import ReceiptView from '@/components/ReceiptView';
-import type { Servis } from '@/lib/store';
+import type { Servis } from '@/hooks/useSupabaseData';
 
 const daftarLayanan = [
   { nama: 'Ganti Oli', harga: 20000 },
@@ -24,61 +24,74 @@ const daftarLayanan = [
 
 export default function TransaksiPage() {
   const { toast } = useToast();
+  const { spareparts } = useSparepart();
+  const { add: addServis } = useServis();
   const [form, setForm] = useState({
     namaPelanggan: '', noHp: '', platMotor: '', tipeMotor: '', keluhan: '',
   });
-  const [selectedLayanan, setSelectedLayanan] = useState<LayananServis[]>([]);
-  const [selectedSpareparts, setSelectedSpareparts] = useState<{ sparepartId: string; nama: string; harga: number; qty: number }[]>([]);
+  const [selectedLayanan, setSelectedLayanan] = useState<{ nama: string; harga: number }[]>([]);
+  const [selectedSpareparts, setSelectedSpareparts] = useState<{ sparepart_id: string; nama: string; harga: number; qty: number }[]>([]);
   const [showReceipt, setShowReceipt] = useState(false);
   const [lastServis, setLastServis] = useState<Servis | null>(null);
+  const [saving, setSaving] = useState(false);
 
-  const allSpareparts = sparepartStore.getAll();
   const totalLayanan = selectedLayanan.reduce((s, l) => s + l.harga, 0);
   const totalSparepart = selectedSpareparts.reduce((s, sp) => s + sp.harga * sp.qty, 0);
   const totalBiaya = totalLayanan + totalSparepart;
 
-  const toggleLayanan = (l: LayananServis) => {
+  const toggleLayanan = (l: { nama: string; harga: number }) => {
     setSelectedLayanan(prev =>
       prev.find(x => x.nama === l.nama) ? prev.filter(x => x.nama !== l.nama) : [...prev, l]
     );
   };
 
   const addSparepart = (spId: string) => {
-    const sp = allSpareparts.find(s => s.id === spId);
+    const sp = spareparts.find(s => s.id === spId);
     if (!sp) return;
-    if (selectedSpareparts.find(s => s.sparepartId === spId)) {
-      setSelectedSpareparts(prev => prev.map(s => s.sparepartId === spId ? { ...s, qty: s.qty + 1 } : s));
+    if (selectedSpareparts.find(s => s.sparepart_id === spId)) {
+      setSelectedSpareparts(prev => prev.map(s => s.sparepart_id === spId ? { ...s, qty: s.qty + 1 } : s));
     } else {
-      setSelectedSpareparts(prev => [...prev, { sparepartId: spId, nama: sp.nama, harga: sp.harga, qty: 1 }]);
+      setSelectedSpareparts(prev => [...prev, { sparepart_id: spId, nama: sp.nama, harga: sp.harga, qty: 1 }]);
     }
   };
 
   const removeSparepart = (spId: string) => {
-    setSelectedSpareparts(prev => prev.filter(s => s.sparepartId !== spId));
+    setSelectedSpareparts(prev => prev.filter(s => s.sparepart_id !== spId));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.namaPelanggan || !form.platMotor) {
       toast({ title: 'Error', description: 'Nama dan plat motor wajib diisi', variant: 'destructive' });
       return;
     }
 
-    const servis = servisStore.add({
-      pelangganId: '',
-      ...form,
-      detail: { spareparts: selectedSpareparts, layanan: selectedLayanan },
-      totalBiaya,
-      status: 'selesai',
-    });
-    setLastServis(servis);
-    setShowReceipt(true);
-    toast({ title: 'Berhasil', description: 'Transaksi servis berhasil disimpan' });
+    setSaving(true);
+    const servis = await addServis(
+      {
+        nama_pelanggan: form.namaPelanggan,
+        no_hp: form.noHp,
+        plat_motor: form.platMotor,
+        tipe_motor: form.tipeMotor,
+        keluhan: form.keluhan,
+        total_biaya: totalBiaya,
+        status: 'selesai',
+      },
+      selectedLayanan,
+      selectedSpareparts
+    );
+    setSaving(false);
 
-    // Reset form
-    setForm({ namaPelanggan: '', noHp: '', platMotor: '', tipeMotor: '', keluhan: '' });
-    setSelectedLayanan([]);
-    setSelectedSpareparts([]);
+    if (servis) {
+      setLastServis(servis);
+      setShowReceipt(true);
+      toast({ title: 'Berhasil', description: 'Transaksi servis berhasil disimpan' });
+      setForm({ namaPelanggan: '', noHp: '', platMotor: '', tipeMotor: '', keluhan: '' });
+      setSelectedLayanan([]);
+      setSelectedSpareparts([]);
+    } else {
+      toast({ title: 'Error', description: 'Gagal menyimpan transaksi', variant: 'destructive' });
+    }
   };
 
   return (
@@ -89,7 +102,6 @@ export default function TransaksiPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Left: Customer Info */}
         <div className="space-y-6">
           <div className="stat-card space-y-4">
             <h3 className="font-semibold">Data Pelanggan</h3>
@@ -117,7 +129,6 @@ export default function TransaksiPage() {
             </div>
           </div>
 
-          {/* Layanan */}
           <div className="stat-card space-y-3">
             <h3 className="font-semibold">Pilih Layanan</h3>
             <div className="flex flex-wrap gap-2">
@@ -138,7 +149,6 @@ export default function TransaksiPage() {
           </div>
         </div>
 
-        {/* Right: Spareparts & Total */}
         <div className="space-y-6">
           <div className="stat-card space-y-3">
             <h3 className="font-semibold">Sparepart</h3>
@@ -148,21 +158,21 @@ export default function TransaksiPage() {
               defaultValue=""
             >
               <option value="">+ Tambah sparepart...</option>
-              {allSpareparts.filter(sp => sp.stok > 0).map(sp => (
+              {spareparts.filter(sp => sp.stok > 0).map(sp => (
                 <option key={sp.id} value={sp.id}>{sp.nama} - {formatRupiah(sp.harga)} (Stok: {sp.stok})</option>
               ))}
             </select>
             {selectedSpareparts.length > 0 && (
               <div className="space-y-2">
                 {selectedSpareparts.map(sp => (
-                  <div key={sp.sparepartId} className="flex items-center justify-between p-2 rounded-lg bg-muted">
+                  <div key={sp.sparepart_id} className="flex items-center justify-between p-2 rounded-lg bg-muted">
                     <div>
                       <p className="text-sm font-medium">{sp.nama}</p>
                       <p className="text-xs text-muted-foreground">{formatRupiah(sp.harga)} × {sp.qty}</p>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium">{formatRupiah(sp.harga * sp.qty)}</span>
-                      <Button type="button" variant="ghost" size="icon" onClick={() => removeSparepart(sp.sparepartId)} className="h-7 w-7">
+                      <Button type="button" variant="ghost" size="icon" onClick={() => removeSparepart(sp.sparepart_id)} className="h-7 w-7">
                         <Trash2 className="w-3.5 h-3.5 text-destructive" />
                       </Button>
                     </div>
@@ -172,7 +182,6 @@ export default function TransaksiPage() {
             )}
           </div>
 
-          {/* Summary */}
           <div className="stat-card space-y-3">
             <h3 className="font-semibold">Ringkasan Biaya</h3>
             <div className="space-y-2 text-sm">
@@ -182,14 +191,14 @@ export default function TransaksiPage() {
                 <span>Total</span><span className="text-primary">{formatRupiah(totalBiaya)}</span>
               </div>
             </div>
-            <Button type="submit" className="w-full" size="lg">
-              <Plus className="w-4 h-4 mr-2" /> Simpan Transaksi
+            <Button type="submit" className="w-full" size="lg" disabled={saving}>
+              {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
+              Simpan Transaksi
             </Button>
           </div>
         </div>
       </form>
 
-      {/* Receipt Dialog */}
       <Dialog open={showReceipt} onOpenChange={setShowReceipt}>
         <DialogContent className="max-w-md">
           <DialogHeader>

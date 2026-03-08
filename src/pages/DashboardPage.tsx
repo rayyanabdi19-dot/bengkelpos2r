@@ -1,11 +1,18 @@
-import { statsStore } from '@/lib/store';
+import { useDashboardStats } from '@/hooks/useSupabaseData';
 import { formatRupiah } from '@/lib/format';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Wrench, DollarSign, Package, CalendarCheck, AlertTriangle } from 'lucide-react';
+import { Wrench, DollarSign, Package, CalendarCheck, AlertTriangle, Loader2 } from 'lucide-react';
 
 export default function DashboardPage() {
-  const stats = statsStore.getTodayStats();
-  const monthlyData = statsStore.getMonthlyRevenue();
+  const { stats, monthlyData, loading } = useDashboardStats();
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   const statCards = [
     { label: 'Servis Hari Ini', value: stats.totalServis, icon: Wrench, color: 'text-primary' },
@@ -21,7 +28,6 @@ export default function DashboardPage() {
         <p className="page-subtitle">Ringkasan aktivitas bengkel hari ini</p>
       </div>
 
-      {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((card) => (
           <div key={card.label} className="stat-card animate-count-up">
@@ -34,7 +40,6 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* Low Stock Warning */}
       {stats.lowStock > 0 && (
         <div className="flex items-center gap-3 p-4 rounded-xl bg-warning/10 border border-warning/20">
           <AlertTriangle className="w-5 h-5 text-warning shrink-0" />
@@ -42,7 +47,6 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Monthly Revenue Chart */}
       <div className="stat-card">
         <h3 className="font-semibold mb-4">Pendapatan 6 Bulan Terakhir</h3>
         <div className="h-64">
