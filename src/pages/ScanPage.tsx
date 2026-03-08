@@ -3,7 +3,7 @@ import { useSparepart, type Sparepart } from '@/hooks/useSupabaseData';
 import { formatRupiah } from '@/lib/format';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ScanBarcode, Camera, CameraOff, X, Loader2 } from 'lucide-react';
+import { ScanBarcode, Camera, CameraOff, X, Loader2, Flashlight, FlashlightOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Html5Qrcode } from 'html5-qrcode';
 
