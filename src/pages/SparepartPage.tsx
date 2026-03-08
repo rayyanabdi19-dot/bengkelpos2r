@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useSparepart, type Sparepart } from '@/hooks/useSupabaseData';
 import { formatRupiah } from '@/lib/format';
 import { Button } from '@/components/ui/button';
@@ -6,7 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Pencil, Trash2, AlertTriangle, Search, Loader2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, AlertTriangle, Search, Loader2, Camera, CameraOff } from 'lucide-react';
+import { Html5Qrcode } from 'html5-qrcode';
 
 export default function SparepartPage() {
   const { toast } = useToast();
@@ -16,6 +17,43 @@ export default function SparepartPage() {
   const [editing, setEditing] = useState<Sparepart | null>(null);
   const [form, setForm] = useState({ nama: '', barcode: '', harga: 0, stok: 0, stok_minimum: 5, kategori: '' });
   const [saving, setSaving] = useState(false);
+  const [scanningBarcode, setScanningBarcode] = useState(false);
+  const scannerRef = useRef<Html5Qrcode | null>(null);
+
+  const stopBarcodeScanner = useCallback(async () => {
+    if (scannerRef.current) {
+      try { await scannerRef.current.stop(); } catch {}
+      scannerRef.current = null;
+    }
+    setScanningBarcode(false);
+  }, []);
+
+  const startBarcodeScanner = useCallback(async () => {
+    try {
+      const scanner = new Html5Qrcode('sparepart-barcode-reader');
+      scannerRef.current = scanner;
+      await scanner.start(
+        { facingMode: 'environment' },
+        { fps: 10, qrbox: { width: 250, height: 150 } },
+        (decodedText) => {
+          setForm(prev => ({ ...prev, barcode: decodedText }));
+          toast({ title: 'Barcode Terdeteksi', description: decodedText });
+          scanner.stop().catch(() => {});
+          scannerRef.current = null;
+          setScanningBarcode(false);
+        },
+        () => {}
+      );
+      setScanningBarcode(true);
+    } catch {
+      toast({ title: 'Error', description: 'Tidak dapat mengakses kamera.', variant: 'destructive' });
+    }
+  }, [toast]);
+
+  // Cleanup scanner on dialog close
+  useEffect(() => {
+    if (!showDialog) stopBarcodeScanner();
+  }, [showDialog, stopBarcodeScanner]);
 
   const filtered = spareparts.filter(i =>
     i.nama.toLowerCase().includes(search.toLowerCase()) || i.barcode.includes(search)
@@ -102,7 +140,16 @@ export default function SparepartPage() {
           <DialogHeader><DialogTitle>{editing ? 'Edit' : 'Tambah'} Sparepart</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div className="space-y-1"><Label>Nama</Label><Input value={form.nama} onChange={e => setForm({ ...form, nama: e.target.value })} /></div>
-            <div className="space-y-1"><Label>Barcode</Label><Input value={form.barcode} onChange={e => setForm({ ...form, barcode: e.target.value })} /></div>
+            <div className="space-y-1">
+              <Label>Barcode</Label>
+              <div className="flex gap-2">
+                <Input value={form.barcode} onChange={e => setForm({ ...form, barcode: e.target.value })} className="font-mono" placeholder="Scan atau ketik barcode" />
+                <Button type="button" variant={scanningBarcode ? 'destructive' : 'outline'} size="icon" onClick={scanningBarcode ? stopBarcodeScanner : startBarcodeScanner}>
+                  {scanningBarcode ? <CameraOff className="w-4 h-4" /> : <Camera className="w-4 h-4" />}
+                </Button>
+              </div>
+              <div id="sparepart-barcode-reader" className={`w-full rounded-lg overflow-hidden border border-border bg-muted mt-2 ${scanningBarcode ? 'min-h-[200px]' : 'hidden'}`} />
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1"><Label>Harga</Label><Input type="number" value={form.harga} onChange={e => setForm({ ...form, harga: Number(e.target.value) })} /></div>
               <div className="space-y-1"><Label>Stok</Label><Input type="number" value={form.stok} onChange={e => setForm({ ...form, stok: Number(e.target.value) })} /></div>
