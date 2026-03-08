@@ -81,18 +81,29 @@ export default function AbsensiPage() {
 
   const startCamera = useCallback(async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } }
-      });
+      const constraints: MediaStreamConstraints = {
+        video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
+        audio: false
+      };
+      let stream: MediaStream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
+      } catch {
+        // Fallback: try without specific constraints for older devices
+        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      }
       streamRef.current = stream;
       if (videoRef.current) {
+        videoRef.current.setAttribute('playsinline', 'true');
+        videoRef.current.setAttribute('webkit-playsinline', 'true');
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
       }
       setStreaming(true);
       setCapturedImage(null);
-    } catch {
-      toast({ title: 'Gagal mengakses kamera', description: 'Pastikan izin kamera diaktifkan', variant: 'destructive' });
+    } catch (err) {
+      console.error('Camera error:', err);
+      toast({ title: 'Gagal mengakses kamera', description: 'Pastikan izin kamera diaktifkan di pengaturan browser/HP', variant: 'destructive' });
     }
   }, [toast]);
 

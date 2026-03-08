@@ -258,7 +258,7 @@ export default function KaryawanPage() {
                 )}
                 {showCamera && streaming && (
                   <div className="relative">
-                    <video ref={videoRef} autoPlay playsInline muted className="w-full max-h-[250px] object-cover" style={{ transform: 'scaleX(-1)' }} />
+                    <video ref={videoRef} autoPlay playsInline muted webkit-playsinline="true" className="w-full max-h-[250px] object-cover" style={{ transform: 'scaleX(-1)' }} />
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                       <div className="w-32 h-40 border-2 border-dashed border-primary/60 rounded-[50%]" />
                     </div>
