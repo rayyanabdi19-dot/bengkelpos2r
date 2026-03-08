@@ -21,6 +21,7 @@ export default function PembelianPage() {
     nama_barang: '',
     qty: 1,
     harga_beli: 0,
+    harga_jual: 0,
     supplier: '',
     catatan: '',
   });
@@ -33,7 +34,7 @@ export default function PembelianPage() {
   const handleSparepartSelect = (spId: string) => {
     const sp = spareparts.find(s => s.id === spId);
     if (sp) {
-      setForm({ ...form, sparepart_id: spId, nama_barang: sp.nama, harga_beli: sp.hpp || 0 });
+      setForm({ ...form, sparepart_id: spId, nama_barang: sp.nama, harga_beli: sp.hpp || 0, harga_jual: sp.harga || 0 });
     }
   };
 
@@ -56,14 +57,14 @@ export default function PembelianPage() {
       total: form.harga_beli * form.qty,
       supplier: form.supplier,
       catatan: form.catatan,
-    });
+    }, form.harga_jual);
     setSaving(false);
 
     if (ok) {
       toast({ title: 'Berhasil', description: 'Pembelian berhasil dicatat & stok diperbarui' });
       await refreshSparepart();
       setShowDialog(false);
-      setForm({ sparepart_id: null, nama_barang: '', qty: 1, harga_beli: 0, supplier: '', catatan: '' });
+      setForm({ sparepart_id: null, nama_barang: '', qty: 1, harga_beli: 0, harga_jual: 0, supplier: '', catatan: '' });
     } else {
       toast({ title: 'Error', description: 'Gagal menyimpan pembelian', variant: 'destructive' });
     }
@@ -164,7 +165,7 @@ export default function PembelianPage() {
                   if (e.target.value) {
                     handleSparepartSelect(e.target.value);
                   } else {
-                    setForm({ ...form, sparepart_id: null, nama_barang: '' });
+                    setForm({ ...form, sparepart_id: null, nama_barang: '', harga_jual: 0 });
                   }
                 }}
               >
@@ -181,7 +182,7 @@ export default function PembelianPage() {
               <Input value={form.nama_barang} onChange={e => setForm({ ...form, nama_barang: e.target.value })} placeholder="Nama sparepart" />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               <div className="space-y-1">
                 <Label>Jumlah *</Label>
                 <Input type="number" min={1} value={form.qty} onChange={e => setForm({ ...form, qty: Number(e.target.value) })} />
@@ -189,6 +190,10 @@ export default function PembelianPage() {
               <div className="space-y-1">
                 <Label>Harga Beli/pcs</Label>
                 <Input type="number" min={0} value={form.harga_beli} onChange={e => setForm({ ...form, harga_beli: Number(e.target.value) })} />
+              </div>
+              <div className="space-y-1">
+                <Label>Harga Jual/pcs</Label>
+                <Input type="number" min={0} value={form.harga_jual} onChange={e => setForm({ ...form, harga_jual: Number(e.target.value) })} />
               </div>
             </div>
 
