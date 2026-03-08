@@ -30,6 +30,7 @@ export default function LoginPage() {
   const [regPassword, setRegPassword] = useState('');
   const [regConfirmPassword, setRegConfirmPassword] = useState('');
   const [regLicense, setRegLicense] = useState('');
+  const [regPhone, setRegPhone] = useState('');
   const [regError, setRegError] = useState('');
   const [regLoading, setRegLoading] = useState(false);
   const [regSuccess, setRegSuccess] = useState(false);
@@ -70,9 +71,13 @@ export default function LoginPage() {
       setRegError('Kode lisensi wajib diisi');
       return;
     }
+    if (!regPhone.trim()) {
+      setRegError('Nomor HP wajib diisi');
+      return;
+    }
 
     setRegLoading(true);
-    const result = await register(regEmail, regUsername, regPassword, regLicense);
+    const result = await register(regEmail, regUsername, regPassword, regLicense, regPhone);
     if (!result.success) {
       setRegError(result.error || 'Pendaftaran gagal');
     } else {
@@ -209,6 +214,12 @@ export default function LoginPage() {
                   <div className="space-y-2">
                     <Label htmlFor="regUsername">Username *</Label>
                     <Input id="regUsername" value={regUsername} onChange={e => setRegUsername(e.target.value)} placeholder="Nama pengguna" />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="regPhone">Nomor HP *</Label>
+                    <Input id="regPhone" type="tel" value={regPhone} onChange={e => setRegPhone(e.target.value)} placeholder="08xxxxxxxxxx" />
+                    <p className="text-xs text-muted-foreground">Digunakan untuk reset password via WhatsApp</p>
                   </div>
 
                   <div className="space-y-2">

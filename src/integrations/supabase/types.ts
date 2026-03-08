@@ -229,6 +229,36 @@ export type Database = {
         }
         Relationships: []
       }
+      password_reset_codes: {
+        Row: {
+          code: string
+          created_at: string
+          expires_at: string
+          id: string
+          no_hp: string
+          used: boolean
+          user_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          no_hp: string
+          used?: boolean
+          user_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          no_hp?: string
+          used?: boolean
+          user_id?: string
+        }
+        Relationships: []
+      }
       pelanggan: {
         Row: {
           created_at: string
@@ -305,6 +335,7 @@ export type Database = {
           created_at: string
           id: string
           license_kode: string | null
+          no_hp: string
           role: string
           username: string
         }
@@ -312,6 +343,7 @@ export type Database = {
           created_at?: string
           id: string
           license_kode?: string | null
+          no_hp?: string
           role?: string
           username: string
         }
@@ -319,6 +351,7 @@ export type Database = {
           created_at?: string
           id?: string
           license_kode?: string | null
+          no_hp?: string
           role?: string
           username?: string
         }
