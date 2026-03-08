@@ -17,6 +17,43 @@ export default function SparepartPage() {
   const [editing, setEditing] = useState<Sparepart | null>(null);
   const [form, setForm] = useState({ nama: '', barcode: '', harga: 0, stok: 0, stok_minimum: 5, kategori: '' });
   const [saving, setSaving] = useState(false);
+  const [scanningBarcode, setScanningBarcode] = useState(false);
+  const scannerRef = useRef<Html5Qrcode | null>(null);
+
+  const stopBarcodeScanner = useCallback(async () => {
+    if (scannerRef.current) {
+      try { await scannerRef.current.stop(); } catch {}
+      scannerRef.current = null;
+    }
+    setScanningBarcode(false);
+  }, []);
+
+  const startBarcodeScanner = useCallback(async () => {
+    try {
+      const scanner = new Html5Qrcode('sparepart-barcode-reader');
+      scannerRef.current = scanner;
+      await scanner.start(
+        { facingMode: 'environment' },
+        { fps: 10, qrbox: { width: 250, height: 150 } },
+        (decodedText) => {
+          setForm(prev => ({ ...prev, barcode: decodedText }));
+          toast({ title: 'Barcode Terdeteksi', description: decodedText });
+          scanner.stop().catch(() => {});
+          scannerRef.current = null;
+          setScanningBarcode(false);
+        },
+        () => {}
+      );
+      setScanningBarcode(true);
+    } catch {
+      toast({ title: 'Error', description: 'Tidak dapat mengakses kamera.', variant: 'destructive' });
+    }
+  }, [toast]);
+
+  // Cleanup scanner on dialog close
+  useEffect(() => {
+    if (!showDialog) stopBarcodeScanner();
+  }, [showDialog, stopBarcodeScanner]);
 
   const filtered = spareparts.filter(i =>
     i.nama.toLowerCase().includes(search.toLowerCase()) || i.barcode.includes(search)
