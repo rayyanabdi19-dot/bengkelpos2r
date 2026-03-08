@@ -52,6 +52,8 @@ function AppRoutes() {
         <Route path="/profil" element={<ProfilePage />} />
         <Route path="/printer" element={<PrinterPage />} />
         <Route path="/install" element={<InstallPage />} />
+        <Route path="/karyawan" element={<KaryawanPage />} />
+        <Route path="/karyawan/gaji" element={<GajiPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppLayout>

@@ -55,6 +55,7 @@ export function AppSidebar() {
   const { profile } = useBengkelProfile();
 
   const isSparepart = location.pathname === '/sparepart' || location.pathname === '/pembelian';
+  const isKaryawan = location.pathname.startsWith('/karyawan');
   const isLaporan = location.pathname.startsWith('/laporan');
   const isPengaturan = location.pathname === '/pengaturan' || location.pathname === '/printer' || location.pathname === '/install';
 
