@@ -3,12 +3,13 @@ import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu,
-  SidebarMenuButton, SidebarMenuItem, useSidebar,
+  SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubItem, SidebarMenuSubButton, useSidebar,
 } from '@/components/ui/sidebar';
 import {
   LayoutDashboard, FileText, ScanBarcode, Package, CalendarCheck,
-  Users, BarChart3, Settings, LogOut, Wrench,
+  Users, BarChart3, Settings, LogOut, Wrench, TrendingUp, ChevronDown,
 } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 const menuItems = [
   { title: 'Dashboard', url: '/', icon: LayoutDashboard },
@@ -17,8 +18,12 @@ const menuItems = [
   { title: 'Sparepart', url: '/sparepart', icon: Package },
   { title: 'Booking Servis', url: '/booking', icon: CalendarCheck },
   { title: 'Pelanggan', url: '/pelanggan', icon: Users },
-  { title: 'Laporan', url: '/laporan', icon: BarChart3 },
   { title: 'Pengaturan', url: '/pengaturan', icon: Settings },
+];
+
+const laporanSubmenu = [
+  { title: 'Laporan Umum', url: '/laporan' },
+  { title: 'Laporan Laba', url: '/laporan/laba' },
 ];
 
 export function AppSidebar() {
@@ -57,6 +62,38 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+
+              {/* Laporan with submenu */}
+              <Collapsible defaultOpen={location.pathname.startsWith('/laporan')} className="group/collapsible">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton isActive={location.pathname.startsWith('/laporan')} className="hover:bg-sidebar-accent">
+                      <BarChart3 className="mr-2 h-4 w-4" />
+                      {!collapsed && (
+                        <>
+                          <span className="flex-1">Laporan</span>
+                          <ChevronDown className="h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                        </>
+                      )}
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  {!collapsed && (
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        {laporanSubmenu.map(sub => (
+                          <SidebarMenuSubItem key={sub.url}>
+                            <SidebarMenuSubButton asChild isActive={location.pathname === sub.url}>
+                              <NavLink to={sub.url} end className="hover:bg-sidebar-accent" activeClassName="text-sidebar-primary font-medium">
+                                {sub.title}
+                              </NavLink>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  )}
+                </SidebarMenuItem>
+              </Collapsible>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

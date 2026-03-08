@@ -13,6 +13,7 @@ import SparepartPage from "@/pages/SparepartPage";
 import BookingPage from "@/pages/BookingPage";
 import PelangganPage from "@/pages/PelangganPage";
 import LaporanPage from "@/pages/LaporanPage";
+import LabaPage from "@/pages/LabaPage";
 import PengaturanPage from "@/pages/PengaturanPage";
 import NotFound from "@/pages/NotFound";
 
@@ -33,6 +34,7 @@ function AppRoutes() {
         <Route path="/booking" element={<BookingPage />} />
         <Route path="/pelanggan" element={<PelangganPage />} />
         <Route path="/laporan" element={<LaporanPage />} />
+        <Route path="/laporan/laba" element={<LabaPage />} />
         <Route path="/pengaturan" element={<PengaturanPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
