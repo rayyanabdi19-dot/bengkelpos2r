@@ -1,6 +1,6 @@
 import { useDashboardStats, useSparepart, useBooking } from '@/hooks/useSupabaseData';
 import { formatRupiah } from '@/lib/format';
-import { Wrench, DollarSign, Package, CalendarCheck, AlertTriangle, Loader2, Plus, ScanLine, ShoppingCart, Users, ChevronLeft, ChevronRight, ClipboardList, Search } from 'lucide-react';
+import { Wrench, DollarSign, Package, CalendarCheck, AlertTriangle, Loader2, Plus, ScanLine, ShoppingCart, Users, ChevronLeft, ChevronRight, ClipboardList, Search, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
@@ -14,6 +14,12 @@ export default function DashboardPage() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [spSearch, setSpSearch] = useState('');
   const [showSpSearch, setShowSpSearch] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const slides = [
     { title: 'Selamat Datang di BengkelPOS', description: 'Kelola bengkel motor Anda dengan mudah dan profesional', bg: 'from-primary to-primary/70' },
@@ -63,9 +69,20 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="page-header">Dashboard</h1>
-        <p className="page-subtitle">Ringkasan aktivitas bengkel hari ini</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="page-header">Dashboard</h1>
+          <p className="page-subtitle">Ringkasan aktivitas bengkel hari ini</p>
+        </div>
+        <div className="text-right">
+          <div className="flex items-center gap-2 text-2xl font-bold tabular-nums">
+            <Clock className="w-5 h-5 text-primary" />
+            {currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+          </div>
+          <p className="text-sm text-muted-foreground">
+            {currentTime.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+          </p>
+        </div>
       </div>
 
       {/* Carousel */}
