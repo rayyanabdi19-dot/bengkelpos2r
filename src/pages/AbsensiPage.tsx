@@ -184,10 +184,27 @@ export default function AbsensiPage() {
           handleBarcodeFound(decodedText);
           scanner.stop().catch(() => {});
           setScanning(false);
+          setTorchOn(false);
+          trackRef.current = null;
+          setTorchSupported(false);
         },
         () => {}
       );
       setScanning(true);
+
+      // Check torch support
+      try {
+        const videoElement = document.querySelector('#absensi-barcode-reader video') as HTMLVideoElement;
+        if (videoElement?.srcObject) {
+          const stream = videoElement.srcObject as MediaStream;
+          const track = stream.getVideoTracks()[0];
+          const capabilities = track.getCapabilities?.() as any;
+          if (capabilities?.torch) {
+            trackRef.current = track;
+            setTorchSupported(true);
+          }
+        }
+      } catch {}
     } catch {
       toast({ title: 'Error', description: 'Tidak dapat mengakses kamera. Pastikan izin kamera diaktifkan.', variant: 'destructive' });
     }
