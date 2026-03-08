@@ -6,9 +6,59 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Loader2, Printer, Bluetooth, Search, Receipt } from 'lucide-react';
+import { Loader2, Printer, Bluetooth, Search, Receipt, MessageCircle } from 'lucide-react';
 import ReceiptView from '@/components/ReceiptView';
 import type { Servis } from '@/hooks/useSupabaseData';
+
+function generateReceiptText(servis: Servis, profile: any): string {
+  let text = '';
+  text += `*${profile?.nama || 'BENGKEL POS'}*\n`;
+  text += `${profile?.alamat || ''}\n`;
+  text += `Telp: ${profile?.telepon || ''}\n`;
+  text += `━━━━━━━━━━━━━━━\n`;
+  text += `Tgl: ${formatDateTime(servis.created_at)}\n`;
+  text += `Pelanggan: ${servis.nama_pelanggan}\n`;
+  text += `Plat: ${servis.plat_motor}\n`;
+  text += `Motor: ${servis.tipe_motor}\n`;
+  if (servis.keluhan) text += `Keluhan: ${servis.keluhan}\n`;
+  text += `━━━━━━━━━━━━━━━\n`;
+
+  if (servis.layanan && servis.layanan.length > 0) {
+    text += `*LAYANAN:*\n`;
+    servis.layanan.forEach(l => {
+      text += `• ${l.nama}: ${formatRupiah(l.harga)}\n`;
+    });
+  }
+
+  if (servis.spareparts && servis.spareparts.length > 0) {
+    text += `*SPAREPART:*\n`;
+    servis.spareparts.forEach(sp => {
+      text += `• ${sp.nama} x${sp.qty}: ${formatRupiah(sp.harga * sp.qty)}\n`;
+    });
+  }
+
+  text += `━━━━━━━━━━━━━━━\n`;
+  text += `*TOTAL: ${formatRupiah(servis.total_biaya)}*\n`;
+  text += `━━━━━━━━━━━━━━━\n`;
+  text += `${profile?.footer_struk || 'Terima kasih! 🏍️'}\n`;
+
+  return text;
+}
+
+function sendWhatsApp(phone: string, text: string) {
+  // Clean phone number: remove spaces, dashes, and leading 0 → 62
+  let cleaned = phone.replace(/[\s\-\(\)]/g, '');
+  if (cleaned.startsWith('0')) {
+    cleaned = '62' + cleaned.substring(1);
+  }
+  if (!cleaned.startsWith('+') && !cleaned.startsWith('62')) {
+    cleaned = '62' + cleaned;
+  }
+  cleaned = cleaned.replace('+', '');
+
+  const url = `https://wa.me/${cleaned}?text=${encodeURIComponent(text)}`;
+  window.open(url, '_blank');
+}
 
 export default function RiwayatPage() {
   const { servisList, loading } = useServis();
@@ -28,6 +78,11 @@ export default function RiwayatPage() {
       if (!ok) return;
     }
     await btPrinter.printReceipt(servis, profile);
+  };
+
+  const handleWhatsApp = (servis: Servis) => {
+    const text = generateReceiptText(servis, profile);
+    sendWhatsApp(servis.no_hp, text);
   };
 
   if (loading) {
@@ -95,6 +150,11 @@ export default function RiwayatPage() {
               </div>
               <div className="flex items-center gap-2 shrink-0 ml-4">
                 <span className="font-bold text-sm text-primary">{formatRupiah(s.total_biaya)}</span>
+                {s.no_hp && (
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleWhatsApp(s)} title="Kirim via WhatsApp">
+                    <MessageCircle className="w-4 h-4 text-success" />
+                  </Button>
+                )}
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setSelectedServis(s)}>
                   <Printer className="w-4 h-4" />
                 </Button>
@@ -110,10 +170,15 @@ export default function RiwayatPage() {
             <DialogTitle>Struk Transaksi</DialogTitle>
           </DialogHeader>
           {selectedServis && <ReceiptView servis={selectedServis} />}
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <Button onClick={() => window.print()} variant="outline" className="flex-1">
-              <Printer className="w-4 h-4 mr-2" /> Cetak Browser
+              <Printer className="w-4 h-4 mr-2" /> Cetak
             </Button>
+            {selectedServis?.no_hp && (
+              <Button onClick={() => selectedServis && handleWhatsApp(selectedServis)} variant="outline" className="flex-1 text-success border-success/30 hover:bg-success/10">
+                <MessageCircle className="w-4 h-4 mr-2" /> WhatsApp
+              </Button>
+            )}
             {btPrinter.isSupported && selectedServis && (
               <Button onClick={() => handleBtPrint(selectedServis)} disabled={btPrinter.printing} className="flex-1">
                 {btPrinter.printing

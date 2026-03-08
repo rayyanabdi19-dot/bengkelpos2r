@@ -29,14 +29,17 @@ const laporanSubmenu = [
   { title: 'Laporan Laba', url: '/laporan/laba' },
 ];
 
+const pengaturanSubmenu = [
+  { title: 'Umum', url: '/pengaturan' },
+  { title: 'Printer Bluetooth', url: '/printer' },
+  { title: 'Install Aplikasi', url: '/install' },
+];
+
 const bottomMenuItems = [
   { title: 'Layanan', url: '/layanan', icon: ClipboardList },
   { title: 'Booking Servis', url: '/booking', icon: CalendarCheck },
   { title: 'Pelanggan', url: '/pelanggan', icon: Users },
   { title: 'Profil Bengkel', url: '/profil', icon: Store },
-  { title: 'Printer Bluetooth', url: '/printer', icon: Bluetooth },
-  { title: 'Pengaturan', url: '/pengaturan', icon: Settings },
-  { title: 'Install Aplikasi', url: '/install', icon: Download },
 ];
 
 export function AppSidebar() {
@@ -48,6 +51,7 @@ export function AppSidebar() {
 
   const isSparepart = location.pathname === '/sparepart' || location.pathname === '/pembelian';
   const isLaporan = location.pathname.startsWith('/laporan');
+  const isPengaturan = location.pathname === '/pengaturan' || location.pathname === '/printer' || location.pathname === '/install';
 
   return (
     <Sidebar collapsible="icon">
@@ -146,6 +150,38 @@ export function AppSidebar() {
                     <CollapsibleContent>
                       <SidebarMenuSub>
                         {laporanSubmenu.map(sub => (
+                          <SidebarMenuSubItem key={sub.url}>
+                            <SidebarMenuSubButton asChild isActive={location.pathname === sub.url}>
+                              <NavLink to={sub.url} end className="hover:bg-sidebar-accent" activeClassName="text-sidebar-primary font-medium">
+                                {sub.title}
+                              </NavLink>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  )}
+                </SidebarMenuItem>
+              </Collapsible>
+
+              {/* Pengaturan with submenu */}
+              <Collapsible defaultOpen={isPengaturan} className="group/collapsible-set">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton isActive={isPengaturan} className="hover:bg-sidebar-accent">
+                      <Settings className="mr-2 h-4 w-4" />
+                      {!collapsed && (
+                        <>
+                          <span className="flex-1">Pengaturan</span>
+                          <ChevronDown className="h-4 w-4 transition-transform group-data-[state=open]/collapsible-set:rotate-180" />
+                        </>
+                      )}
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  {!collapsed && (
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        {pengaturanSubmenu.map(sub => (
                           <SidebarMenuSubItem key={sub.url}>
                             <SidebarMenuSubButton asChild isActive={location.pathname === sub.url}>
                               <NavLink to={sub.url} end className="hover:bg-sidebar-accent" activeClassName="text-sidebar-primary font-medium">
