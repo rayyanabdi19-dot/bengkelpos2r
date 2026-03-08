@@ -1,6 +1,7 @@
 import { useAuth } from '@/hooks/useAuth';
 import { useBengkelProfile } from '@/hooks/useSupabaseData';
 import { Wrench, Info, QrCode, Bell } from 'lucide-react';
+import { APP_VERSION } from '@/lib/version';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
