@@ -202,6 +202,33 @@ export type Database = {
         }
         Relationships: []
       }
+      licenses: {
+        Row: {
+          aktif: boolean
+          created_at: string
+          id: string
+          kode: string
+          used_at: string | null
+          used_by: string | null
+        }
+        Insert: {
+          aktif?: boolean
+          created_at?: string
+          id?: string
+          kode: string
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Update: {
+          aktif?: boolean
+          created_at?: string
+          id?: string
+          kode?: string
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Relationships: []
+      }
       pelanggan: {
         Row: {
           created_at: string
@@ -272,6 +299,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          id: string
+          license_kode: string | null
+          role: string
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          license_kode?: string | null
+          role?: string
+          username: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          license_kode?: string | null
+          role?: string
+          username?: string
+        }
+        Relationships: []
       }
       servis: {
         Row: {
