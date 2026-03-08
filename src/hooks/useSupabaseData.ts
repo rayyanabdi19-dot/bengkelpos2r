@@ -102,6 +102,30 @@ export interface Pembelian {
   created_at: string;
 }
 
+export interface Karyawan {
+  id: string;
+  nama: string;
+  no_hp: string;
+  jabatan: string;
+  alamat: string;
+  gaji_pokok: number;
+  tanggal_masuk: string;
+  aktif: boolean;
+  created_at: string;
+}
+
+export interface SlipGaji {
+  id: string;
+  karyawan_id: string;
+  periode: string;
+  gaji_pokok: number;
+  bonus: number;
+  potongan: number;
+  total: number;
+  catatan: string;
+  created_at: string;
+}
+
 const db = {
   pelanggan: () => supabase.from('pelanggan' as any),
   sparepart: () => supabase.from('sparepart' as any),
@@ -112,6 +136,8 @@ const db = {
   bengkel_profile: () => supabase.from('bengkel_profile' as any),
   layanan: () => supabase.from('layanan' as any),
   pembelian: () => supabase.from('pembelian' as any),
+  karyawan: () => supabase.from('karyawan' as any),
+  slip_gaji: () => supabase.from('slip_gaji' as any),
 };
 
 function useSupabaseTable<T>(tableFn: () => ReturnType<typeof supabase.from>) {
@@ -456,4 +482,48 @@ export function useBengkelProfile() {
   };
 
   return { profile, loading, refresh, update };
+}
+
+// Karyawan CRUD
+export function useKaryawan() {
+  const { data, loading, refresh } = useSupabaseTable<Karyawan>(db.karyawan);
+
+  const add = async (k: Omit<Karyawan, 'id' | 'created_at'>) => {
+    const { error } = await db.karyawan().insert(k as any);
+    if (!error) await refresh();
+    return !error;
+  };
+
+  const update = async (id: string, k: Partial<Karyawan>) => {
+    const { error } = await db.karyawan().update(k as any).eq('id', id);
+    if (!error) await refresh();
+    return !error;
+  };
+
+  const remove = async (id: string) => {
+    const { error } = await db.karyawan().delete().eq('id', id);
+    if (!error) await refresh();
+    return !error;
+  };
+
+  return { karyawanList: data, loading, refresh, add, update, remove };
+}
+
+// Slip Gaji CRUD
+export function useSlipGaji() {
+  const { data, loading, refresh } = useSupabaseTable<SlipGaji>(db.slip_gaji);
+
+  const add = async (s: Omit<SlipGaji, 'id' | 'created_at'>) => {
+    const { error } = await db.slip_gaji().insert(s as any);
+    if (!error) await refresh();
+    return !error;
+  };
+
+  const remove = async (id: string) => {
+    const { error } = await db.slip_gaji().delete().eq('id', id);
+    if (!error) await refresh();
+    return !error;
+  };
+
+  return { slipList: data, loading, refresh, add, remove };
 }

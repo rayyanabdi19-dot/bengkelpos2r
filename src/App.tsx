@@ -22,6 +22,8 @@ import ProfilePage from "@/pages/ProfilePage";
 import PrinterPage from "@/pages/PrinterPage";
 import RiwayatPage from "@/pages/RiwayatPage";
 import InstallPage from "@/pages/InstallPage";
+import KaryawanPage from "@/pages/KaryawanPage";
+import GajiPage from "@/pages/GajiPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -50,6 +52,8 @@ function AppRoutes() {
         <Route path="/profil" element={<ProfilePage />} />
         <Route path="/printer" element={<PrinterPage />} />
         <Route path="/install" element={<InstallPage />} />
+        <Route path="/karyawan" element={<KaryawanPage />} />
+        <Route path="/karyawan/gaji" element={<GajiPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppLayout>

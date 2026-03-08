@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/sidebar';
 import {
   LayoutDashboard, FileText, ScanBarcode, Package, CalendarCheck,
-  Users, BarChart3, Settings, LogOut, Wrench, ChevronDown, Store, ClipboardList, Bluetooth, History, Download,
+  Users, BarChart3, Settings, LogOut, Wrench, ChevronDown, Store, ClipboardList, History, Download, UserCog,
 } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
@@ -35,6 +35,11 @@ const pengaturanSubmenu = [
   { title: 'Install Aplikasi', url: '/install' },
 ];
 
+const karyawanSubmenu = [
+  { title: 'Data Karyawan', url: '/karyawan' },
+  { title: 'Gaji Karyawan', url: '/karyawan/gaji' },
+];
+
 const bottomMenuItems = [
   { title: 'Layanan', url: '/layanan', icon: ClipboardList },
   { title: 'Booking Servis', url: '/booking', icon: CalendarCheck },
@@ -50,6 +55,7 @@ export function AppSidebar() {
   const { profile } = useBengkelProfile();
 
   const isSparepart = location.pathname === '/sparepart' || location.pathname === '/pembelian';
+  const isKaryawan = location.pathname.startsWith('/karyawan');
   const isLaporan = location.pathname.startsWith('/laporan');
   const isPengaturan = location.pathname === '/pengaturan' || location.pathname === '/printer' || location.pathname === '/install';
 
@@ -106,6 +112,38 @@ export function AppSidebar() {
                     <CollapsibleContent>
                       <SidebarMenuSub>
                         {sparepartSubmenu.map(sub => (
+                          <SidebarMenuSubItem key={sub.url}>
+                            <SidebarMenuSubButton asChild isActive={location.pathname === sub.url}>
+                              <NavLink to={sub.url} end className="hover:bg-sidebar-accent" activeClassName="text-sidebar-primary font-medium">
+                                {sub.title}
+                              </NavLink>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  )}
+                </SidebarMenuItem>
+              </Collapsible>
+
+              {/* Karyawan with submenu */}
+              <Collapsible defaultOpen={isKaryawan} className="group/collapsible-kar">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton isActive={isKaryawan} className="hover:bg-sidebar-accent">
+                      <UserCog className="mr-2 h-4 w-4" />
+                      {!collapsed && (
+                        <>
+                          <span className="flex-1">Karyawan</span>
+                          <ChevronDown className="h-4 w-4 transition-transform group-data-[state=open]/collapsible-kar:rotate-180" />
+                        </>
+                      )}
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  {!collapsed && (
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        {karyawanSubmenu.map(sub => (
                           <SidebarMenuSubItem key={sub.url}>
                             <SidebarMenuSubButton asChild isActive={location.pathname === sub.url}>
                               <NavLink to={sub.url} end className="hover:bg-sidebar-accent" activeClassName="text-sidebar-primary font-medium">
