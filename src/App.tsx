@@ -18,6 +18,7 @@ import LabaPage from "@/pages/LabaPage";
 import PengaturanPage from "@/pages/PengaturanPage";
 import ProfilePage from "@/pages/ProfilePage";
 import PrinterPage from "@/pages/PrinterPage";
+import RiwayatPage from "@/pages/RiwayatPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
