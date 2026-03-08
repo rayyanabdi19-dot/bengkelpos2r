@@ -29,6 +29,7 @@ import GajiPage from "@/pages/GajiPage";
 import AbsensiPage from "@/pages/AbsensiPage";
 import BackupPage from "@/pages/BackupPage";
 import PanduanPage from "@/pages/PanduanPage";
+import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -105,7 +106,10 @@ const App = () => (
       <Sonner />
       <AuthProvider>
         <BrowserRouter>
-          <AppRoutes />
+          <Routes>
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route path="*" element={<AppRoutes />} />
+          </Routes>
         </BrowserRouter>
       </AuthProvider>
     </TooltipProvider>

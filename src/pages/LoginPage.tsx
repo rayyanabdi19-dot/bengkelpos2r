@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Wrench, KeyRound, Eye, EyeOff } from 'lucide-react';
+import ForgotPasswordForm from '@/components/ForgotPasswordForm';
 
 export default function LoginPage() {
   const { login, loginWithSupabase, register } = useAuth();
@@ -21,6 +22,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showDemoPassword, setShowDemoPassword] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   // Register state
   const [regEmail, setRegEmail] = useState('');
@@ -136,25 +138,36 @@ export default function LoginPage() {
                 </TabsContent>
 
                 <TabsContent value="account">
-                  <form onSubmit={handleAccountLogin} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="loginEmail">Email</Label>
-                      <Input id="loginEmail" type="email" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} placeholder="email@contoh.com" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="loginPassword">Password</Label>
-                      <div className="relative">
-                        <Input id="loginPassword" type={showPassword ? 'text' : 'password'} value={loginPassword} onChange={e => setLoginPassword(e.target.value)} placeholder="••••••" />
-                        <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" onClick={() => setShowPassword(!showPassword)}>
-                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                        </button>
+                  {showForgotPassword ? (
+                    <ForgotPasswordForm onBack={() => setShowForgotPassword(false)} />
+                  ) : (
+                    <form onSubmit={handleAccountLogin} className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="loginEmail">Email</Label>
+                        <Input id="loginEmail" type="email" value={loginEmail} onChange={e => setLoginEmail(e.target.value)} placeholder="email@contoh.com" />
                       </div>
-                    </div>
-                    {error && <p className="text-destructive text-sm">{error}</p>}
-                    <Button type="submit" className="w-full" disabled={loading}>
-                      {loading ? 'Memproses...' : 'Masuk'}
-                    </Button>
-                  </form>
+                      <div className="space-y-2">
+                        <Label htmlFor="loginPassword">Password</Label>
+                        <div className="relative">
+                          <Input id="loginPassword" type={showPassword ? 'text' : 'password'} value={loginPassword} onChange={e => setLoginPassword(e.target.value)} placeholder="••••••" />
+                          <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" onClick={() => setShowPassword(!showPassword)}>
+                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
+                        </div>
+                      </div>
+                      {error && <p className="text-destructive text-sm">{error}</p>}
+                      <Button type="submit" className="w-full" disabled={loading}>
+                        {loading ? 'Memproses...' : 'Masuk'}
+                      </Button>
+                      <button
+                        type="button"
+                        onClick={() => setShowForgotPassword(true)}
+                        className="w-full text-center text-sm text-primary hover:underline"
+                      >
+                        Lupa Password?
+                      </button>
+                    </form>
+                  )}
                 </TabsContent>
               </Tabs>
             </div>
