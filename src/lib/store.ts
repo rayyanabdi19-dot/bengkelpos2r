@@ -166,9 +166,26 @@ export const authStore = {
     if (user) {
       const userData: User = { username: user.username, role: user.role };
       localStorage.setItem('bengkel_user', JSON.stringify(userData));
+      // Set trial start date if not already set
+      if (!localStorage.getItem('bengkel_trial_start')) {
+        localStorage.setItem('bengkel_trial_start', new Date().toISOString());
+      }
       return userData;
     }
     return null;
+  },
+  getTrialDaysLeft: (): number | null => {
+    const startStr = localStorage.getItem('bengkel_trial_start');
+    if (!startStr) return null;
+    const start = new Date(startStr);
+    const now = new Date();
+    const diffMs = now.getTime() - start.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    return Math.max(0, 7 - diffDays);
+  },
+  isTrialExpired: (): boolean => {
+    const daysLeft = authStore.getTrialDaysLeft();
+    return daysLeft !== null && daysLeft <= 0;
   },
   getUser: (): User | null => {
     try {
