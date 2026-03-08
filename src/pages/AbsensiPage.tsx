@@ -360,15 +360,44 @@ export default function AbsensiPage() {
         {/* Tab: QR Code Karyawan */}
         <TabsContent value="qrcode">
           <div className="stat-card space-y-4">
-            <h2 className="font-semibold text-lg flex items-center gap-2">
-              <QrCode className="w-5 h-5 text-primary" />QR Code Karyawan
-            </h2>
-            <p className="text-sm text-muted-foreground">Cetak QR Code untuk masing-masing karyawan. QR Code ini digunakan untuk scan absensi.</p>
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div>
+                <h2 className="font-semibold text-lg flex items-center gap-2">
+                  <QrCode className="w-5 h-5 text-primary" />QR Code Karyawan
+                </h2>
+                <p className="text-sm text-muted-foreground">Cetak QR Code untuk scan absensi karyawan.</p>
+              </div>
+              <Button onClick={() => {
+                const w = window.open('', '_blank');
+                if (!w) return;
+                const cards = activeKaryawan.map(k => {
+                  const svgEl = document.getElementById(`qr-svg-${k.id}`);
+                  const svgHtml = svgEl ? svgEl.outerHTML : '';
+                  return `<div class="card"><div class="qr">${svgHtml}</div><div class="info"><p class="name">${k.nama}</p><p class="role">${k.jabatan || 'Staff'}</p></div></div>`;
+                }).join('');
+                w.document.write(`<html><head><title>QR Code Semua Karyawan</title><style>
+                  *{margin:0;padding:0;box-sizing:border-box}
+                  body{font-family:sans-serif;padding:10mm}
+                  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8mm}
+                  .card{border:1px dashed #ccc;border-radius:4mm;padding:5mm;display:flex;flex-direction:column;align-items:center;text-align:center;break-inside:avoid}
+                  .qr svg{width:30mm;height:30mm}
+                  .name{font-weight:bold;font-size:11pt;margin-top:3mm}
+                  .role{font-size:9pt;color:#666;margin-top:1mm}
+                  @media print{body{padding:5mm}.grid{gap:5mm}}
+                </style></head><body><div class="grid">${cards}</div></body></html>`);
+                w.document.close();
+                setTimeout(() => w.print(), 300);
+              }}>
+                <Download className="w-4 h-4 mr-2" />Cetak Semua QR
+              </Button>
+            </div>
 
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {activeKaryawan.map(k => (
                 <div key={k.id} className="border border-border rounded-lg p-4 flex items-center gap-4 bg-background">
-                  <QRCodeSVG value={k.id} size={64} />
+                  <div id={`qr-svg-${k.id}`}>
+                    <QRCodeSVG value={k.id} size={64} />
+                  </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold truncate">{k.nama}</p>
                     <p className="text-xs text-muted-foreground">{k.jabatan || 'Staff'}</p>
