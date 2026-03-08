@@ -9,6 +9,7 @@ import { useStockNotification } from "@/hooks/useStockNotification";
 import AppLayout from "@/components/AppLayout";
 import LoginPage from "@/pages/LoginPage";
 import TrialExpiredDialog from "@/components/TrialExpiredDialog";
+import MaintenanceNotification from "@/components/MaintenanceNotification";
 import DashboardPage from "@/pages/DashboardPage";
 import TransaksiPage from "@/pages/TransaksiPage";
 import ScanPage from "@/pages/ScanPage";
@@ -107,6 +108,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <MaintenanceNotification />
       <AuthProvider>
         <BrowserRouter>
           <Routes>
