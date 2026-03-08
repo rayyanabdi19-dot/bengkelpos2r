@@ -57,20 +57,49 @@ export default function PelangganPage() {
       <Dialog open={!!selectedId} onOpenChange={() => setSelectedId(null)}>
         <DialogContent className="max-w-lg">
           <DialogHeader><DialogTitle className="flex items-center gap-2"><History className="w-5 h-5" /> Riwayat Servis</DialogTitle></DialogHeader>
+          {(() => {
+            const sel = pelanggan.find(p => p.id === selectedId);
+            return sel ? (
+              <div className="mb-3 p-3 rounded-lg bg-muted">
+                <p className="font-semibold">{sel.nama}</p>
+                <p className="text-sm text-muted-foreground">🏍️ {sel.plat_motor} • {sel.tipe_motor} • {sel.no_hp}</p>
+              </div>
+            ) : null;
+          })()}
           {riwayat.length === 0 ? (
             <p className="text-sm text-muted-foreground">Belum ada riwayat servis.</p>
           ) : (
             <div className="space-y-3 max-h-96 overflow-auto">
               {riwayat.map(s => (
-                <div key={s.id} className="p-3 rounded-lg bg-muted">
-                  <div className="flex justify-between text-sm">
-                    <span className="font-medium">{formatDate(s.created_at)}</span>
+                <div key={s.id} className="p-3 rounded-lg border border-border">
+                  <div className="flex justify-between items-start text-sm mb-2">
+                    <div>
+                      <p className="font-medium">{new Date(s.created_at).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                      <p className="text-xs text-muted-foreground">{new Date(s.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB</p>
+                    </div>
                     <span className="font-bold text-primary">{formatRupiah(s.total_biaya)}</span>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">{s.keluhan}</p>
-                  <p className="text-xs mt-1">
-                    Layanan: {s.layanan?.map(l => l.nama).join(', ') || '-'}
-                  </p>
+                  {s.keluhan && <p className="text-xs text-muted-foreground mb-2">Keluhan: {s.keluhan}</p>}
+                  {s.layanan && s.layanan.length > 0 && (
+                    <div className="mb-1">
+                      <p className="text-xs font-medium text-muted-foreground mb-1">Layanan:</p>
+                      {s.layanan.map(l => (
+                        <div key={l.id} className="flex justify-between text-xs pl-2">
+                          <span>{l.nama}</span><span>{formatRupiah(l.harga)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {s.spareparts && s.spareparts.length > 0 && (
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground mb-1">Sparepart:</p>
+                      {s.spareparts.map(sp => (
+                        <div key={sp.id} className="flex justify-between text-xs pl-2">
+                          <span>{sp.nama} x{sp.qty}</span><span>{formatRupiah(sp.harga * sp.qty)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

@@ -69,9 +69,20 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="page-header">Dashboard</h1>
-        <p className="page-subtitle">Ringkasan aktivitas bengkel hari ini</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="page-header">Dashboard</h1>
+          <p className="page-subtitle">Ringkasan aktivitas bengkel hari ini</p>
+        </div>
+        <div className="text-right">
+          <div className="flex items-center gap-2 text-2xl font-bold tabular-nums">
+            <Clock className="w-5 h-5 text-primary" />
+            {currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+          </div>
+          <p className="text-sm text-muted-foreground">
+            {currentTime.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+          </p>
+        </div>
       </div>
 
       {/* Carousel */}
