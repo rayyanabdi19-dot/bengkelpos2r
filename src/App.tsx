@@ -90,6 +90,7 @@ function AppRoutes() {
           <Route path="/karyawan/absensi" element={<AbsensiPage />} />
           <Route path="/pengaturan/backup" element={<BackupPage />} />
           <Route path="/pengaturan/panduan" element={<PanduanPage />} />
+          <Route path="/pengaturan/rubah-password" element={<RubahPasswordPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </AppLayout>
