@@ -15,7 +15,7 @@ export default function SparepartPage() {
   const [search, setSearch] = useState('');
   const [showDialog, setShowDialog] = useState(false);
   const [editing, setEditing] = useState<Sparepart | null>(null);
-  const [form, setForm] = useState({ nama: '', barcode: '', harga: 0, stok: 0, stok_minimum: 5, kategori: '' });
+  const [form, setForm] = useState({ nama: '', barcode: '', harga: 0, hpp: 0, stok: 0, stok_minimum: 5, kategori: '' });
   const [saving, setSaving] = useState(false);
   const [scanningBarcode, setScanningBarcode] = useState(false);
   const scannerRef = useRef<Html5Qrcode | null>(null);

@@ -323,3 +323,27 @@ export function useDashboardStats() {
 
   return { stats, monthlyData, loading };
 }
+
+// Bengkel Profile
+export function useBengkelProfile() {
+  const [profile, setProfile] = useState<BengkelProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    const { data, error } = await db.bengkel_profile().select('*').limit(1).single();
+    if (!error && data) setProfile(data as BengkelProfile);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { refresh(); }, [refresh]);
+
+  const update = async (p: Partial<BengkelProfile>) => {
+    if (!profile) return false;
+    const { error } = await db.bengkel_profile().update({ ...p, updated_at: new Date().toISOString() } as any).eq('id', profile.id);
+    if (!error) await refresh();
+    return !error;
+  };
+
+  return { profile, loading, refresh, update };
+}
