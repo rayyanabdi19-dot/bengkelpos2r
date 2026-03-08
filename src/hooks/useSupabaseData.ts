@@ -150,6 +150,7 @@ const db = {
   pembelian: () => supabase.from('pembelian' as any),
   karyawan: () => supabase.from('karyawan' as any),
   slip_gaji: () => supabase.from('slip_gaji' as any),
+  absensi: () => supabase.from('absensi' as any),
 };
 
 function useSupabaseTable<T>(tableFn: () => ReturnType<typeof supabase.from>) {
