@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      bengkel_profile: {
+        Row: {
+          alamat: string
+          created_at: string
+          footer_struk: string
+          id: string
+          logo_url: string
+          nama: string
+          pemilik: string
+          telepon: string
+          updated_at: string
+        }
+        Insert: {
+          alamat?: string
+          created_at?: string
+          footer_struk?: string
+          id?: string
+          logo_url?: string
+          nama?: string
+          pemilik?: string
+          telepon?: string
+          updated_at?: string
+        }
+        Update: {
+          alamat?: string
+          created_at?: string
+          footer_struk?: string
+          id?: string
+          logo_url?: string
+          nama?: string
+          pemilik?: string
+          telepon?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       booking: {
         Row: {
           created_at: string
@@ -156,6 +192,7 @@ export type Database = {
       servis_sparepart: {
         Row: {
           harga: number
+          hpp: number
           id: string
           nama: string
           qty: number
@@ -164,6 +201,7 @@ export type Database = {
         }
         Insert: {
           harga?: number
+          hpp?: number
           id?: string
           nama: string
           qty?: number
@@ -172,6 +210,7 @@ export type Database = {
         }
         Update: {
           harga?: number
+          hpp?: number
           id?: string
           nama?: string
           qty?: number
@@ -200,6 +239,7 @@ export type Database = {
           barcode: string
           created_at: string
           harga: number
+          hpp: number
           id: string
           kategori: string
           nama: string
@@ -210,6 +250,7 @@ export type Database = {
           barcode?: string
           created_at?: string
           harga?: number
+          hpp?: number
           id?: string
           kategori?: string
           nama: string
@@ -220,6 +261,7 @@ export type Database = {
           barcode?: string
           created_at?: string
           harga?: number
+          hpp?: number
           id?: string
           kategori?: string
           nama?: string
