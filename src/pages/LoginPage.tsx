@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
 import { useBengkelProfile } from '@/hooks/useSupabaseData';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +12,7 @@ import ForgotPasswordForm from '@/components/ForgotPasswordForm';
 export default function LoginPage() {
   const { login, loginWithSupabase, register } = useAuth();
   const { profile } = useBengkelProfile();
+  const { toast } = useToast();
 
   // Login state
   const [loginMode, setLoginMode] = useState<'demo' | 'account'>('demo');
@@ -82,6 +84,10 @@ export default function LoginPage() {
       setRegError(result.error || 'Pendaftaran gagal');
     } else {
       setRegSuccess(true);
+      toast({
+        title: '🎉 Selamat Datang!',
+        description: `Halo ${regUsername}, akun berlisensi Anda berhasil didaftarkan! Nikmati akses penuh ke semua fitur BengkelPOS.`,
+      });
     }
     setRegLoading(false);
   };
