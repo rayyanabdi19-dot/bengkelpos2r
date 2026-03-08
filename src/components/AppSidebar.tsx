@@ -7,7 +7,7 @@ import {
 } from '@/components/ui/sidebar';
 import {
   LayoutDashboard, FileText, ScanBarcode, Package, CalendarCheck,
-  Users, BarChart3, Settings, LogOut, Wrench, TrendingUp, ChevronDown,
+  Users, BarChart3, Settings, LogOut, Wrench, TrendingUp, ChevronDown, Store,
 } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
