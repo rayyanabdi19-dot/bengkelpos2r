@@ -13,6 +13,7 @@ import SparepartPage from "@/pages/SparepartPage";
 import BookingPage from "@/pages/BookingPage";
 import PelangganPage from "@/pages/PelangganPage";
 import LaporanPage from "@/pages/LaporanPage";
+import LabaPage from "@/pages/LabaPage";
 import PengaturanPage from "@/pages/PengaturanPage";
 import NotFound from "@/pages/NotFound";
 
