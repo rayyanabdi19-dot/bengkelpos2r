@@ -12,6 +12,7 @@ import ForgotPasswordForm from '@/components/ForgotPasswordForm';
 export default function LoginPage() {
   const { login, loginWithSupabase, register } = useAuth();
   const { profile } = useBengkelProfile();
+  const { toast } = useToast();
 
   // Login state
   const [loginMode, setLoginMode] = useState<'demo' | 'account'>('demo');
