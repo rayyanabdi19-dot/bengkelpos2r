@@ -34,7 +34,7 @@ export default function PembelianPage() {
   const handleSparepartSelect = (spId: string) => {
     const sp = spareparts.find(s => s.id === spId);
     if (sp) {
-      setForm({ ...form, sparepart_id: spId, nama_barang: sp.nama, harga_beli: sp.hpp || 0 });
+      setForm({ ...form, sparepart_id: spId, nama_barang: sp.nama, harga_beli: sp.hpp || 0, harga_jual: sp.harga || 0 });
     }
   };
 
