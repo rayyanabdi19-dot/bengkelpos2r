@@ -14,6 +14,7 @@ import * as XLSX from 'xlsx';
 
 export default function AbsensiPage() {
   const { karyawanList, loading: kLoading } = useKaryawan();
+  const { profile } = useBengkelProfile();
   const { absensiList, loading: aLoading, add, update } = useAbsensi();
   const { toast } = useToast();
 
