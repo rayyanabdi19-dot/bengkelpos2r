@@ -30,6 +30,7 @@ import AbsensiPage from "@/pages/AbsensiPage";
 import BackupPage from "@/pages/BackupPage";
 import PanduanPage from "@/pages/PanduanPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
+import AdminResetCodesPage from "@/pages/AdminResetCodesPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
