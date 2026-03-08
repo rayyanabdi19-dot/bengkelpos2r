@@ -173,20 +173,40 @@ export default function DashboardPage() {
         </div>
       )}
 
-      <div className="stat-card">
-        <h3 className="font-semibold mb-4">Pendapatan 6 Bulan Terakhir</h3>
-        <div className="h-64">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={monthlyData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis dataKey="bulan" tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} />
-              <YAxis tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} tickFormatter={(v) => `${(v / 1000)}k`} />
-              <Tooltip formatter={(value: number) => formatRupiah(value)} labelStyle={{ color: 'hsl(var(--foreground))' }} contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }} />
-              <Bar dataKey="pendapatan" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
+      {/* Booking Hari Ini */}
+      {(() => {
+        const today = new Date().toISOString().split('T')[0];
+        const todayBookings = bookings.filter(b => b.tanggal === today);
+        return (
+          <div className="stat-card">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold flex items-center gap-2">
+                <CalendarCheck className="w-4 h-4 text-warning" /> Booking Hari Ini
+              </h3>
+              <Button variant="ghost" size="sm" onClick={() => navigate('/booking')} className="text-xs">Lihat Semua</Button>
+            </div>
+            {todayBookings.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-4">Tidak ada booking hari ini</p>
+            ) : (
+              <div className="space-y-2">
+                {todayBookings.map(b => (
+                  <div key={b.id} className="flex items-center justify-between p-3 rounded-lg border border-border">
+                    <div className="min-w-0">
+                      <p className="font-medium text-sm truncate">{b.nama}</p>
+                      <p className="text-xs text-muted-foreground">{b.plat_motor} • {b.jam || '-'}</p>
+                    </div>
+                    <span className={`text-xs px-2 py-1 rounded-full shrink-0 ${
+                      b.status === 'dikonfirmasi' ? 'bg-success/10 text-success' :
+                      b.status === 'dibatalkan' ? 'bg-destructive/10 text-destructive' :
+                      'bg-warning/10 text-warning'
+                    }`}>{b.status}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })()}
     </div>
   );
 }

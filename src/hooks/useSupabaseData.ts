@@ -483,3 +483,47 @@ export function useBengkelProfile() {
 
   return { profile, loading, refresh, update };
 }
+
+// Karyawan CRUD
+export function useKaryawan() {
+  const { data, loading, refresh } = useSupabaseTable<Karyawan>(db.karyawan);
+
+  const add = async (k: Omit<Karyawan, 'id' | 'created_at'>) => {
+    const { error } = await db.karyawan().insert(k as any);
+    if (!error) await refresh();
+    return !error;
+  };
+
+  const update = async (id: string, k: Partial<Karyawan>) => {
+    const { error } = await db.karyawan().update(k as any).eq('id', id);
+    if (!error) await refresh();
+    return !error;
+  };
+
+  const remove = async (id: string) => {
+    const { error } = await db.karyawan().delete().eq('id', id);
+    if (!error) await refresh();
+    return !error;
+  };
+
+  return { karyawanList: data, loading, refresh, add, update, remove };
+}
+
+// Slip Gaji CRUD
+export function useSlipGaji() {
+  const { data, loading, refresh } = useSupabaseTable<SlipGaji>(db.slip_gaji);
+
+  const add = async (s: Omit<SlipGaji, 'id' | 'created_at'>) => {
+    const { error } = await db.slip_gaji().insert(s as any);
+    if (!error) await refresh();
+    return !error;
+  };
+
+  const remove = async (id: string) => {
+    const { error } = await db.slip_gaji().delete().eq('id', id);
+    if (!error) await refresh();
+    return !error;
+  };
+
+  return { slipList: data, loading, refresh, add, remove };
+}
