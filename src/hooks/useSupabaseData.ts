@@ -87,6 +87,7 @@ const db = {
   servis_layanan: () => supabase.from('servis_layanan' as any),
   servis_sparepart: () => supabase.from('servis_sparepart' as any),
   booking: () => supabase.from('booking' as any),
+  bengkel_profile: () => supabase.from('bengkel_profile' as any),
 };
 
 function useSupabaseTable<T>(tableFn: () => ReturnType<typeof supabase.from>) {
