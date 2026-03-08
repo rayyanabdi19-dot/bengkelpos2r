@@ -422,6 +422,13 @@ export default function AbsensiPage() {
               {profile?.nama && (
                 <p className="font-bold text-base text-primary">{profile.nama}</p>
               )}
+              {qrKaryawan.foto_wajah ? (
+                <img src={qrKaryawan.foto_wajah} alt={qrKaryawan.nama} className="w-20 h-20 rounded-full object-cover border-2 border-border" />
+              ) : (
+                <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
+                  <UserCheck className="w-8 h-8 text-primary" />
+                </div>
+              )}
               <QRCodeSVG value={qrKaryawan.id} size={200} />
               <div className="text-center">
                 <p className="font-bold text-lg">{qrKaryawan.nama}</p>
