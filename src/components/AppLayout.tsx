@@ -1,8 +1,13 @@
 import type { ReactNode } from 'react';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
+import { useAuth } from '@/hooks/useAuth';
+import { Crown } from 'lucide-react';
 
 export default function AppLayout({ children }: { children: ReactNode }) {
+  const { isDemoUser } = useAuth();
+  const isLicensed = !isDemoUser;
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
@@ -11,6 +16,12 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           <header className="h-14 flex items-center border-b border-border px-4 bg-card shrink-0">
             <SidebarTrigger className="mr-3" />
             <span className="text-sm font-medium text-muted-foreground">Sistem Kasir Bengkel Motor</span>
+            {isLicensed && (
+              <div className="ml-auto flex items-center gap-1.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 px-2.5 py-1 rounded-full">
+                <Crown className="w-4 h-4" />
+                <span className="text-xs font-semibold">Premium</span>
+              </div>
+            )}
           </header>
           <main className="flex-1 overflow-auto p-4 md:p-6">
             {children}
