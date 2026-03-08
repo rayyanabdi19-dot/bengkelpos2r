@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Plus, FileText, Trash2, Download } from 'lucide-react';
+import { Loader2, Plus, Trash2, Download } from 'lucide-react';
 
 interface SlipForm {
   karyawan_id: string;

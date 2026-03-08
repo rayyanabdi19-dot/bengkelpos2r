@@ -10,6 +10,7 @@ export default function DashboardPage() {
   const { stats, loading } = useDashboardStats();
   const { spareparts } = useSparepart();
   const { bookings } = useBooking();
+  const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [spSearch, setSpSearch] = useState('');
   const [showSpSearch, setShowSpSearch] = useState(false);
