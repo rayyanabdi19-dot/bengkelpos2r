@@ -71,9 +71,13 @@ export default function LoginPage() {
       setRegError('Kode lisensi wajib diisi');
       return;
     }
+    if (!regPhone.trim()) {
+      setRegError('Nomor HP wajib diisi');
+      return;
+    }
 
     setRegLoading(true);
-    const result = await register(regEmail, regUsername, regPassword, regLicense);
+    const result = await register(regEmail, regUsername, regPassword, regLicense, regPhone);
     if (!result.success) {
       setRegError(result.error || 'Pendaftaran gagal');
     } else {
