@@ -20,6 +20,7 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showDemoPassword, setShowDemoPassword] = useState(false);
 
   // Register state
   const [regEmail, setRegEmail] = useState('');
@@ -116,12 +117,20 @@ export default function LoginPage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="password">Password</Label>
-                      <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••" />
+                      <div className="relative">
+                        <Input id="password" type={showDemoPassword ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••" />
+                        <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" onClick={() => setShowDemoPassword(!showDemoPassword)}>
+                          {showDemoPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
                     </div>
                     {error && <p className="text-destructive text-sm">{error}</p>}
                     <Button type="submit" className="w-full">Masuk Demo</Button>
                     <p className="text-xs text-center text-muted-foreground">
                       Demo: admin/admin123 atau kasir/kasir123
+                    </p>
+                    <p className="text-xs text-center text-amber-600 dark:text-amber-400 font-medium">
+                      ⚠️ Mode demo terbatas 7 hari trial
                     </p>
                   </form>
                 </TabsContent>
