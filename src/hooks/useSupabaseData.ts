@@ -162,6 +162,33 @@ export function useSparepart() {
   return { spareparts: data, loading, refresh, add, update, remove, getByBarcode, getLowStock };
 }
 
+// Layanan CRUD
+export function useLayanan() {
+  const { data, loading, refresh } = useSupabaseTable<Layanan>(db.layanan);
+
+  const add = async (l: Omit<Layanan, 'id' | 'created_at'>) => {
+    const { error } = await db.layanan().insert(l as any);
+    if (!error) await refresh();
+    return !error;
+  };
+
+  const update = async (id: string, l: Partial<Layanan>) => {
+    const { error } = await db.layanan().update(l as any).eq('id', id);
+    if (!error) await refresh();
+    return !error;
+  };
+
+  const remove = async (id: string) => {
+    const { error } = await db.layanan().delete().eq('id', id);
+    if (!error) await refresh();
+    return !error;
+  };
+
+  const getActive = () => data.filter(l => l.aktif);
+
+  return { layananList: data, loading, refresh, add, update, remove, getActive };
+}
+
 // Booking
 export function useBooking() {
   const { data, loading, refresh } = useSupabaseTable<Booking>(db.booking);
