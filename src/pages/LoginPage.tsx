@@ -84,6 +84,10 @@ export default function LoginPage() {
       setRegError(result.error || 'Pendaftaran gagal');
     } else {
       setRegSuccess(true);
+      toast({
+        title: '🎉 Selamat Datang!',
+        description: `Halo ${regUsername}, akun berlisensi Anda berhasil didaftarkan! Nikmati akses penuh ke semua fitur BengkelPOS.`,
+      });
     }
     setRegLoading(false);
   };
