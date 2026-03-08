@@ -374,18 +374,28 @@ export default function AbsensiPage() {
                 const cards = activeKaryawan.map(k => {
                   const svgEl = document.getElementById(`qr-svg-${k.id}`);
                   const svgHtml = svgEl ? svgEl.outerHTML : '';
-                  return `<div class="card"><div class="qr">${svgHtml}</div><div class="info"><p class="name">${k.nama}</p><p class="role">${k.jabatan || 'Staff'}</p></div></div>`;
+                  const fotoHtml = k.foto_wajah
+                    ? `<img src="${k.foto_wajah}" class="photo" />`
+                    : `<div class="photo-placeholder">👤</div>`;
+                  return `<div class="card">${fotoHtml}<div class="qr">${svgHtml}</div><div class="info"><p class="name">${k.nama}</p><p class="role">${k.jabatan || 'Staff'}</p></div></div>`;
                 }).join('');
+                const bengkelName = profile?.nama ? `<h1 class="header">${profile.nama}</h1>` : '';
                 w.document.write(`<html><head><title>QR Code Semua Karyawan</title><style>
                   *{margin:0;padding:0;box-sizing:border-box}
-                  body{font-family:sans-serif;padding:10mm}
-                  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8mm}
-                  .card{border:1px dashed #ccc;border-radius:4mm;padding:5mm;display:flex;flex-direction:column;align-items:center;text-align:center;break-inside:avoid}
-                  .qr svg{width:30mm;height:30mm}
-                  .name{font-weight:bold;font-size:11pt;margin-top:3mm}
-                  .role{font-size:9pt;color:#666;margin-top:1mm}
-                  @media print{body{padding:5mm}.grid{gap:5mm}}
-                </style></head><body><div class="grid">${cards}</div></body></html>`);
+                  body{font-family:sans-serif;padding:8mm}
+                  .header{text-align:center;font-size:14pt;margin-bottom:6mm}
+                  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(55mm,1fr));gap:5mm}
+                  .card{border:1px dashed #ccc;border-radius:3mm;padding:4mm;display:flex;flex-direction:column;align-items:center;text-align:center;break-inside:avoid}
+                  .photo{width:15mm;height:15mm;border-radius:50%;object-fit:cover;margin-bottom:2mm}
+                  .photo-placeholder{width:15mm;height:15mm;border-radius:50%;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:8mm;margin-bottom:2mm}
+                  .qr svg{width:25mm;height:25mm}
+                  .name{font-weight:bold;font-size:9pt;margin-top:2mm;word-break:break-word}
+                  .role{font-size:8pt;color:#666;margin-top:1mm}
+                  @media print{
+                    body{padding:5mm}
+                    @page{margin:5mm}
+                  }
+                </style></head><body>${bengkelName}<div class="grid">${cards}</div></body></html>`);
                 w.document.close();
                 setTimeout(() => w.print(), 300);
               }}>
@@ -439,9 +449,21 @@ export default function AbsensiPage() {
                 if (!printContent) return;
                 const w = window.open('', '_blank');
                 if (!w) return;
-                w.document.write(`<html><head><title>QR Code - ${qrKaryawan.nama}</title><style>body{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;margin:0}h2{margin:8px 0 4px}p{margin:0;color:#666}.bengkel-name{font-size:14pt;font-weight:bold;margin-bottom:8px}</style></head><body>${printContent.innerHTML}</body></html>`);
+                w.document.write(`<html><head><title>QR Code - ${qrKaryawan.nama}</title><style>
+                  *{margin:0;padding:0;box-sizing:border-box}
+                  body{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;margin:0;padding:10mm}
+                  img{max-width:25mm;max-height:25mm;border-radius:50%;object-fit:cover}
+                  svg{width:40mm;height:40mm}
+                  p{margin:0;color:#333}
+                  .bengkel-name{font-size:12pt;font-weight:bold;margin-bottom:4mm;color:#666}
+                  @media print{
+                    body{padding:0}
+                    @page{margin:10mm}
+                    svg{width:35mm;height:35mm}
+                  }
+                </style></head><body>${printContent.innerHTML}</body></html>`);
                 w.document.close();
-                w.print();
+                setTimeout(() => w.print(), 300);
               }} className="w-full">
                 <Download className="w-4 h-4 mr-2" />Cetak QR Code
               </Button>
