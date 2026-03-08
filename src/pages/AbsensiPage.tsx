@@ -444,40 +444,63 @@ export default function AbsensiPage() {
         <DialogContent className="max-w-sm">
           <DialogHeader><DialogTitle>QR Code Absensi</DialogTitle></DialogHeader>
           {qrKaryawan && (
-            <div className="flex flex-col items-center gap-4 py-4" id="qr-print-area">
-              {profile?.nama && (
-                <p className="font-bold text-base text-primary">{profile.nama}</p>
-              )}
-              {qrKaryawan.foto_wajah ? (
-                <img src={qrKaryawan.foto_wajah} alt={qrKaryawan.nama} className="w-20 h-20 rounded-full object-cover border-2 border-border" />
-              ) : (
-                <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
-                  <UserCheck className="w-8 h-8 text-primary" />
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Label className="text-sm whitespace-nowrap">Ukuran:</Label>
+                <Select value={printSize} onValueChange={v => setPrintSize(v as any)}>
+                  <SelectTrigger className="flex-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="cr80">🪪 ID Card CR-80</SelectItem>
+                    <SelectItem value="a7">📄 A7 (74×105mm)</SelectItem>
+                    <SelectItem value="a8">📋 A8 (52×74mm)</SelectItem>
+                    <SelectItem value="custom">📐 Custom 60×90mm</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex flex-col items-center gap-4 py-4" id="qr-print-area">
+                {profile?.nama && (
+                  <p className="font-bold text-base text-primary">{profile.nama}</p>
+                )}
+                {qrKaryawan.foto_wajah ? (
+                  <img src={qrKaryawan.foto_wajah} alt={qrKaryawan.nama} className="w-20 h-20 rounded-full object-cover border-2 border-border" />
+                ) : (
+                  <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
+                    <UserCheck className="w-8 h-8 text-primary" />
+                  </div>
+                )}
+                <QRCodeSVG value={qrKaryawan.id} size={200} />
+                <div className="text-center">
+                  <p className="font-bold text-lg">{qrKaryawan.nama}</p>
+                  <p className="text-sm text-muted-foreground">{qrKaryawan.jabatan || 'Staff'}</p>
                 </div>
-              )}
-              <QRCodeSVG value={qrKaryawan.id} size={200} />
-              <div className="text-center">
-                <p className="font-bold text-lg">{qrKaryawan.nama}</p>
-                <p className="text-sm text-muted-foreground">{qrKaryawan.jabatan || 'Staff'}</p>
               </div>
               <Button onClick={() => {
-                const printContent = document.getElementById('qr-print-area');
-                if (!printContent) return;
+                const sizes: Record<string, { w: string; h: string; qr: string; photo: string; nameSize: string; roleSize: string; pad: string }> = {
+                  cr80: { w: '85.6mm', h: '53.98mm', qr: '22mm', photo: '14mm', nameSize: '9pt', roleSize: '7pt', pad: '3mm' },
+                  a7: { w: '74mm', h: '105mm', qr: '30mm', photo: '18mm', nameSize: '10pt', roleSize: '8pt', pad: '4mm' },
+                  a8: { w: '52mm', h: '74mm', qr: '20mm', photo: '12mm', nameSize: '8pt', roleSize: '7pt', pad: '3mm' },
+                  custom: { w: '60mm', h: '90mm', qr: '25mm', photo: '15mm', nameSize: '9pt', roleSize: '7pt', pad: '3mm' },
+                };
+                const s = sizes[printSize];
+                const fotoHtml = qrKaryawan.foto_wajah
+                  ? `<img src="${qrKaryawan.foto_wajah}" class="photo" />`
+                  : '';
+                const qrEl = document.querySelector('#qr-print-area svg');
+                const qrHtml = qrEl ? qrEl.outerHTML : '';
+                const bengkelHtml = profile?.nama ? `<p class="bengkel">${profile.nama}</p>` : '';
                 const w = window.open('', '_blank');
                 if (!w) return;
                 w.document.write(`<html><head><title>QR Code - ${qrKaryawan.nama}</title><style>
                   *{margin:0;padding:0;box-sizing:border-box}
-                  body{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;margin:0;padding:10mm}
-                  img{max-width:25mm;max-height:25mm;border-radius:50%;object-fit:cover}
-                  svg{width:40mm;height:40mm}
-                  p{margin:0;color:#333}
-                  .bengkel-name{font-size:12pt;font-weight:bold;margin-bottom:4mm;color:#666}
-                  @media print{
-                    body{padding:0}
-                    @page{margin:10mm}
-                    svg{width:35mm;height:35mm}
-                  }
-                </style></head><body>${printContent.innerHTML}</body></html>`);
+                  body{display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif}
+                  .card{width:${s.w};height:${s.h};border:1px solid #ccc;border-radius:2mm;padding:${s.pad};display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;overflow:hidden}
+                  .bengkel{font-size:${s.roleSize};color:#666;margin-bottom:1mm}
+                  .photo{width:${s.photo};height:${s.photo};border-radius:50%;object-fit:cover}
+                  svg{width:${s.qr};height:${s.qr}}
+                  .name{font-weight:bold;font-size:${s.nameSize};margin-top:1.5mm;line-height:1.2}
+                  .role{font-size:${s.roleSize};color:#666;margin-top:0.5mm}
+                  @media print{@page{size:${s.w} ${s.h};margin:0}.card{border:none}}
+                </style></head><body><div class="card">${bengkelHtml}${fotoHtml}<div class="qr">${qrHtml}</div><p class="name">${qrKaryawan.nama}</p><p class="role">${qrKaryawan.jabatan || 'Staff'}</p></div></body></html>`);
                 w.document.close();
                 setTimeout(() => w.print(), 300);
               }} className="w-full">
