@@ -22,6 +22,8 @@ import ProfilePage from "@/pages/ProfilePage";
 import PrinterPage from "@/pages/PrinterPage";
 import RiwayatPage from "@/pages/RiwayatPage";
 import InstallPage from "@/pages/InstallPage";
+import KaryawanPage from "@/pages/KaryawanPage";
+import GajiPage from "@/pages/GajiPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
