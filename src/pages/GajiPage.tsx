@@ -59,6 +59,10 @@ export default function GajiPage() {
   const downloadSlip = (slip: any) => {
     const k = karyawanList.find(k => k.id === slip.karyawan_id);
     const content = `
+${profile?.nama || 'BengkelPOS'}
+${profile?.alamat || ''}
+${profile?.telepon ? 'Telp: ' + profile.telepon : ''}
+==========================================
 SLIP GAJI KARYAWAN
 ==========================================
 Nama       : ${k?.nama || '-'}
