@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,6 +8,7 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { useStockNotification } from "@/hooks/useStockNotification";
 import AppLayout from "@/components/AppLayout";
 import LoginPage from "@/pages/LoginPage";
+import TrialExpiredDialog from "@/components/TrialExpiredDialog";
 import DashboardPage from "@/pages/DashboardPage";
 import TransaksiPage from "@/pages/TransaksiPage";
 import ScanPage from "@/pages/ScanPage";
@@ -32,40 +34,70 @@ import NotFound from "@/pages/NotFound";
 const queryClient = new QueryClient();
 
 function AppRoutes() {
-  const { user } = useAuth();
+  const { user, isDemoUser, trialDaysLeft, isTrialExpired, logout } = useAuth();
   useStockNotification();
+  
+  const [showTrialDialog, setShowTrialDialog] = useState(false);
+
+  useEffect(() => {
+    if (isDemoUser && trialDaysLeft !== null) {
+      if (isTrialExpired || trialDaysLeft <= 3) {
+        setShowTrialDialog(true);
+      }
+    }
+  }, [isDemoUser, trialDaysLeft, isTrialExpired]);
 
   if (!user) return <LoginPage />;
 
+  // If trial expired, force show dialog and block access
+  if (isTrialExpired) {
+    return (
+      <>
+        <LoginPage />
+        <TrialExpiredDialog
+          open={true}
+          onClose={() => { logout(); setShowTrialDialog(false); }}
+          daysLeft={0}
+        />
+      </>
+    );
+  }
+
   return (
-    <AppLayout>
-      <Routes>
-        <Route path="/" element={<DashboardPage />} />
-        <Route path="/transaksi" element={<TransaksiPage />} />
-        <Route path="/riwayat" element={<RiwayatPage />} />
-        <Route path="/scan" element={<ScanPage />} />
-        <Route path="/sparepart" element={<SparepartPage />} />
-        <Route path="/pembelian" element={<PembelianPage />} />
-        <Route path="/layanan" element={<LayananPage />} />
-        <Route path="/booking" element={<BookingPage />} />
-        <Route path="/pelanggan" element={<PelangganPage />} />
-        <Route path="/laporan" element={<LaporanPage />} />
-        <Route path="/laporan/laba" element={<LabaPage />} />
-        <Route path="/pengaturan" element={<PengaturanPage />} />
-        <Route path="/profil" element={<ProfilePage />} />
-        <Route path="/printer" element={<PrinterPage />} />
-        <Route path="/install" element={<InstallPage />} />
-        <Route path="/karyawan" element={<KaryawanPage />} />
-        <Route path="/karyawan/gaji" element={<GajiPage />} />
-        <Route path="/karyawan/absensi" element={<AbsensiPage />} />
-        <Route path="/pengaturan/backup" element={<BackupPage />} />
-        <Route path="/pengaturan/panduan" element={<PanduanPage />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </AppLayout>
+    <>
+      <AppLayout>
+        <Routes>
+          <Route path="/" element={<DashboardPage />} />
+          <Route path="/transaksi" element={<TransaksiPage />} />
+          <Route path="/riwayat" element={<RiwayatPage />} />
+          <Route path="/scan" element={<ScanPage />} />
+          <Route path="/sparepart" element={<SparepartPage />} />
+          <Route path="/pembelian" element={<PembelianPage />} />
+          <Route path="/layanan" element={<LayananPage />} />
+          <Route path="/booking" element={<BookingPage />} />
+          <Route path="/pelanggan" element={<PelangganPage />} />
+          <Route path="/laporan" element={<LaporanPage />} />
+          <Route path="/laporan/laba" element={<LabaPage />} />
+          <Route path="/pengaturan" element={<PengaturanPage />} />
+          <Route path="/profil" element={<ProfilePage />} />
+          <Route path="/printer" element={<PrinterPage />} />
+          <Route path="/install" element={<InstallPage />} />
+          <Route path="/karyawan" element={<KaryawanPage />} />
+          <Route path="/karyawan/gaji" element={<GajiPage />} />
+          <Route path="/karyawan/absensi" element={<AbsensiPage />} />
+          <Route path="/pengaturan/backup" element={<BackupPage />} />
+          <Route path="/pengaturan/panduan" element={<PanduanPage />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </AppLayout>
+      <TrialExpiredDialog
+        open={showTrialDialog}
+        onClose={() => setShowTrialDialog(false)}
+        daysLeft={trialDaysLeft ?? undefined}
+      />
+    </>
   );
 }
-
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>

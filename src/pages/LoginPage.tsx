@@ -20,6 +20,7 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showDemoPassword, setShowDemoPassword] = useState(false);
 
   // Register state
   const [regEmail, setRegEmail] = useState('');
