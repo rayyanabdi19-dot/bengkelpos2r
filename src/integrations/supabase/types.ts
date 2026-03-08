@@ -20,6 +20,7 @@ export type Database = {
           created_at: string
           footer_struk: string
           id: string
+          link_qrcode: string
           logo_url: string
           nama: string
           pemilik: string
@@ -31,6 +32,7 @@ export type Database = {
           created_at?: string
           footer_struk?: string
           id?: string
+          link_qrcode?: string
           logo_url?: string
           nama?: string
           pemilik?: string
@@ -42,6 +44,7 @@ export type Database = {
           created_at?: string
           footer_struk?: string
           id?: string
+          link_qrcode?: string
           logo_url?: string
           nama?: string
           pemilik?: string
