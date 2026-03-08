@@ -1,0 +1,9 @@
+{
+  "appId": "app.lovable.9dd6a120fe0a4d6e922dd9ee22a9a7ba",
+  "appName": "BengkelPOS",
+  "webDir": "dist",
+  "server": {
+    "url": "https://9dd6a120-fe0a-4d6e-922d-d9ee22a9a7ba.lovableproject.com?forceHideBadge=true",
+    "cleartext": true
+  }
+}
