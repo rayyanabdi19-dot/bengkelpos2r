@@ -35,6 +35,7 @@ const bottomMenuItems = [
   { title: 'Profil Bengkel', url: '/profil', icon: Store },
   { title: 'Printer Bluetooth', url: '/printer', icon: Bluetooth },
   { title: 'Pengaturan', url: '/pengaturan', icon: Settings },
+  { title: 'Install Aplikasi', url: '/install', icon: Download },
 ];
 
 export function AppSidebar() {
