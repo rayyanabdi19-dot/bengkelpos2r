@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ScanBarcode, Camera, CameraOff, UserCheck, Clock, CalendarDays, Download, FileSpreadsheet, QrCode, LogOut } from 'lucide-react';
+import { Loader2, ScanBarcode, Camera, CameraOff, UserCheck, Clock, CalendarDays, Download, FileSpreadsheet, QrCode, LogOut, ArrowUpCircle, ArrowDownCircle, CheckCircle2, XCircle } from 'lucide-react';
 import { Html5Qrcode } from 'html5-qrcode';
 import { QRCodeSVG } from 'qrcode.react';
 import * as XLSX from 'xlsx';
