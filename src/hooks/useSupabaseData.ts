@@ -540,3 +540,28 @@ export function useSlipGaji() {
 
   return { slipList: data, loading, refresh, add, remove };
 }
+
+// Absensi CRUD
+export function useAbsensi() {
+  const { data, loading, refresh } = useSupabaseTable<Absensi>(db.absensi);
+
+  const add = async (a: Omit<Absensi, 'id' | 'created_at'>) => {
+    const { error } = await db.absensi().insert(a as any);
+    if (!error) await refresh();
+    return !error;
+  };
+
+  const update = async (id: string, a: Partial<Absensi>) => {
+    const { error } = await db.absensi().update(a as any).eq('id', id);
+    if (!error) await refresh();
+    return !error;
+  };
+
+  const remove = async (id: string) => {
+    const { error } = await db.absensi().delete().eq('id', id);
+    if (!error) await refresh();
+    return !error;
+  };
+
+  return { absensiList: data, loading, refresh, add, update, remove };
+}
