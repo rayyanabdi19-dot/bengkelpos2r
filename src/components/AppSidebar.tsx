@@ -14,6 +14,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 const menuItems = [
   { title: 'Dashboard', url: '/', icon: LayoutDashboard },
   { title: 'Transaksi Servis', url: '/transaksi', icon: FileText },
+  { title: 'Riwayat Transaksi', url: '/riwayat', icon: History },
   { title: 'Scan Sparepart', url: '/scan', icon: ScanBarcode },
   { title: 'Sparepart', url: '/sparepart', icon: Package },
   { title: 'Layanan', url: '/layanan', icon: ClipboardList },

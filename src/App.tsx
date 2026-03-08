@@ -33,6 +33,7 @@ function AppRoutes() {
       <Routes>
         <Route path="/" element={<DashboardPage />} />
         <Route path="/transaksi" element={<TransaksiPage />} />
+        <Route path="/riwayat" element={<RiwayatPage />} />
         <Route path="/scan" element={<ScanPage />} />
         <Route path="/sparepart" element={<SparepartPage />} />
         <Route path="/layanan" element={<LayananPage />} />
