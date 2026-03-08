@@ -109,6 +109,13 @@ Dicetak: ${new Date().toLocaleDateString('id-ID')}
           const k = karyawanList.find(k => k.id === slip.karyawan_id);
           return (
             <div key={slip.id} className="stat-card">
+              {/* Header Bengkel */}
+              <div className="text-center border-b border-border pb-3 mb-3">
+                {profile?.logo_url && <img src={profile.logo_url} alt="Logo" className="h-10 mx-auto mb-1 object-contain" />}
+                <p className="font-bold text-sm">{profile?.nama || 'BengkelPOS'}</p>
+                {profile?.alamat && <p className="text-xs text-muted-foreground">{profile.alamat}</p>}
+                {profile?.telepon && <p className="text-xs text-muted-foreground">Telp: {profile.telepon}</p>}
+              </div>
               <div className="flex items-center justify-between mb-2">
                 <div>
                   <p className="font-semibold">{k?.nama || '-'}</p>
