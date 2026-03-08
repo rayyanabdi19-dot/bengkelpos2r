@@ -38,6 +38,7 @@ const pengaturanSubmenu = [
 const karyawanSubmenu = [
   { title: 'Data Karyawan', url: '/karyawan' },
   { title: 'Gaji Karyawan', url: '/karyawan/gaji' },
+  { title: 'Absensi', url: '/karyawan/absensi' },
 ];
 
 const bottomMenuItems = [

@@ -14,6 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      absensi: {
+        Row: {
+          catatan: string
+          created_at: string
+          foto_url: string
+          id: string
+          jam_keluar: string
+          jam_masuk: string
+          karyawan_id: string
+          status: string
+          tanggal: string
+        }
+        Insert: {
+          catatan?: string
+          created_at?: string
+          foto_url?: string
+          id?: string
+          jam_keluar?: string
+          jam_masuk?: string
+          karyawan_id: string
+          status?: string
+          tanggal: string
+        }
+        Update: {
+          catatan?: string
+          created_at?: string
+          foto_url?: string
+          id?: string
+          jam_keluar?: string
+          jam_masuk?: string
+          karyawan_id?: string
+          status?: string
+          tanggal?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "absensi_karyawan_id_fkey"
+            columns: ["karyawan_id"]
+            isOneToOne: false
+            referencedRelation: "karyawan"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bengkel_profile: {
         Row: {
           alamat: string

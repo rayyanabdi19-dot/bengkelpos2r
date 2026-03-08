@@ -126,6 +126,18 @@ export interface SlipGaji {
   created_at: string;
 }
 
+export interface Absensi {
+  id: string;
+  karyawan_id: string;
+  tanggal: string;
+  jam_masuk: string;
+  jam_keluar: string;
+  status: string;
+  foto_url: string;
+  catatan: string;
+  created_at: string;
+}
+
 const db = {
   pelanggan: () => supabase.from('pelanggan' as any),
   sparepart: () => supabase.from('sparepart' as any),
@@ -138,6 +150,7 @@ const db = {
   pembelian: () => supabase.from('pembelian' as any),
   karyawan: () => supabase.from('karyawan' as any),
   slip_gaji: () => supabase.from('slip_gaji' as any),
+  absensi: () => supabase.from('absensi' as any),
 };
 
 function useSupabaseTable<T>(tableFn: () => ReturnType<typeof supabase.from>) {
@@ -526,4 +539,29 @@ export function useSlipGaji() {
   };
 
   return { slipList: data, loading, refresh, add, remove };
+}
+
+// Absensi CRUD
+export function useAbsensi() {
+  const { data, loading, refresh } = useSupabaseTable<Absensi>(db.absensi);
+
+  const add = async (a: Omit<Absensi, 'id' | 'created_at'>) => {
+    const { error } = await db.absensi().insert(a as any);
+    if (!error) await refresh();
+    return !error;
+  };
+
+  const update = async (id: string, a: Partial<Absensi>) => {
+    const { error } = await db.absensi().update(a as any).eq('id', id);
+    if (!error) await refresh();
+    return !error;
+  };
+
+  const remove = async (id: string) => {
+    const { error } = await db.absensi().delete().eq('id', id);
+    if (!error) await refresh();
+    return !error;
+  };
+
+  return { absensiList: data, loading, refresh, add, update, remove };
 }
