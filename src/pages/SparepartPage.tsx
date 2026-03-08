@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Pencil, Trash2, AlertTriangle, Search, Loader2, Camera, CameraOff } from 'lucide-react';
 import { Html5Qrcode } from 'html5-qrcode';
@@ -50,7 +51,6 @@ export default function SparepartPage() {
     }
   }, [toast]);
 
-  // Cleanup scanner on dialog close
   useEffect(() => {
     if (!showDialog) stopBarcodeScanner();
   }, [showDialog, stopBarcodeScanner]);
@@ -108,32 +108,57 @@ export default function SparepartPage() {
         <Input placeholder="Cari nama atau barcode..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filtered.map(sp => (
-          <div key={sp.id} className="stat-card">
-            <div className="flex justify-between items-start mb-2">
-              <div>
-                <h4 className="font-semibold">{sp.nama}</h4>
-                <p className="text-xs text-muted-foreground font-mono">{sp.barcode}</p>
-              </div>
-              <span className="text-xs bg-secondary px-2 py-0.5 rounded-md text-secondary-foreground">{sp.kategori}</span>
-            </div>
-            <p className="text-lg font-bold text-primary">{formatRupiah(sp.harga)}</p>
-            {sp.hpp > 0 && <p className="text-xs text-muted-foreground">HPP: {formatRupiah(sp.hpp)}</p>}
-            <div className="flex items-center justify-between mt-2">
-              <div className="flex items-center gap-1">
-                {sp.stok <= sp.stok_minimum && <AlertTriangle className="w-3.5 h-3.5 text-warning" />}
-                <span className={`text-sm ${sp.stok <= sp.stok_minimum ? 'text-warning font-medium' : 'text-muted-foreground'}`}>
-                  Stok: {sp.stok}
-                </span>
-              </div>
-              <div className="flex gap-1">
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(sp)}><Pencil className="w-3.5 h-3.5" /></Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDelete(sp.id)}><Trash2 className="w-3.5 h-3.5 text-destructive" /></Button>
-              </div>
-            </div>
-          </div>
-        ))}
+      <div className="rounded-lg border border-border bg-card">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[40px]">No</TableHead>
+              <TableHead>Nama</TableHead>
+              <TableHead className="hidden sm:table-cell">Barcode</TableHead>
+              <TableHead className="hidden md:table-cell">Kategori</TableHead>
+              <TableHead className="text-right">HPP</TableHead>
+              <TableHead className="text-right">Harga Jual</TableHead>
+              <TableHead className="text-center">Stok</TableHead>
+              <TableHead className="text-right w-[100px]">Aksi</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filtered.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
+                  Belum ada data sparepart
+                </TableCell>
+              </TableRow>
+            ) : (
+              filtered.map((sp, idx) => (
+                <TableRow key={sp.id}>
+                  <TableCell className="text-muted-foreground">{idx + 1}</TableCell>
+                  <TableCell className="font-medium">{sp.nama}</TableCell>
+                  <TableCell className="hidden sm:table-cell font-mono text-xs text-muted-foreground">{sp.barcode || '-'}</TableCell>
+                  <TableCell className="hidden md:table-cell">
+                    {sp.kategori ? (
+                      <span className="text-xs bg-secondary px-2 py-0.5 rounded-md text-secondary-foreground">{sp.kategori}</span>
+                    ) : '-'}
+                  </TableCell>
+                  <TableCell className="text-right text-muted-foreground">{formatRupiah(sp.hpp)}</TableCell>
+                  <TableCell className="text-right font-semibold text-primary">{formatRupiah(sp.harga)}</TableCell>
+                  <TableCell className="text-center">
+                    <span className={`inline-flex items-center gap-1 ${sp.stok <= sp.stok_minimum ? 'text-warning font-semibold' : ''}`}>
+                      {sp.stok <= sp.stok_minimum && <AlertTriangle className="w-3.5 h-3.5" />}
+                      {sp.stok}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-1">
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(sp)}><Pencil className="w-3.5 h-3.5" /></Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDelete(sp.id)}><Trash2 className="w-3.5 h-3.5 text-destructive" /></Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
       </div>
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
