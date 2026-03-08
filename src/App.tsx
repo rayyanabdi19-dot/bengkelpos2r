@@ -29,6 +29,7 @@ import GajiPage from "@/pages/GajiPage";
 import AbsensiPage from "@/pages/AbsensiPage";
 import BackupPage from "@/pages/BackupPage";
 import PanduanPage from "@/pages/PanduanPage";
+import RubahPasswordPage from "@/pages/RubahPasswordPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
 
 import NotFound from "@/pages/NotFound";
@@ -89,6 +90,7 @@ function AppRoutes() {
           <Route path="/karyawan/absensi" element={<AbsensiPage />} />
           <Route path="/pengaturan/backup" element={<BackupPage />} />
           <Route path="/pengaturan/panduan" element={<PanduanPage />} />
+          <Route path="/pengaturan/rubah-password" element={<RubahPasswordPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </AppLayout>

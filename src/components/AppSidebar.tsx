@@ -31,6 +31,7 @@ const laporanSubmenu = [
 
 const pengaturanSubmenu = [
   { title: 'Umum', url: '/pengaturan' },
+  { title: 'Rubah Password', url: '/pengaturan/rubah-password' },
   { title: 'Printer Bluetooth', url: '/printer' },
   { title: 'Backup Data', url: '/pengaturan/backup' },
   { title: 'Panduan Penggunaan', url: '/pengaturan/panduan' },

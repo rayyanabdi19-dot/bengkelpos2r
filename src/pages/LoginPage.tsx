@@ -143,7 +143,7 @@ export default function LoginPage() {
                       Demo: admin/admin123 atau kasir/kasir123
                     </p>
                     <p className="text-xs text-center text-amber-600 dark:text-amber-400 font-medium">
-                      ⚠️ Mode demo terbatas 7 hari trial
+                      ⚠️ Mode demo terbatas 30 hari trial
                     </p>
                   </form>
                 </TabsContent>
