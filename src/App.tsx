@@ -17,6 +17,7 @@ import LaporanPage from "@/pages/LaporanPage";
 import LabaPage from "@/pages/LabaPage";
 import PengaturanPage from "@/pages/PengaturanPage";
 import ProfilePage from "@/pages/ProfilePage";
+import PrinterPage from "@/pages/PrinterPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ function AppRoutes() {
         <Route path="/laporan/laba" element={<LabaPage />} />
         <Route path="/pengaturan" element={<PengaturanPage />} />
         <Route path="/profil" element={<ProfilePage />} />
+        <Route path="/printer" element={<PrinterPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppLayout>

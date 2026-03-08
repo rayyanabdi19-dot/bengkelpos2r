@@ -7,7 +7,7 @@ import {
 } from '@/components/ui/sidebar';
 import {
   LayoutDashboard, FileText, ScanBarcode, Package, CalendarCheck,
-  Users, BarChart3, Settings, LogOut, Wrench, ChevronDown, Store, ClipboardList,
+  Users, BarChart3, Settings, LogOut, Wrench, ChevronDown, Store, ClipboardList, Bluetooth,
 } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
@@ -20,6 +20,7 @@ const menuItems = [
   { title: 'Booking Servis', url: '/booking', icon: CalendarCheck },
   { title: 'Pelanggan', url: '/pelanggan', icon: Users },
   { title: 'Profil Bengkel', url: '/profil', icon: Store },
+  { title: 'Printer Bluetooth', url: '/printer', icon: Bluetooth },
   { title: 'Pengaturan', url: '/pengaturan', icon: Settings },
 ];
 
