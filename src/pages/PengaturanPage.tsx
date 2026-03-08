@@ -111,7 +111,7 @@ export default function PengaturanPage() {
         <h3 className="font-semibold mb-4 flex items-center gap-2"><Wrench className="w-4 h-4 text-primary" /> Tentang Aplikasi</h3>
         <div className="space-y-2 text-sm">
           <div className="flex justify-between"><span className="text-muted-foreground">Nama Aplikasi</span><span className="font-medium">BengkelPOS MicroData2R</span></div>
-          <div className="flex justify-between"><span className="text-muted-foreground">Versi</span><span className="font-medium">1.0.0</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">Versi</span><span className="font-medium">{APP_VERSION}</span></div>
           <div className="flex justify-between"><span className="text-muted-foreground">Platform</span><span className="font-medium">React + TypeScript</span></div>
         </div>
       </div>
