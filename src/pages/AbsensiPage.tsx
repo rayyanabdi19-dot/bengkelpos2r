@@ -259,6 +259,34 @@ export default function AbsensiPage() {
         <p className="page-subtitle">Scan QR Code untuk pencatatan kehadiran</p>
       </div>
 
+      {/* Ringkasan Statistik Hari Ini */}
+      {(() => {
+        const today = new Date().toISOString().split('T')[0];
+        const todayData = absensiList.filter(a => a.tanggal === today);
+        const hadir = todayData.filter(a => a.status === 'hadir').length;
+        const belumPulang = todayData.filter(a => a.status === 'hadir' && a.jam_masuk && !a.jam_keluar).length;
+        const izin = todayData.filter(a => a.status === 'izin').length;
+        const sakit = todayData.filter(a => a.status === 'sakit').length;
+        const belumAbsen = activeKaryawan.length - todayData.length;
+        const items = [
+          { label: 'Hadir', value: hadir, icon: '🟢', color: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' },
+          { label: 'Belum Pulang', value: belumPulang, icon: '🟠', color: 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400' },
+          { label: 'Izin', value: izin, icon: '🟡', color: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400' },
+          { label: 'Sakit', value: sakit, icon: '🔵', color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400' },
+          { label: 'Belum Absen', value: belumAbsen, icon: '⚪', color: 'bg-muted text-muted-foreground' },
+        ];
+        return (
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+            {items.map(item => (
+              <div key={item.label} className={`rounded-lg p-3 text-center ${item.color}`}>
+                <p className="text-2xl font-bold">{item.value}</p>
+                <p className="text-xs font-medium mt-1">{item.icon} {item.label}</p>
+              </div>
+            ))}
+          </div>
+        );
+      })()}
+
       <Tabs defaultValue="absen">
         <TabsList>
           <TabsTrigger value="absen">Scan Absensi</TabsTrigger>
