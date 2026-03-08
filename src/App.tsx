@@ -34,6 +34,7 @@ function AppRoutes() {
         <Route path="/booking" element={<BookingPage />} />
         <Route path="/pelanggan" element={<PelangganPage />} />
         <Route path="/laporan" element={<LaporanPage />} />
+        <Route path="/laporan/laba" element={<LabaPage />} />
         <Route path="/pengaturan" element={<PengaturanPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
