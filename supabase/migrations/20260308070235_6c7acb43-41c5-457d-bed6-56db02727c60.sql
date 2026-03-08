@@ -1,0 +1,2 @@
+
+ALTER TABLE public.servis_layanan ADD COLUMN hpp INTEGER NOT NULL DEFAULT 0;

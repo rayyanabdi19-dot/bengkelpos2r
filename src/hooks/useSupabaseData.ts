@@ -55,6 +55,17 @@ export interface ServisLayanan {
   servis_id: string;
   nama: string;
   harga: number;
+  hpp: number;
+}
+
+export interface Layanan {
+  id: string;
+  nama: string;
+  harga: number;
+  hpp: number;
+  kategori: string;
+  aktif: boolean;
+  created_at: string;
 }
 
 export interface ServisSparepart {
@@ -88,6 +99,7 @@ const db = {
   servis_sparepart: () => supabase.from('servis_sparepart' as any),
   booking: () => supabase.from('booking' as any),
   bengkel_profile: () => supabase.from('bengkel_profile' as any),
+  layanan: () => supabase.from('layanan' as any),
 };
 
 function useSupabaseTable<T>(tableFn: () => ReturnType<typeof supabase.from>) {
@@ -150,6 +162,33 @@ export function useSparepart() {
   return { spareparts: data, loading, refresh, add, update, remove, getByBarcode, getLowStock };
 }
 
+// Layanan CRUD
+export function useLayanan() {
+  const { data, loading, refresh } = useSupabaseTable<Layanan>(db.layanan);
+
+  const add = async (l: Omit<Layanan, 'id' | 'created_at'>) => {
+    const { error } = await db.layanan().insert(l as any);
+    if (!error) await refresh();
+    return !error;
+  };
+
+  const update = async (id: string, l: Partial<Layanan>) => {
+    const { error } = await db.layanan().update(l as any).eq('id', id);
+    if (!error) await refresh();
+    return !error;
+  };
+
+  const remove = async (id: string) => {
+    const { error } = await db.layanan().delete().eq('id', id);
+    if (!error) await refresh();
+    return !error;
+  };
+
+  const getActive = () => data.filter(l => l.aktif);
+
+  return { layananList: data, loading, refresh, add, update, remove, getActive };
+}
+
 // Booking
 export function useBooking() {
   const { data, loading, refresh } = useSupabaseTable<Booking>(db.booking);
@@ -204,7 +243,7 @@ export function useServis() {
       total_biaya: number;
       status: string;
     },
-    layanan: { nama: string; harga: number }[],
+    layanan: { nama: string; harga: number; hpp: number }[],
     spareparts: { sparepart_id: string; nama: string; harga: number; hpp: number; qty: number }[]
   ) => {
     const { data: newServis, error } = await db.servis()
@@ -217,7 +256,7 @@ export function useServis() {
 
     if (layanan.length > 0) {
       await db.servis_layanan().insert(
-        layanan.map(l => ({ servis_id: servisId, nama: l.nama, harga: l.harga })) as any
+        layanan.map(l => ({ servis_id: servisId, nama: l.nama, harga: l.harga, hpp: l.hpp })) as any
       );
     }
 
