@@ -86,6 +86,36 @@ export type Database = {
         }
         Relationships: []
       }
+      layanan: {
+        Row: {
+          aktif: boolean
+          created_at: string
+          harga: number
+          hpp: number
+          id: string
+          kategori: string
+          nama: string
+        }
+        Insert: {
+          aktif?: boolean
+          created_at?: string
+          harga?: number
+          hpp?: number
+          id?: string
+          kategori?: string
+          nama: string
+        }
+        Update: {
+          aktif?: boolean
+          created_at?: string
+          harga?: number
+          hpp?: number
+          id?: string
+          kategori?: string
+          nama?: string
+        }
+        Relationships: []
+      }
       pelanggan: {
         Row: {
           created_at: string
