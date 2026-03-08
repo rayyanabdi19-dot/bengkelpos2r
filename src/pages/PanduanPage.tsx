@@ -1,5 +1,5 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { BookOpen, LayoutDashboard, FileText, Package, Users, BarChart3, UserCog, Settings, ScanBarcode, CalendarCheck, Printer } from 'lucide-react';
+import { BookOpen, LayoutDashboard, FileText, Package, Users, BarChart3, UserCog, Settings, ScanBarcode, CalendarCheck, Printer, KeyRound, Shield, HeadphonesIcon, Crown } from 'lucide-react';
 
 const guides = [
   {
@@ -48,9 +48,29 @@ const guides = [
     content: 'Hubungkan printer thermal Bluetooth untuk mencetak struk secara langsung dari aplikasi. Pastikan Bluetooth aktif dan printer sudah dalam mode pairing.',
   },
   {
+    icon: KeyRound,
+    title: 'Rubah Password',
+    content: 'Ganti password akun Anda melalui menu Pengaturan > Rubah Password. Masukkan password saat ini untuk verifikasi, lalu buat password baru minimal 6 karakter.',
+  },
+  {
+    icon: Shield,
+    title: 'Lupa Password',
+    content: 'Jika lupa password, klik "Lupa Password?" di halaman login. Masukkan email terdaftar dan kode OTP 6 digit akan dikirim ke email Anda. Setelah verifikasi OTP, Anda bisa membuat password baru.',
+  },
+  {
+    icon: Crown,
+    title: 'Akun Premium (Berlisensi)',
+    content: 'Akun berlisensi mendapatkan akses penuh ke semua fitur tanpa batas waktu trial. Badge "Premium" akan muncul di header sebagai tanda akun aktif berlisensi. Daftar akun berlisensi melalui tab "Daftar" di halaman login dengan memasukkan kode lisensi.',
+  },
+  {
+    icon: HeadphonesIcon,
+    title: 'Helpdesk / Bantuan',
+    content: 'Hubungi tim support melalui menu Pengaturan > Helpdesk / Bantuan. Anda akan diarahkan ke WhatsApp untuk mendapatkan bantuan langsung dari tim kami.',
+  },
+  {
     icon: Settings,
     title: 'Pengaturan',
-    content: 'Konfigurasi aplikasi: QR Code struk, notifikasi stok menipis, backup & restore data, dan informasi akun. Di menu Profil Bengkel, atur nama bengkel, alamat, logo, dan footer struk.',
+    content: 'Konfigurasi aplikasi: QR Code struk, notifikasi stok menipis, rubah password, backup & restore data, panduan penggunaan, install aplikasi, helpdesk, dan informasi akun. Di menu Profil Bengkel, atur nama bengkel, alamat, logo, dan footer struk.',
   },
 ];
 
@@ -59,7 +79,7 @@ export default function PanduanPage() {
     <div className="space-y-6 animate-fade-in">
       <div>
         <h1 className="page-header">Panduan Penggunaan</h1>
-        <p className="page-subtitle">Cara menggunakan fitur-fitur BengkelPOS</p>
+        <p className="page-subtitle">Cara menggunakan fitur-fitur BengkelPOS MicroData2R</p>
       </div>
 
       <div className="stat-card max-w-2xl">
@@ -93,6 +113,9 @@ export default function PanduanPage() {
           <li>Atur stok minimum pada setiap sparepart agar mendapatkan notifikasi otomatis.</li>
           <li>Gunakan fitur scan barcode untuk pencarian sparepart yang lebih cepat.</li>
           <li>Cetak struk dalam format thermal 58mm atau PDF untuk arsip digital.</li>
+          <li>Daftarkan akun berlisensi untuk akses penuh tanpa batas waktu trial.</li>
+          <li>Gunakan fitur Lupa Password via email OTP jika lupa password akun.</li>
+          <li>Hubungi Helpdesk via WhatsApp untuk bantuan teknis.</li>
         </ul>
       </div>
     </div>
