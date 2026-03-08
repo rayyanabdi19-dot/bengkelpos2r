@@ -1,6 +1,6 @@
 import { useDashboardStats, useSparepart, useBooking } from '@/hooks/useSupabaseData';
 import { formatRupiah } from '@/lib/format';
-import { Wrench, DollarSign, Package, CalendarCheck, AlertTriangle, Loader2, Plus, ScanLine, ShoppingCart, Users, ChevronLeft, ChevronRight, ClipboardList, Search, Clock } from 'lucide-react';
+import { Wrench, DollarSign, Package, CalendarCheck, AlertTriangle, Loader2, Plus, ScanLine, ShoppingCart, Users, ChevronLeft, ChevronRight, ClipboardList, Search, Clock, UserCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
@@ -42,8 +42,8 @@ export default function DashboardPage() {
 
   const quickActions = [
     { label: 'Servis Baru', icon: Plus, color: 'bg-primary text-primary-foreground', path: '/transaksi' },
+    { label: 'Absensi', icon: UserCheck, color: 'bg-info text-primary-foreground', path: '/karyawan/absensi' },
     { label: 'Booking', icon: CalendarCheck, color: 'bg-warning text-primary-foreground', path: '/booking' },
-    { label: 'Layanan', icon: ClipboardList, color: 'bg-info text-primary-foreground', path: '/layanan' },
     { label: 'Scan Barcode', icon: ScanLine, color: 'bg-secondary text-secondary-foreground', path: '/scan' },
     { label: 'Pembelian', icon: ShoppingCart, color: 'bg-success text-primary-foreground', path: '/pembelian' },
     { label: 'Pelanggan', icon: Users, color: 'bg-accent text-accent-foreground', path: '/pelanggan' },
