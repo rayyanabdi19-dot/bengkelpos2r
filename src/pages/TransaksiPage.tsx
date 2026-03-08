@@ -30,7 +30,7 @@ export default function TransaksiPage() {
     namaPelanggan: '', noHp: '', platMotor: '', tipeMotor: '', keluhan: '',
   });
   const [selectedLayanan, setSelectedLayanan] = useState<{ nama: string; harga: number }[]>([]);
-  const [selectedSpareparts, setSelectedSpareparts] = useState<{ sparepart_id: string; nama: string; harga: number; qty: number }[]>([]);
+  const [selectedSpareparts, setSelectedSpareparts] = useState<{ sparepart_id: string; nama: string; harga: number; hpp: number; qty: number }[]>([]);
   const [showReceipt, setShowReceipt] = useState(false);
   const [lastServis, setLastServis] = useState<Servis | null>(null);
   const [saving, setSaving] = useState(false);
