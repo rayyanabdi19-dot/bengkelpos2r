@@ -109,6 +109,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route path="/admin/reset-codes" element={<AdminResetCodesPage />} />
             <Route path="*" element={<AppRoutes />} />
           </Routes>
         </BrowserRouter>
