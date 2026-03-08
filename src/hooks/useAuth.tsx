@@ -7,7 +7,7 @@ interface AuthContextType {
   user: User | null;
   login: (username: string, password: string) => boolean;
   loginWithSupabase: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  register: (email: string, username: string, password: string, licenseKey: string) => Promise<{ success: boolean; error?: string }>;
+  register: (email: string, username: string, password: string, licenseKey: string, noHp: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   isDemoUser: boolean;
   trialDaysLeft: number | null;
