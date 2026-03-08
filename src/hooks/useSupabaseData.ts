@@ -63,6 +63,7 @@ export interface ServisSparepart {
   sparepart_id: string | null;
   nama: string;
   harga: number;
+  hpp: number;
   qty: number;
 }
 
