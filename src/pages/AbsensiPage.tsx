@@ -268,7 +268,7 @@ export default function AbsensiPage() {
                 )}
                 {showCamera && streaming && (
                   <div className="relative">
-                    <video ref={videoRef} autoPlay playsInline muted className="w-full max-h-[400px] object-cover" style={{ transform: 'scaleX(-1)' }} />
+                    <video ref={videoRef} autoPlay playsInline muted webkit-playsinline="true" className="w-full max-h-[400px] object-cover" style={{ transform: 'scaleX(-1)' }} />
                     <div className="absolute bottom-0 inset-x-0 p-3 flex justify-center gap-2 bg-gradient-to-t from-black/60 to-transparent">
                       <Button onClick={capturePhoto} size="lg" className="rounded-full"><Camera className="w-5 h-5 mr-2" />Ambil Foto</Button>
                       <Button onClick={() => { stopCamera(); setShowCamera(false); }} variant="outline" size="lg" className="rounded-full bg-background/80"><CameraOff className="w-5 h-5 mr-2" />Tutup</Button>
