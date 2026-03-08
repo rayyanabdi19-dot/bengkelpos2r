@@ -32,7 +32,10 @@ export default function AbsensiPage() {
   // Barcode scanner state
   const [scanning, setScanning] = useState(false);
   const [scannedName, setScannedName] = useState('');
+  const [torchOn, setTorchOn] = useState(false);
+  const [torchSupported, setTorchSupported] = useState(false);
   const scannerRef = useRef<Html5Qrcode | null>(null);
+  const trackRef = useRef<MediaStreamTrack | null>(null);
 
   // QR Code dialog
   const [showQrDialog, setShowQrDialog] = useState(false);
