@@ -13,7 +13,10 @@ export default function ScanPage() {
   const [barcode, setBarcode] = useState('');
   const [result, setResult] = useState<Sparepart | null>(null);
   const [scanning, setScanning] = useState(false);
+  const [torchOn, setTorchOn] = useState(false);
+  const [torchSupported, setTorchSupported] = useState(false);
   const scannerRef = useRef<Html5Qrcode | null>(null);
+  const trackRef = useRef<MediaStreamTrack | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFound = useCallback((code: string) => {
