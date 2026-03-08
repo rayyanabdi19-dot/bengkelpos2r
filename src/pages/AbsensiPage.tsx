@@ -83,18 +83,47 @@ export default function AbsensiPage() {
     toast({ title: 'Berhasil', description: 'File Excel berhasil diunduh' });
   };
 
-  // Barcode scanner
-  const handleBarcodeFound = useCallback((code: string) => {
+  // Barcode scanner - auto absen masuk/pulang
+  const handleBarcodeFound = useCallback(async (code: string) => {
     const karyawan = karyawanList.find(k => k.id === code);
-    if (karyawan) {
-      setSelectedKaryawan(karyawan.id);
-      setScannedName(karyawan.nama);
-      toast({ title: '✅ Karyawan Ditemukan', description: `${karyawan.nama} - ${karyawan.jabatan || 'Staff'}` });
-    } else {
+    if (!karyawan) {
       setScannedName('');
       toast({ title: 'Tidak Ditemukan', description: 'QR Code tidak cocok dengan data karyawan', variant: 'destructive' });
+      return;
     }
-  }, [karyawanList, toast]);
+
+    setSelectedKaryawan(karyawan.id);
+    setScannedName(karyawan.nama);
+
+    const today = new Date().toISOString().split('T')[0];
+    const now = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const existing = absensiList.find(a => a.karyawan_id === karyawan.id && a.tanggal === today);
+
+    if (!existing) {
+      // Belum absen hari ini → catat masuk
+      const ok = await add({ karyawan_id: karyawan.id, tanggal: today, jam_masuk: now, jam_keluar: '', status: 'hadir', foto_url: '', catatan: '' });
+      if (ok) {
+        toast({ title: '⬆️ Absen Masuk Berhasil', description: `${karyawan.nama} — ${now}` });
+      } else {
+        toast({ title: 'Gagal mencatat absen masuk', variant: 'destructive' });
+      }
+    } else if (existing.jam_masuk && !existing.jam_keluar) {
+      // Sudah masuk, belum pulang → catat pulang
+      const ok = await update(existing.id, { jam_keluar: now });
+      if (ok) {
+        toast({ title: '⬇️ Absen Pulang Berhasil', description: `${karyawan.nama} — ${now}` });
+      } else {
+        toast({ title: 'Gagal mencatat absen pulang', variant: 'destructive' });
+      }
+    } else if (existing.jam_keluar) {
+      toast({ title: 'Sudah Lengkap', description: `${karyawan.nama} sudah absen masuk & pulang hari ini` });
+    } else {
+      toast({ title: `${karyawan.nama} sudah memiliki catatan absensi hari ini` });
+    }
+
+    setSelectedKaryawan('');
+    setScannedName('');
+  }, [karyawanList, absensiList, toast, add, update]);
 
   const startScanner = useCallback(async () => {
     try {
