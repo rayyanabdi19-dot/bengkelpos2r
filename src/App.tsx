@@ -16,9 +16,6 @@ import LaporanPage from "@/pages/LaporanPage";
 import PengaturanPage from "@/pages/PengaturanPage";
 import NotFound from "@/pages/NotFound";
 
-// Seed demo data on first load
-seedDemoData();
-
 const queryClient = new QueryClient();
 
 function AppRoutes() {
