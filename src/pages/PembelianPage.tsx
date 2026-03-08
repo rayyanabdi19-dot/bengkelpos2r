@@ -57,14 +57,14 @@ export default function PembelianPage() {
       total: form.harga_beli * form.qty,
       supplier: form.supplier,
       catatan: form.catatan,
-    });
+    }, form.harga_jual);
     setSaving(false);
 
     if (ok) {
       toast({ title: 'Berhasil', description: 'Pembelian berhasil dicatat & stok diperbarui' });
       await refreshSparepart();
       setShowDialog(false);
-      setForm({ sparepart_id: null, nama_barang: '', qty: 1, harga_beli: 0, supplier: '', catatan: '' });
+      setForm({ sparepart_id: null, nama_barang: '', qty: 1, harga_beli: 0, harga_jual: 0, supplier: '', catatan: '' });
     } else {
       toast({ title: 'Error', description: 'Gagal menyimpan pembelian', variant: 'destructive' });
     }
