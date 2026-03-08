@@ -1,32 +1,24 @@
-import { useDashboardStats } from '@/hooks/useSupabaseData';
+import { useDashboardStats, useSparepart } from '@/hooks/useSupabaseData';
 import { formatRupiah } from '@/lib/format';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Wrench, DollarSign, Package, CalendarCheck, AlertTriangle, Loader2, Plus, ScanLine, ShoppingCart, Users, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Wrench, DollarSign, Package, CalendarCheck, AlertTriangle, Loader2, Plus, ScanLine, ShoppingCart, Users, ChevronLeft, ChevronRight, ClipboardList, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
 
 export default function DashboardPage() {
   const { stats, monthlyData, loading } = useDashboardStats();
+  const { spareparts } = useSparepart();
   const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [spSearch, setSpSearch] = useState('');
+  const [showSpSearch, setShowSpSearch] = useState(false);
 
   const slides = [
-    {
-      title: 'Selamat Datang di BengkelPOS',
-      description: 'Kelola bengkel motor Anda dengan mudah dan profesional',
-      bg: 'from-primary to-primary/70',
-    },
-    {
-      title: 'Pantau Stok Sparepart',
-      description: 'Notifikasi otomatis saat stok menipis, jangan sampai kehabisan!',
-      bg: 'from-info to-info/70',
-    },
-    {
-      title: 'Laporan Lengkap',
-      description: 'Analisis pendapatan, laba, dan performa bengkel Anda',
-      bg: 'from-success to-success/70',
-    },
+    { title: 'Selamat Datang di BengkelPOS', description: 'Kelola bengkel motor Anda dengan mudah dan profesional', bg: 'from-primary to-primary/70' },
+    { title: 'Pantau Stok Sparepart', description: 'Notifikasi otomatis saat stok menipis, jangan sampai kehabisan!', bg: 'from-info to-info/70' },
+    { title: 'Laporan Lengkap', description: 'Analisis pendapatan, laba, dan performa bengkel Anda', bg: 'from-success to-success/70' },
   ];
 
   const nextSlide = useCallback(() => {
@@ -44,17 +36,22 @@ export default function DashboardPage() {
 
   const quickActions = [
     { label: 'Servis Baru', icon: Plus, color: 'bg-primary text-primary-foreground', path: '/transaksi' },
-    { label: 'Scan Barcode', icon: ScanLine, color: 'bg-info text-primary-foreground', path: '/scan' },
-    { label: 'Pembelian', icon: ShoppingCart, color: 'bg-warning text-primary-foreground', path: '/pembelian' },
-    { label: 'Pelanggan', icon: Users, color: 'bg-success text-primary-foreground', path: '/pelanggan' },
+    { label: 'Booking', icon: CalendarCheck, color: 'bg-warning text-primary-foreground', path: '/booking' },
+    { label: 'Layanan', icon: ClipboardList, color: 'bg-info text-primary-foreground', path: '/layanan' },
+    { label: 'Scan Barcode', icon: ScanLine, color: 'bg-secondary text-secondary-foreground', path: '/scan' },
+    { label: 'Pembelian', icon: ShoppingCart, color: 'bg-success text-primary-foreground', path: '/pembelian' },
+    { label: 'Pelanggan', icon: Users, color: 'bg-accent text-accent-foreground', path: '/pelanggan' },
   ];
 
+  const filteredSpareparts = spSearch.trim()
+    ? spareparts.filter(sp =>
+        sp.nama.toLowerCase().includes(spSearch.toLowerCase()) ||
+        sp.barcode.includes(spSearch)
+      ).slice(0, 5)
+    : [];
+
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
+    return <div className="flex items-center justify-center h-64"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
   }
 
   const statCards = [
@@ -93,7 +90,7 @@ export default function DashboardPage() {
       {/* Quick Actions */}
       <div>
         <h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wide">Aksi Cepat</h3>
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
           {quickActions.map((action) => (
             <Button
               key={action.label}
@@ -108,6 +105,54 @@ export default function DashboardPage() {
             </Button>
           ))}
         </div>
+      </div>
+
+      {/* Sparepart Search */}
+      <div className="stat-card">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-semibold flex items-center gap-2">
+            <Search className="w-4 h-4 text-primary" /> Cari Sparepart
+          </h3>
+          <Button variant="ghost" size="sm" onClick={() => navigate('/sparepart')} className="text-xs">
+            Lihat Semua
+          </Button>
+        </div>
+        <div className="relative">
+          <Search className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="Cari nama atau barcode sparepart..."
+            value={spSearch}
+            onChange={e => { setSpSearch(e.target.value); setShowSpSearch(true); }}
+            onFocus={() => setShowSpSearch(true)}
+            className="pl-9"
+          />
+        </div>
+        {showSpSearch && spSearch.trim() && (
+          <div className="mt-2 border border-border rounded-lg overflow-hidden">
+            {filteredSpareparts.length === 0 ? (
+              <div className="p-3 text-sm text-muted-foreground text-center">Tidak ditemukan</div>
+            ) : (
+              filteredSpareparts.map(sp => (
+                <div
+                  key={sp.id}
+                  className="flex items-center justify-between p-3 border-b border-border last:border-0 hover:bg-muted/50 cursor-pointer transition-colors"
+                  onClick={() => { navigate('/sparepart'); }}
+                >
+                  <div className="min-w-0">
+                    <p className="font-medium text-sm truncate">{sp.nama}</p>
+                    <p className="text-xs text-muted-foreground">{sp.barcode || sp.kategori || '-'}</p>
+                  </div>
+                  <div className="text-right shrink-0 ml-3">
+                    <p className="text-sm font-semibold text-primary">{formatRupiah(sp.harga)}</p>
+                    <p className={`text-xs ${sp.stok <= sp.stok_minimum ? 'text-warning font-medium' : 'text-muted-foreground'}`}>
+                      {sp.stok <= sp.stok_minimum && '⚠ '}Stok: {sp.stok}
+                    </p>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
