@@ -55,6 +55,17 @@ export interface ServisLayanan {
   servis_id: string;
   nama: string;
   harga: number;
+  hpp: number;
+}
+
+export interface Layanan {
+  id: string;
+  nama: string;
+  harga: number;
+  hpp: number;
+  kategori: string;
+  aktif: boolean;
+  created_at: string;
 }
 
 export interface ServisSparepart {
