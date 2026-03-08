@@ -205,7 +205,7 @@ export function useServis() {
       status: string;
     },
     layanan: { nama: string; harga: number }[],
-    spareparts: { sparepart_id: string; nama: string; harga: number; qty: number }[]
+    spareparts: { sparepart_id: string; nama: string; harga: number; hpp: number; qty: number }[]
   ) => {
     const { data: newServis, error } = await db.servis()
       .insert(servisData as any)
