@@ -395,41 +395,76 @@ export default function AbsensiPage() {
             {todayAbsensi.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">Belum ada data absensi pada tanggal ini</div>
             ) : (
-              <div className="grid gap-2">
-                {todayAbsensi.map(a => (
-                  <div key={a.id} className="flex items-center gap-3 p-3 rounded-lg border border-border bg-background">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                      <UserCheck className="w-5 h-5 text-primary" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="font-semibold truncate">{getKaryawanName(a.karyawan_id)}</p>
-                      <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                        {a.jam_masuk && <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> Masuk: {a.jam_masuk}</span>}
-                        {a.jam_keluar && <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> Keluar: {a.jam_keluar}</span>}
+              <div className="grid gap-3">
+                {todayAbsensi.map(a => {
+                  const nama = getKaryawanName(a.karyawan_id);
+                  const karyawan = karyawanList.find(k => k.id === a.karyawan_id);
+                  const hasCheckedOut = a.status === 'hadir' && a.jam_masuk && a.jam_keluar;
+                  const isWorking = a.status === 'hadir' && a.jam_masuk && !a.jam_keluar;
+                  return (
+                    <div key={a.id} className="rounded-lg border border-border bg-background overflow-hidden">
+                      {/* Header row */}
+                      <div className="flex items-center gap-3 p-3">
+                        <div className="w-10 h-10 rounded-full overflow-hidden bg-primary/10 flex items-center justify-center shrink-0">
+                          {karyawan?.foto_wajah ? (
+                            <img src={karyawan.foto_wajah} alt={nama} className="w-full h-full object-cover" />
+                          ) : (
+                            <UserCheck className="w-5 h-5 text-primary" />
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-semibold truncate">{nama}</p>
+                          <p className="text-xs text-muted-foreground">{karyawan?.jabatan || 'Staff'}</p>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          {isWorking && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-orange-600 border-orange-300 hover:bg-orange-50 dark:hover:bg-orange-900/20"
+                              onClick={async () => {
+                                const now = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                                const ok = await update(a.id, { jam_keluar: now });
+                                if (ok) toast({ title: `Absen pulang ${nama} berhasil dicatat` });
+                                else toast({ title: 'Gagal menyimpan absensi pulang', variant: 'destructive' });
+                              }}
+                            >
+                              <LogOut className="w-4 h-4 mr-1" /> Pulang
+                            </Button>
+                          )}
+                          <span className={`text-xs px-2 py-1 rounded-full font-medium ${getStatusBadge(a.status)}`}>
+                            {a.status}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      {a.status === 'hadir' && a.jam_masuk && !a.jam_keluar && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-orange-600 border-orange-300 hover:bg-orange-50 dark:hover:bg-orange-900/20"
-                          onClick={async () => {
-                            const now = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                            const ok = await update(a.id, { jam_keluar: now });
-                            if (ok) toast({ title: `Absen pulang ${getKaryawanName(a.karyawan_id)} berhasil dicatat` });
-                            else toast({ title: 'Gagal menyimpan absensi pulang', variant: 'destructive' });
-                          }}
-                        >
-                          <LogOut className="w-4 h-4 mr-1" /> Pulang
-                        </Button>
+                      {/* Timeline masuk/pulang */}
+                      {a.status === 'hadir' && (
+                        <div className="border-t border-border px-3 py-2 bg-muted/20 grid grid-cols-2 gap-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center shrink-0">
+                              <ArrowUp className="w-3.5 h-3.5 text-white" />
+                            </div>
+                            <div>
+                              <p className="text-[10px] uppercase font-semibold text-green-600 dark:text-green-400">Masuk</p>
+                              <p className="text-sm font-mono font-bold">{a.jam_masuk || '-'}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${hasCheckedOut ? 'bg-blue-500' : 'bg-muted-foreground/30'}`}>
+                              <ArrowDown className="w-3.5 h-3.5 text-white" />
+                            </div>
+                            <div>
+                              <p className="text-[10px] uppercase font-semibold text-blue-600 dark:text-blue-400">Pulang</p>
+                              <p className={`text-sm font-mono font-bold ${hasCheckedOut ? '' : 'text-muted-foreground'}`}>
+                                {a.jam_keluar || 'Belum'}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
                       )}
-                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${getStatusBadge(a.status)}`}>
-                        {a.status}
-                      </span>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
