@@ -81,18 +81,29 @@ export default function AbsensiPage() {
 
   const startCamera = useCallback(async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } }
-      });
+      const constraints: MediaStreamConstraints = {
+        video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
+        audio: false
+      };
+      let stream: MediaStream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
+      } catch {
+        // Fallback: try without specific constraints for older devices
+        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      }
       streamRef.current = stream;
       if (videoRef.current) {
+        videoRef.current.setAttribute('playsinline', 'true');
+        videoRef.current.setAttribute('webkit-playsinline', 'true');
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
       }
       setStreaming(true);
       setCapturedImage(null);
-    } catch {
-      toast({ title: 'Gagal mengakses kamera', description: 'Pastikan izin kamera diaktifkan', variant: 'destructive' });
+    } catch (err) {
+      console.error('Camera error:', err);
+      toast({ title: 'Gagal mengakses kamera', description: 'Pastikan izin kamera diaktifkan di pengaturan browser/HP', variant: 'destructive' });
     }
   }, [toast]);
 
@@ -257,7 +268,7 @@ export default function AbsensiPage() {
                 )}
                 {showCamera && streaming && (
                   <div className="relative">
-                    <video ref={videoRef} autoPlay playsInline muted className="w-full max-h-[400px] object-cover" style={{ transform: 'scaleX(-1)' }} />
+                    <video ref={videoRef} autoPlay playsInline muted webkit-playsinline="true" className="w-full max-h-[400px] object-cover" style={{ transform: 'scaleX(-1)' }} />
                     <div className="absolute bottom-0 inset-x-0 p-3 flex justify-center gap-2 bg-gradient-to-t from-black/60 to-transparent">
                       <Button onClick={capturePhoto} size="lg" className="rounded-full"><Camera className="w-5 h-5 mr-2" />Ambil Foto</Button>
                       <Button onClick={() => { stopCamera(); setShowCamera(false); }} variant="outline" size="lg" className="rounded-full bg-background/80"><CameraOff className="w-5 h-5 mr-2" />Tutup</Button>

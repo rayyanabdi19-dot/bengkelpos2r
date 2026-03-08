@@ -59,18 +59,29 @@ export default function KaryawanPage() {
 
   const startCamera = useCallback(async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'user', width: { ideal: 480 }, height: { ideal: 360 } }
-      });
+      const constraints: MediaStreamConstraints = {
+        video: { facingMode: 'user', width: { ideal: 480 }, height: { ideal: 360 } },
+        audio: false
+      };
+      let stream: MediaStream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
+      } catch {
+        // Fallback: try without specific constraints for older devices
+        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      }
       streamRef.current = stream;
       if (videoRef.current) {
+        videoRef.current.setAttribute('playsinline', 'true');
+        videoRef.current.setAttribute('webkit-playsinline', 'true');
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
       }
       setStreaming(true);
       setCapturedFace(null);
-    } catch {
-      toast({ title: 'Gagal mengakses kamera', variant: 'destructive' });
+    } catch (err) {
+      console.error('Camera error:', err);
+      toast({ title: 'Gagal mengakses kamera', description: 'Pastikan izin kamera diaktifkan di pengaturan browser/HP', variant: 'destructive' });
     }
   }, [toast]);
 
@@ -247,7 +258,7 @@ export default function KaryawanPage() {
                 )}
                 {showCamera && streaming && (
                   <div className="relative">
-                    <video ref={videoRef} autoPlay playsInline muted className="w-full max-h-[250px] object-cover" style={{ transform: 'scaleX(-1)' }} />
+                    <video ref={videoRef} autoPlay playsInline muted webkit-playsinline="true" className="w-full max-h-[250px] object-cover" style={{ transform: 'scaleX(-1)' }} />
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                       <div className="w-32 h-40 border-2 border-dashed border-primary/60 rounded-[50%]" />
                     </div>
