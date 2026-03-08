@@ -15,6 +15,7 @@ import PelangganPage from "@/pages/PelangganPage";
 import LaporanPage from "@/pages/LaporanPage";
 import LabaPage from "@/pages/LabaPage";
 import PengaturanPage from "@/pages/PengaturanPage";
+import ProfilePage from "@/pages/ProfilePage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
