@@ -24,6 +24,7 @@ import RiwayatPage from "@/pages/RiwayatPage";
 import InstallPage from "@/pages/InstallPage";
 import KaryawanPage from "@/pages/KaryawanPage";
 import GajiPage from "@/pages/GajiPage";
+import AbsensiPage from "@/pages/AbsensiPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
