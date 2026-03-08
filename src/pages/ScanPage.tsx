@@ -73,8 +73,21 @@ export default function ScanPage() {
       try { await scannerRef.current.stop(); } catch {}
       scannerRef.current = null;
     }
+    trackRef.current = null;
     setScanning(false);
+    setTorchOn(false);
+    setTorchSupported(false);
   }, []);
+
+  const toggleTorch = useCallback(async () => {
+    if (!trackRef.current) return;
+    try {
+      await (trackRef.current as any).applyConstraints({ advanced: [{ torch: !torchOn }] });
+      setTorchOn(prev => !prev);
+    } catch {
+      toast({ title: 'Error', description: 'Gagal mengaktifkan lampu senter.', variant: 'destructive' });
+    }
+  }, [torchOn, toast]);
 
   useEffect(() => {
     return () => { stopScanner(); };
