@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useKaryawan, useSlipGaji } from '@/hooks/useSupabaseData';
+import { useKaryawan, useSlipGaji, useBengkelProfile } from '@/hooks/useSupabaseData';
 import { formatRupiah } from '@/lib/format';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,6 +24,7 @@ const emptyForm: SlipForm = { karyawan_id: '', periode: '', gaji_pokok: 0, bonus
 export default function GajiPage() {
   const { karyawanList, loading: kLoading } = useKaryawan();
   const { slipList, loading: sLoading, add, remove } = useSlipGaji();
+  const { profile } = useBengkelProfile();
   const { toast } = useToast();
   const [showDialog, setShowDialog] = useState(false);
   const [form, setForm] = useState<SlipForm>(emptyForm);
@@ -58,6 +59,10 @@ export default function GajiPage() {
   const downloadSlip = (slip: any) => {
     const k = karyawanList.find(k => k.id === slip.karyawan_id);
     const content = `
+${profile?.nama || 'BengkelPOS'}
+${profile?.alamat || ''}
+${profile?.telepon ? 'Telp: ' + profile.telepon : ''}
+==========================================
 SLIP GAJI KARYAWAN
 ==========================================
 Nama       : ${k?.nama || '-'}
@@ -104,6 +109,13 @@ Dicetak: ${new Date().toLocaleDateString('id-ID')}
           const k = karyawanList.find(k => k.id === slip.karyawan_id);
           return (
             <div key={slip.id} className="stat-card">
+              {/* Header Bengkel */}
+              <div className="text-center border-b border-border pb-3 mb-3">
+                {profile?.logo_url && <img src={profile.logo_url} alt="Logo" className="h-10 mx-auto mb-1 object-contain" />}
+                <p className="font-bold text-sm">{profile?.nama || 'BengkelPOS'}</p>
+                {profile?.alamat && <p className="text-xs text-muted-foreground">{profile.alamat}</p>}
+                {profile?.telepon && <p className="text-xs text-muted-foreground">Telp: {profile.telepon}</p>}
+              </div>
               <div className="flex items-center justify-between mb-2">
                 <div>
                   <p className="font-semibold">{k?.nama || '-'}</p>
