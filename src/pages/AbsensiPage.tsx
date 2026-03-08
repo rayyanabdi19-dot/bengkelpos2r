@@ -22,7 +22,7 @@ export default function AbsensiPage() {
   const [filterDate, setFilterDate] = useState(new Date().toISOString().split('T')[0]);
   const [absenType, setAbsenType] = useState<'masuk' | 'keluar'>('masuk');
   const [absenStatus, setAbsenStatus] = useState<'hadir' | 'izin' | 'sakit'>('hadir');
-  const [showPhoto, setShowPhoto] = useState<string | null>(null);
+  
   const [rekapMonth, setRekapMonth] = useState(() => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
@@ -439,13 +439,6 @@ export default function AbsensiPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Photo Preview Dialog (kept for backward compat with old records) */}
-      <Dialog open={!!showPhoto} onOpenChange={() => setShowPhoto(null)}>
-        <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle>Foto Absensi</DialogTitle></DialogHeader>
-          {showPhoto && <img src={showPhoto} alt="Foto absensi" className="w-full rounded-lg" />}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
