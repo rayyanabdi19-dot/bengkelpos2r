@@ -419,6 +419,9 @@ export default function AbsensiPage() {
           <DialogHeader><DialogTitle>QR Code Absensi</DialogTitle></DialogHeader>
           {qrKaryawan && (
             <div className="flex flex-col items-center gap-4 py-4" id="qr-print-area">
+              {profile?.nama && (
+                <p className="font-bold text-base text-primary">{profile.nama}</p>
+              )}
               <QRCodeSVG value={qrKaryawan.id} size={200} />
               <div className="text-center">
                 <p className="font-bold text-lg">{qrKaryawan.nama}</p>
@@ -429,7 +432,7 @@ export default function AbsensiPage() {
                 if (!printContent) return;
                 const w = window.open('', '_blank');
                 if (!w) return;
-                w.document.write(`<html><head><title>QR Code - ${qrKaryawan.nama}</title><style>body{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;margin:0}h2{margin:8px 0 4px}p{margin:0;color:#666}</style></head><body>${printContent.innerHTML}</body></html>`);
+                w.document.write(`<html><head><title>QR Code - ${qrKaryawan.nama}</title><style>body{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;margin:0}h2{margin:8px 0 4px}p{margin:0;color:#666}.bengkel-name{font-size:14pt;font-weight:bold;margin-bottom:8px}</style></head><body>${printContent.innerHTML}</body></html>`);
                 w.document.close();
                 w.print();
               }} className="w-full">
