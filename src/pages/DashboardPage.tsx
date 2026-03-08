@@ -14,6 +14,12 @@ export default function DashboardPage() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [spSearch, setSpSearch] = useState('');
   const [showSpSearch, setShowSpSearch] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const slides = [
     { title: 'Selamat Datang di BengkelPOS', description: 'Kelola bengkel motor Anda dengan mudah dan profesional', bg: 'from-primary to-primary/70' },
