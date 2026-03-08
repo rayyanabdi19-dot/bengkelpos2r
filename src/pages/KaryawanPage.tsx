@@ -17,10 +17,9 @@ interface KaryawanForm {
   gaji_pokok: number;
   tanggal_masuk: string;
   aktif: boolean;
-  foto_wajah?: string;
 }
 
-const emptyForm: KaryawanForm = { nama: '', no_hp: '', jabatan: '', alamat: '', gaji_pokok: 0, tanggal_masuk: '', aktif: true, foto_wajah: '' };
+const emptyForm: KaryawanForm = { nama: '', no_hp: '', jabatan: '', alamat: '', gaji_pokok: 0, tanggal_masuk: '', aktif: true };
 
 export default function KaryawanPage() {
   const { karyawanList, loading, add, update, remove } = useKaryawan();
