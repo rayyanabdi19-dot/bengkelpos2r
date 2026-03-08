@@ -181,7 +181,7 @@ export const authStore = {
     const now = new Date();
     const diffMs = now.getTime() - start.getTime();
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    return Math.max(0, 7 - diffDays);
+    return Math.max(0, 30 - diffDays);
   },
   isTrialExpired: (): boolean => {
     const daysLeft = authStore.getTrialDaysLeft();

@@ -45,7 +45,7 @@ export default function TrialExpiredDialog({ open, onClose, daysLeft }: TrialExp
             <div className="space-y-4 text-center">
               <p className="text-muted-foreground">
                 {isExpired
-                  ? 'Akun demo Anda telah melewati batas trial 7 hari. Silakan aktivasi lisensi untuk melanjutkan.'
+                  ? 'Akun demo Anda telah melewati batas trial 30 hari. Silakan aktivasi lisensi untuk melanjutkan.'
                   : 'Segera aktivasi lisensi permanen untuk tetap menggunakan semua fitur tanpa batas.'}
               </p>
 
