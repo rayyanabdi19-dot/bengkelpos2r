@@ -37,6 +37,7 @@ export default function AbsensiPage() {
   // QR Code dialog
   const [showQrDialog, setShowQrDialog] = useState(false);
   const [qrKaryawan, setQrKaryawan] = useState<any>(null);
+  const [printSize, setPrintSize] = useState<'cr80' | 'a7' | 'a8' | 'custom'>('cr80');
 
   const activeKaryawan = karyawanList.filter(k => k.aktif);
   const loading = kLoading || aLoading;
