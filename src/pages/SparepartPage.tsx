@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useSparepart, type Sparepart } from '@/hooks/useSupabaseData';
 import { formatRupiah } from '@/lib/format';
 import { Button } from '@/components/ui/button';
@@ -6,7 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Pencil, Trash2, AlertTriangle, Search, Loader2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, AlertTriangle, Search, Loader2, Camera, CameraOff } from 'lucide-react';
+import { Html5Qrcode } from 'html5-qrcode';
 
 export default function SparepartPage() {
   const { toast } = useToast();
