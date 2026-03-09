@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Wrench, KeyRound, Eye, EyeOff } from 'lucide-react';
 import ForgotPasswordForm from '@/components/ForgotPasswordForm';
+import LoginHero from '@/components/LoginHero';
 
 export default function LoginPage() {
   const { login, loginWithSupabase, register } = useAuth();
@@ -93,9 +94,11 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div className="min-h-screen grid lg:grid-cols-2 bg-background">
+      <LoginHero />
+      <div className="flex items-center justify-center p-4 sm:p-8">
       <div className="w-full max-w-md animate-fade-in">
-        <div className="text-center mb-6">
+        <div className="text-center mb-6 lg:hidden">
           {profile?.logo_url ? (
             <img src={profile.logo_url} alt="Logo Bengkel" className="w-20 h-20 object-contain mx-auto mb-4 rounded-2xl" />
           ) : (
@@ -106,6 +109,7 @@ export default function LoginPage() {
           <h1 className="page-header">{profile?.nama || 'BengkelPOS'}</h1>
           <p className="page-subtitle mt-1">Sistem Kasir Bengkel Motor</p>
         </div>
+        <h2 className="hidden lg:block text-xl font-bold text-foreground mb-6">Masuk ke Akun Anda</h2>
 
         <Tabs defaultValue="login" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-4">
@@ -252,6 +256,7 @@ export default function LoginPage() {
             </div>
           </TabsContent>
         </Tabs>
+      </div>
       </div>
     </div>
   );
