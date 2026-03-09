@@ -1,6 +1,7 @@
 import { useAuth } from '@/hooks/useAuth';
 import { useBengkelProfile } from '@/hooks/useSupabaseData';
-import { Wrench, Info, QrCode, Bell } from 'lucide-react';
+import { Wrench, Info, QrCode, Bell, Sun, Moon, Monitor } from 'lucide-react';
+import { useTheme } from '@/hooks/useTheme';
 import { APP_VERSION } from '@/lib/version';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +16,7 @@ export default function PengaturanPage() {
   const [qrLink, setQrLink] = useState('');
   const [saving, setSaving] = useState(false);
   const [notifPermission, setNotifPermission] = useState<NotificationPermission>('default');
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     if (profile) {
@@ -63,6 +65,30 @@ export default function PengaturanPage() {
         <div className="space-y-2 text-sm">
           <div className="flex justify-between"><span className="text-muted-foreground">Username</span><span className="font-medium">{user?.username}</span></div>
           <div className="flex justify-between"><span className="text-muted-foreground">Role</span><span className="font-medium capitalize">{user?.role}</span></div>
+        </div>
+      </div>
+
+      {/* Tema */}
+      <div className="stat-card max-w-lg">
+        <h3 className="font-semibold mb-4 flex items-center gap-2"><Sun className="w-4 h-4 text-primary" /> Tema Tampilan</h3>
+        <p className="text-sm text-muted-foreground mb-3">Pilih mode tampilan aplikasi</p>
+        <div className="flex gap-2">
+          {([
+            { value: 'light' as const, label: 'Terang', icon: Sun },
+            { value: 'dark' as const, label: 'Gelap', icon: Moon },
+            { value: 'system' as const, label: 'Sistem', icon: Monitor },
+          ]).map(({ value, label, icon: Icon }) => (
+            <Button
+              key={value}
+              variant={theme === value ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setTheme(value)}
+              className="flex items-center gap-1.5"
+            >
+              <Icon className="w-4 h-4" />
+              {label}
+            </Button>
+          ))}
         </div>
       </div>
 
