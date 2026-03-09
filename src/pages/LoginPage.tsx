@@ -257,6 +257,7 @@ export default function LoginPage() {
           </TabsContent>
         </Tabs>
       </div>
+      </div>
     </div>
   );
 }
