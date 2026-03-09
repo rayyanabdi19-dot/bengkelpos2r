@@ -68,6 +68,30 @@ export default function PengaturanPage() {
         </div>
       </div>
 
+      {/* Tema */}
+      <div className="stat-card max-w-lg">
+        <h3 className="font-semibold mb-4 flex items-center gap-2"><Sun className="w-4 h-4 text-primary" /> Tema Tampilan</h3>
+        <p className="text-sm text-muted-foreground mb-3">Pilih mode tampilan aplikasi</p>
+        <div className="flex gap-2">
+          {([
+            { value: 'light' as const, label: 'Terang', icon: Sun },
+            { value: 'dark' as const, label: 'Gelap', icon: Moon },
+            { value: 'system' as const, label: 'Sistem', icon: Monitor },
+          ]).map(({ value, label, icon: Icon }) => (
+            <Button
+              key={value}
+              variant={theme === value ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setTheme(value)}
+              className="flex items-center gap-1.5"
+            >
+              <Icon className="w-4 h-4" />
+              {label}
+            </Button>
+          ))}
+        </div>
+      </div>
+
       {/* Notifikasi */}
       <div className="stat-card max-w-lg">
         <h3 className="font-semibold mb-4 flex items-center gap-2"><Bell className="w-4 h-4 text-primary" /> Notifikasi Stok</h3>
