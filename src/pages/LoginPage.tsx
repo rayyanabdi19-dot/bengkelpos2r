@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Wrench, KeyRound, Eye, EyeOff } from 'lucide-react';
 import ForgotPasswordForm from '@/components/ForgotPasswordForm';
+import LoginHero from '@/components/LoginHero';
 
 export default function LoginPage() {
   const { login, loginWithSupabase, register } = useAuth();
