@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useBengkelProfile } from '@/hooks/useSupabaseData';
-import { Wrench, Gauge, ShieldCheck, Smartphone, BarChart3, Users } from 'lucide-react';
+import { Wrench, Gauge, ShieldCheck, Smartphone, BarChart3, Users, Star, ChevronLeft, ChevronRight, Quote } from 'lucide-react';
 
 const features = [
   { icon: Gauge, title: 'Transaksi Cepat', desc: 'Proses servis & penjualan sparepart dalam hitungan detik' },
@@ -10,9 +10,19 @@ const features = [
   { icon: Smartphone, title: 'Mobile Friendly', desc: 'Akses dari HP, tablet, atau komputer' },
 ];
 
+const testimonials = [
+  { name: 'Budi Santoso', role: 'Pemilik Bengkel Jaya Motor', rating: 5, text: 'Sejak pakai BengkelPOS, omzet bengkel naik 30%. Laporan keuangan jadi rapi dan stok sparepart terkontrol otomatis.' },
+  { name: 'Rina Wati', role: 'Kasir Bengkel Maju Bersama', rating: 5, text: 'Aplikasinya mudah banget dipakai. Transaksi cepat, pelanggan senang karena nggak perlu antri lama.' },
+  { name: 'Ahmad Fauzi', role: 'Pemilik AF Motor Service', rating: 4, text: 'Fitur booking online sangat membantu. Pelanggan bisa reservasi dari rumah, bengkel jadi lebih terorganisir.' },
+  { name: 'Dewi Kartika', role: 'Manager Bengkel DK Racing', rating: 5, text: 'Manajemen karyawan dan slip gaji otomatis. Tidak perlu hitung manual lagi, hemat waktu dan tenaga.' },
+  { name: 'Hendra Wijaya', role: 'Pemilik HW Motoshop', rating: 5, text: 'Support-nya responsif dan fiturnya lengkap. Dari scan barcode sampai cetak struk bluetooth semua ada!' },
+];
+
 export default function LoginHero() {
   const { profile } = useBengkelProfile();
   const [visibleFeatures, setVisibleFeatures] = useState<number[]>([]);
+  const [currentTestimonial, setCurrentTestimonial] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
     features.forEach((_, i) => {
@@ -21,6 +31,32 @@ export default function LoginHero() {
       }, 600 + i * 200);
     });
   }, []);
+
+  // Auto-rotate testimonials
+  useEffect(() => {
+    const interval = setInterval(() => {
+      goNext();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [currentTestimonial]);
+
+  const goNext = useCallback(() => {
+    setIsAnimating(true);
+    setTimeout(() => {
+      setCurrentTestimonial(prev => (prev + 1) % testimonials.length);
+      setIsAnimating(false);
+    }, 300);
+  }, []);
+
+  const goPrev = useCallback(() => {
+    setIsAnimating(true);
+    setTimeout(() => {
+      setCurrentTestimonial(prev => (prev - 1 + testimonials.length) % testimonials.length);
+      setIsAnimating(false);
+    }, 300);
+  }, []);
+
+  const t = testimonials[currentTestimonial];
 
   return (
     <div className="hidden lg:flex flex-col justify-center p-10 xl:p-16 bg-primary/5 dark:bg-primary/10 relative overflow-hidden">
@@ -72,8 +108,57 @@ export default function LoginHero() {
           })}
         </div>
 
+        {/* Testimonial Carousel */}
+        <div className="mt-8 animate-fade-in" style={{ animationDelay: '1.6s', animationFillMode: 'both' }}>
+          <div className="bg-card/60 backdrop-blur-sm rounded-2xl border border-border/50 p-5 relative">
+            <Quote className="absolute top-4 right-4 w-8 h-8 text-primary/15" />
+            <div
+              className="transition-all duration-300"
+              style={{
+                opacity: isAnimating ? 0 : 1,
+                transform: isAnimating ? 'translateY(8px)' : 'translateY(0)',
+              }}
+            >
+              <div className="flex gap-0.5 mb-3">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star
+                    key={i}
+                    className={`w-3.5 h-3.5 ${i < t.rating ? 'text-amber-500 fill-amber-500' : 'text-muted-foreground/30'}`}
+                  />
+                ))}
+              </div>
+              <p className="text-sm text-foreground leading-relaxed mb-3">"{t.text}"</p>
+              <div>
+                <p className="text-sm font-semibold text-foreground">{t.name}</p>
+                <p className="text-xs text-muted-foreground">{t.role}</p>
+              </div>
+            </div>
+
+            {/* Navigation */}
+            <div className="flex items-center justify-between mt-4 pt-3 border-t border-border/30">
+              <div className="flex gap-1.5">
+                {testimonials.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => { setIsAnimating(true); setTimeout(() => { setCurrentTestimonial(i); setIsAnimating(false); }, 300); }}
+                    className={`w-2 h-2 rounded-full transition-all duration-300 ${i === currentTestimonial ? 'bg-primary w-5' : 'bg-muted-foreground/30 hover:bg-muted-foreground/50'}`}
+                  />
+                ))}
+              </div>
+              <div className="flex gap-1">
+                <button onClick={goPrev} className="w-7 h-7 rounded-lg bg-muted/50 hover:bg-muted flex items-center justify-center transition-colors">
+                  <ChevronLeft className="w-4 h-4 text-muted-foreground" />
+                </button>
+                <button onClick={goNext} className="w-7 h-7 rounded-lg bg-muted/50 hover:bg-muted flex items-center justify-center transition-colors">
+                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Footer info */}
-        <div className="mt-10 pt-6 border-t border-border/50 animate-fade-in" style={{ animationDelay: '1.8s', animationFillMode: 'both' }}>
+        <div className="mt-6 pt-4 border-t border-border/50 animate-fade-in" style={{ animationDelay: '2s', animationFillMode: 'both' }}>
           <p className="text-xs text-muted-foreground">
             © {new Date().getFullYear()} {profile?.nama || 'BengkelPOS'} — Sistem kasir bengkel terpercaya
           </p>
