@@ -16,6 +16,7 @@ export default function PengaturanPage() {
   const [qrLink, setQrLink] = useState('');
   const [saving, setSaving] = useState(false);
   const [notifPermission, setNotifPermission] = useState<NotificationPermission>('default');
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     if (profile) {
