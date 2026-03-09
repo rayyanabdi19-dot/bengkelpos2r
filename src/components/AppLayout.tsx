@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   const { isDemoUser, trialDaysLeft } = useAuth();
+  const { resolvedTheme, setTheme } = useTheme();
   const isLicensed = !isDemoUser;
 
   return (
