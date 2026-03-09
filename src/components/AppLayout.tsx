@@ -2,7 +2,9 @@ import type { ReactNode } from 'react';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { useAuth } from '@/hooks/useAuth';
-import { Crown, FlaskConical } from 'lucide-react';
+import { useTheme } from '@/hooks/useTheme';
+import { Crown, FlaskConical, Sun, Moon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   const { isDemoUser, trialDaysLeft } = useAuth();
