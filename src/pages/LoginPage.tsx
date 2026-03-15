@@ -100,7 +100,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md animate-fade-in">
         <div className="text-center mb-6 lg:hidden">
           {profile?.logo_url ? (
-            <img src={profile.logo_url} alt="Logo Bengkel" className="w-20 h-20 object-contain mx-auto mb-4 rounded-2xl" />
+            <img src={profile.logo_url} alt="Logo Bengkel" className="w-20 h-20 object-contain mx-auto mb-4 rounded-2xl shadow-md" />
           ) : (
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-4">
               <Wrench className="w-8 h-8 text-primary" />
@@ -110,6 +110,19 @@ export default function LoginPage() {
             {profile?.nama ? profile.nama : <><span className="text-foreground">BengkelPOS</span> <span className="text-orange-500">MD2R</span></>}
           </h1>
           <p className="page-subtitle mt-1">Sistem Kasir Bengkel Motor</p>
+          {(profile?.alamat || profile?.telepon || profile?.pemilik) && (
+            <div className="mt-3 space-y-1">
+              {profile?.pemilik && (
+                <p className="text-xs text-muted-foreground">👤 {profile.pemilik}</p>
+              )}
+              {profile?.alamat && (
+                <p className="text-xs text-muted-foreground">📍 {profile.alamat}</p>
+              )}
+              {profile?.telepon && (
+                <p className="text-xs text-muted-foreground">📞 {profile.telepon}</p>
+              )}
+            </div>
+          )}
         </div>
         <h2 className="hidden lg:block text-xl font-bold text-foreground mb-6">Masuk ke Akun Anda</h2>
 
