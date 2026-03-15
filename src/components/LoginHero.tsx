@@ -179,7 +179,7 @@ export default function LoginHero() {
             </div>
           )}
           <h2 className="text-3xl xl:text-4xl font-bold text-foreground tracking-tight leading-tight">
-            {profile?.nama || 'BengkelPOS'}
+            {profile?.nama ? profile.nama : <><span className="text-foreground">BengkelPOS</span> <span className="text-orange-500">MD2R</span></>}
           </h2>
           <p className="text-lg text-muted-foreground mt-2">
             Solusi lengkap manajemen bengkel motor modern
