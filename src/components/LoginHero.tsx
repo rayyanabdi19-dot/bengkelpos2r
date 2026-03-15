@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useBengkelProfile } from '@/hooks/useSupabaseData';
-import { Wrench, Gauge, ShieldCheck, Smartphone, BarChart3, Users, Star, ChevronLeft, ChevronRight, Quote } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { Wrench, Gauge, ShieldCheck, Smartphone, BarChart3, Users, Star, ChevronLeft, ChevronRight, Quote, WrenchIcon, UserCircle } from 'lucide-react';
 
 const features = [
   { icon: Gauge, title: 'Transaksi Cepat', desc: 'Proses servis & penjualan sparepart dalam hitungan detik' },
@@ -18,11 +19,109 @@ const testimonials = [
   { name: 'Hendra Wijaya', role: 'Pemilik HW Motoshop', rating: 5, text: 'Support-nya responsif dan fiturnya lengkap. Dari scan barcode sampai cetak struk bluetooth semua ada!' },
 ];
 
+// Animated counter hook
+function useAnimatedCounter(target: number, duration: number = 2000, start: boolean = false) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (!start) {
+      setCount(0);
+      return;
+    }
+
+    let startTime: number | null = null;
+    let animationFrame: number;
+
+    const animate = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      
+      // Easing function for smooth animation
+      const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+      
+      setCount(Math.floor(easeOutQuart * target));
+
+      if (progress < 1) {
+        animationFrame = requestAnimationFrame(animate);
+      }
+    };
+
+    animationFrame = requestAnimationFrame(animate);
+
+    return () => {
+      if (animationFrame) {
+        cancelAnimationFrame(animationFrame);
+      }
+    };
+  }, [target, duration, start]);
+
+  return count;
+}
+
+// Stat Card Component
+function StatCard({ 
+  icon: Icon, 
+  value, 
+  label, 
+  delay, 
+  isVisible 
+}: { 
+  icon: React.ElementType; 
+  value: number; 
+  label: string; 
+  delay: number;
+  isVisible: boolean;
+}) {
+  const animatedValue = useAnimatedCounter(value, 2500, isVisible);
+
+  return (
+    <div
+      className="bg-card/70 backdrop-blur-sm rounded-2xl border border-border/50 p-5 transition-all duration-700"
+      style={{
+        opacity: isVisible ? 1 : 0,
+        transform: isVisible ? 'translateY(0) scale(1)' : 'translateY(20px) scale(0.95)',
+        transitionDelay: `${delay}ms`,
+      }}
+    >
+      <div className="flex items-center gap-3">
+        <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+          <Icon className="w-6 h-6 text-primary" />
+        </div>
+        <div>
+          <p className="text-2xl font-bold text-foreground tabular-nums">
+            {animatedValue.toLocaleString('id-ID')}
+          </p>
+          <p className="text-xs text-muted-foreground">{label}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function LoginHero() {
   const { profile } = useBengkelProfile();
   const [visibleFeatures, setVisibleFeatures] = useState<number[]>([]);
+  const [visibleStats, setVisibleStats] = useState(false);
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [stats, setStats] = useState({ totalServis: 0, totalPelanggan: 0 });
+
+  // Fetch stats from database
+  useEffect(() => {
+    async function fetchStats() {
+      const [servisResult, pelangganResult] = await Promise.all([
+        supabase.from('servis').select('id', { count: 'exact', head: true }),
+        supabase.from('pelanggan').select('id', { count: 'exact', head: true }),
+      ]);
+
+      setStats({
+        totalServis: servisResult.count || 0,
+        totalPelanggan: pelangganResult.count || 0,
+      });
+    }
+
+    fetchStats();
+  }, []);
 
   useEffect(() => {
     features.forEach((_, i) => {
@@ -30,6 +129,11 @@ export default function LoginHero() {
         setVisibleFeatures(prev => [...prev, i]);
       }, 600 + i * 200);
     });
+
+    // Trigger stats animation after features
+    setTimeout(() => {
+      setVisibleStats(true);
+    }, 1800);
   }, []);
 
   // Auto-rotate testimonials
@@ -108,8 +212,26 @@ export default function LoginHero() {
           })}
         </div>
 
+        {/* Animated Statistics */}
+        <div className="mt-8 grid grid-cols-2 gap-4">
+          <StatCard
+            icon={WrenchIcon}
+            value={stats.totalServis}
+            label="Total Servis"
+            delay={0}
+            isVisible={visibleStats}
+          />
+          <StatCard
+            icon={UserCircle}
+            value={stats.totalPelanggan}
+            label="Total Pelanggan"
+            delay={200}
+            isVisible={visibleStats}
+          />
+        </div>
+
         {/* Testimonial Carousel */}
-        <div className="mt-8 animate-fade-in" style={{ animationDelay: '1.6s', animationFillMode: 'both' }}>
+        <div className="mt-8 animate-fade-in" style={{ animationDelay: '2.2s', animationFillMode: 'both' }}>
           <div className="bg-card/60 backdrop-blur-sm rounded-2xl border border-border/50 p-5 relative">
             <Quote className="absolute top-4 right-4 w-8 h-8 text-primary/15" />
             <div
@@ -158,7 +280,7 @@ export default function LoginHero() {
         </div>
 
         {/* Footer info */}
-        <div className="mt-6 pt-4 border-t border-border/50 animate-fade-in" style={{ animationDelay: '2s', animationFillMode: 'both' }}>
+        <div className="mt-6 pt-4 border-t border-border/50 animate-fade-in" style={{ animationDelay: '2.6s', animationFillMode: 'both' }}>
           <p className="text-xs text-muted-foreground">
             © {new Date().getFullYear()} {profile?.nama || 'BengkelPOS'} — Sistem kasir bengkel terpercaya
           </p>
