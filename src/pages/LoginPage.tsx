@@ -106,7 +106,9 @@ export default function LoginPage() {
               <Wrench className="w-8 h-8 text-primary" />
             </div>
           )}
-          <h1 className="page-header">{profile?.nama || 'BengkelPOS'}</h1>
+          <h1 className="page-header">
+            {profile?.nama ? profile.nama : <><span className="text-foreground">BengkelPOS</span> <span className="text-orange-500">MD2R</span></>}
+          </h1>
           <p className="page-subtitle mt-1">Sistem Kasir Bengkel Motor</p>
         </div>
         <h2 className="hidden lg:block text-xl font-bold text-foreground mb-6">Masuk ke Akun Anda</h2>

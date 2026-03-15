@@ -78,7 +78,9 @@ export function AppSidebar() {
           )}
           {!collapsed && (
             <div className="overflow-hidden">
-              <h2 className="text-sm font-bold text-sidebar-accent-foreground truncate">{profile?.nama || 'BengkelPOS'}</h2>
+              <h2 className="text-sm font-bold text-sidebar-accent-foreground truncate">
+                {profile?.nama ? profile.nama : <><span className="text-sidebar-accent-foreground">BengkelPOS</span> <span className="text-orange-500">MD2R</span></>}
+              </h2>
               <p className="text-xs text-sidebar-foreground truncate">{user?.role === 'admin' ? 'Administrator' : 'Kasir'}</p>
             </div>
           )}
