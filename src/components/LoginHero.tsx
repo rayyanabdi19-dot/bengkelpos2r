@@ -179,7 +179,7 @@ export default function LoginHero() {
             </div>
           )}
           <h2 className="text-3xl xl:text-4xl font-bold text-foreground tracking-tight leading-tight">
-            {profile?.nama || 'BengkelPOS'}
+            {profile?.nama ? profile.nama : <><span className="text-foreground">BengkelPOS</span> <span className="text-orange-500">MD2R</span></>}
           </h2>
           <p className="text-lg text-muted-foreground mt-2">
             Solusi lengkap manajemen bengkel motor modern
@@ -282,7 +282,7 @@ export default function LoginHero() {
         {/* Footer info */}
         <div className="mt-6 pt-4 border-t border-border/50 animate-fade-in" style={{ animationDelay: '2.6s', animationFillMode: 'both' }}>
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} {profile?.nama || 'BengkelPOS'} — Sistem kasir bengkel terpercaya
+            © {new Date().getFullYear()} {profile?.nama ? profile.nama : <>BengkelPOS <span className="text-orange-500">MD2R</span></>} — Sistem kasir bengkel terpercaya
           </p>
           {profile?.alamat && (
             <p className="text-xs text-muted-foreground mt-1">📍 {profile.alamat}</p>
