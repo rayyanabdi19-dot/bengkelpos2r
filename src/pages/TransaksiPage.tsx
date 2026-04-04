@@ -19,10 +19,12 @@ export default function TransaksiPage() {
   const { add: addServis } = useServis();
   const { getActive } = useLayanan();
   const { profile } = useBengkelProfile();
+  const { karyawanList } = useKaryawan();
   const btPrinter = useBluetoothPrinter();
   const daftarLayanan = getActive();
+  const activeKaryawan = karyawanList.filter(k => k.aktif);
   const [form, setForm] = useState({
-    namaPelanggan: '', noHp: '', platMotor: '', tipeMotor: '', keluhan: '',
+    namaPelanggan: '', noHp: '', platMotor: '', tipeMotor: '', keluhan: '', mekanikId: '',
   });
   const [selectedLayanan, setSelectedLayanan] = useState<{ nama: string; harga: number; hpp: number }[]>([]);
   const [selectedSpareparts, setSelectedSpareparts] = useState<{ sparepart_id: string; nama: string; harga: number; hpp: number; qty: number }[]>([]);
