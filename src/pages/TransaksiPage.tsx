@@ -136,6 +136,21 @@ export default function TransaksiPage() {
               <Label>Keluhan</Label>
               <Textarea value={form.keluhan} onChange={e => setForm({ ...form, keluhan: e.target.value })} placeholder="Deskripsi keluhan..." rows={3} />
             </div>
+            <div className="space-y-1">
+              <Label>Mekanik / Karyawan</Label>
+              <Select value={form.mekanikId} onValueChange={val => setForm({ ...form, mekanikId: val })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Pilih mekanik..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {activeKaryawan.map(k => (
+                    <SelectItem key={k.id} value={k.id}>
+                      {k.nama} — {k.jabatan || 'Mekanik'}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="stat-card space-y-3">
