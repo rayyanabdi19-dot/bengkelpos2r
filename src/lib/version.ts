@@ -1,5 +1,5 @@
 // App version - update this on each release
-export const APP_VERSION = '1.3.0';
+export const APP_VERSION = '1.3.1';
 export const APP_BUILD_TIME = '__BUILD_TIME__';
 
 export const APP_CHANGELOG: { version: string; date: string; changes: string[] }[] = [
