@@ -332,6 +332,8 @@ export type Database = {
           created_at: string
           id: string
           keluhan: string
+          mekanik_id: string | null
+          nama_mekanik: string
           nama_pelanggan: string
           no_hp: string
           pelanggan_id: string | null
@@ -344,6 +346,8 @@ export type Database = {
           created_at?: string
           id?: string
           keluhan?: string
+          mekanik_id?: string | null
+          nama_mekanik?: string
           nama_pelanggan: string
           no_hp?: string
           pelanggan_id?: string | null
@@ -356,6 +360,8 @@ export type Database = {
           created_at?: string
           id?: string
           keluhan?: string
+          mekanik_id?: string | null
+          nama_mekanik?: string
           nama_pelanggan?: string
           no_hp?: string
           pelanggan_id?: string | null
@@ -365,6 +371,13 @@ export type Database = {
           total_biaya?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "servis_mekanik_id_fkey"
+            columns: ["mekanik_id"]
+            isOneToOne: false
+            referencedRelation: "karyawan"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "servis_pelanggan_id_fkey"
             columns: ["pelanggan_id"]
