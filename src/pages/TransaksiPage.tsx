@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { useSparepart, useServis, useLayanan, useBengkelProfile } from '@/hooks/useSupabaseData';
+import { useSparepart, useServis, useLayanan, useBengkelProfile, useKaryawan } from '@/hooks/useSupabaseData';
 import { useBluetoothPrinter } from '@/hooks/useBluetoothPrinter';
 import { formatRupiah } from '@/lib/format';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Trash2, Printer, Loader2, Bluetooth } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
@@ -18,10 +19,12 @@ export default function TransaksiPage() {
   const { add: addServis } = useServis();
   const { getActive } = useLayanan();
   const { profile } = useBengkelProfile();
+  const { karyawanList } = useKaryawan();
   const btPrinter = useBluetoothPrinter();
   const daftarLayanan = getActive();
+  const activeKaryawan = karyawanList.filter(k => k.aktif);
   const [form, setForm] = useState({
-    namaPelanggan: '', noHp: '', platMotor: '', tipeMotor: '', keluhan: '',
+    namaPelanggan: '', noHp: '', platMotor: '', tipeMotor: '', keluhan: '', mekanikId: '',
   });
   const [selectedLayanan, setSelectedLayanan] = useState<{ nama: string; harga: number; hpp: number }[]>([]);
   const [selectedSpareparts, setSelectedSpareparts] = useState<{ sparepart_id: string; nama: string; harga: number; hpp: number; qty: number }[]>([]);
@@ -60,6 +63,7 @@ export default function TransaksiPage() {
       return;
     }
 
+    const selectedMekanik = activeKaryawan.find(k => k.id === form.mekanikId);
     setSaving(true);
     const servis = await addServis(
       {
@@ -70,6 +74,8 @@ export default function TransaksiPage() {
         keluhan: form.keluhan,
         total_biaya: totalBiaya,
         status: 'selesai',
+        mekanik_id: form.mekanikId || null,
+        nama_mekanik: selectedMekanik?.nama || '',
       },
       selectedLayanan,
       selectedSpareparts
@@ -80,7 +86,7 @@ export default function TransaksiPage() {
       setLastServis(servis);
       setShowReceipt(true);
       toast({ title: 'Berhasil', description: 'Transaksi servis berhasil disimpan' });
-      setForm({ namaPelanggan: '', noHp: '', platMotor: '', tipeMotor: '', keluhan: '' });
+      setForm({ namaPelanggan: '', noHp: '', platMotor: '', tipeMotor: '', keluhan: '', mekanikId: '' });
       setSelectedLayanan([]);
       setSelectedSpareparts([]);
     } else {
@@ -129,6 +135,21 @@ export default function TransaksiPage() {
             <div className="space-y-1">
               <Label>Keluhan</Label>
               <Textarea value={form.keluhan} onChange={e => setForm({ ...form, keluhan: e.target.value })} placeholder="Deskripsi keluhan..." rows={3} />
+            </div>
+            <div className="space-y-1">
+              <Label>Mekanik / Karyawan</Label>
+              <Select value={form.mekanikId} onValueChange={val => setForm({ ...form, mekanikId: val })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Pilih mekanik..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {activeKaryawan.map(k => (
+                    <SelectItem key={k.id} value={k.id}>
+                      {k.nama} — {k.jabatan || 'Mekanik'}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
