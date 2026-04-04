@@ -183,7 +183,19 @@ export function usePelanggan() {
     return !error;
   };
 
-  return { pelanggan: data, loading, refresh, add };
+  const update = async (id: string, p: Partial<Pelanggan>) => {
+    const { error } = await db.pelanggan().update(p as any).eq('id', id);
+    if (!error) await refresh();
+    return !error;
+  };
+
+  const remove = async (id: string) => {
+    const { error } = await db.pelanggan().delete().eq('id', id);
+    if (!error) await refresh();
+    return !error;
+  };
+
+  return { pelanggan: data, loading, refresh, add, update, remove };
 }
 
 // Sparepart
