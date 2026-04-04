@@ -360,6 +360,8 @@ export function useServis() {
   const add = async (
     servisData: {
       pelanggan_id?: string | null;
+      mekanik_id?: string | null;
+      nama_mekanik?: string;
       nama_pelanggan: string;
       no_hp: string;
       plat_motor: string;
