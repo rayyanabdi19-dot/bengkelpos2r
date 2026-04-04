@@ -29,6 +29,7 @@ export default function ReceiptView({ servis }: { servis: Servis }) {
         <p>Plat: {servis.plat_motor}</p>
         <p>Motor: {servis.tipe_motor}</p>
         {servis.keluhan && <p>Keluhan: {servis.keluhan}</p>}
+        {servis.nama_mekanik && <p>Mekanik: {servis.nama_mekanik}</p>}
       </div>
 
       {/* Services */}
