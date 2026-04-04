@@ -63,6 +63,7 @@ export default function TransaksiPage() {
       return;
     }
 
+    const selectedMekanik = activeKaryawan.find(k => k.id === form.mekanikId);
     setSaving(true);
     const servis = await addServis(
       {
@@ -73,6 +74,8 @@ export default function TransaksiPage() {
         keluhan: form.keluhan,
         total_biaya: totalBiaya,
         status: 'selesai',
+        mekanik_id: form.mekanikId || null,
+        nama_mekanik: selectedMekanik?.nama || '',
       },
       selectedLayanan,
       selectedSpareparts
