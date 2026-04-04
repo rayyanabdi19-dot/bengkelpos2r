@@ -4,6 +4,15 @@ export const APP_BUILD_TIME = '__BUILD_TIME__';
 
 export const APP_CHANGELOG: { version: string; date: string; changes: string[] }[] = [
   {
+    version: '1.3.1',
+    date: '2026-04-04',
+    changes: [
+      'Tampilkan profil bengkel di halaman login dengan update otomatis',
+      'Update nama aplikasi menjadi BengkelPOS MD2R dengan highlight orange',
+      'Perbaikan tampilan branding di sidebar dan hero login',
+    ],
+  },
+  {
     version: '1.3.0',
     date: '2026-03-15',
     changes: [
