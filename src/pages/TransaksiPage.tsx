@@ -86,7 +86,7 @@ export default function TransaksiPage() {
       setLastServis(servis);
       setShowReceipt(true);
       toast({ title: 'Berhasil', description: 'Transaksi servis berhasil disimpan' });
-      setForm({ namaPelanggan: '', noHp: '', platMotor: '', tipeMotor: '', keluhan: '' });
+      setForm({ namaPelanggan: '', noHp: '', platMotor: '', tipeMotor: '', keluhan: '', mekanikId: '' });
       setSelectedLayanan([]);
       setSelectedSpareparts([]);
     } else {
