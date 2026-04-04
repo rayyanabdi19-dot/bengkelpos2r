@@ -138,6 +138,7 @@ export default function RiwayatPage() {
                   <span>{s.plat_motor}</span>
                   <span>•</span>
                   <span>{s.tipe_motor}</span>
+                  {s.nama_mekanik && (<><span>•</span><span>🔧 {s.nama_mekanik}</span></>)}
                   <span>•</span>
                   <span>{formatDateTime(s.created_at)}</span>
                 </div>
