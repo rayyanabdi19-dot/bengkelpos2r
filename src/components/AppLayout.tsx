@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/hooks/useTheme';
 import { Crown, FlaskConical, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import NotificationBell from '@/components/NotificationBell';
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   const { isDemoUser, trialDaysLeft } = useAuth();

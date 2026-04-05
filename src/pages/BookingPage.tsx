@@ -11,9 +11,18 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
-import { CalendarCheck, Check, X, Loader2, MoreHorizontal, Trash2, Pencil, Search } from 'lucide-react';
+import { CalendarCheck, Check, X, Loader2, MoreHorizontal, Trash2, Pencil, Search, Download } from 'lucide-react';
+import * as XLSX from 'xlsx';
 
 const emptyForm = { nama: '', no_wa: '', plat_motor: '', keluhan: '', tanggal: '', jam: '' };
+
+function sendWhatsApp(phone: string, text: string) {
+  let cleaned = phone.replace(/[\s\-\(\)]/g, '');
+  if (cleaned.startsWith('0')) cleaned = '62' + cleaned.substring(1);
+  if (!cleaned.startsWith('+') && !cleaned.startsWith('62')) cleaned = '62' + cleaned;
+  cleaned = cleaned.replace('+', '');
+  window.open(`https://wa.me/${cleaned}?text=${encodeURIComponent(text)}`, '_blank');
+}
 
 export default function BookingPage() {
   const { toast } = useToast();
@@ -61,6 +70,38 @@ export default function BookingPage() {
     toast({ title: 'Berhasil', description: 'Booking dihapus' });
   };
 
+  const handleStatusChange = async (b: Booking, newStatus: string) => {
+    await updateStatus(b.id, newStatus);
+
+    const statusLabels: Record<string, string> = {
+      dikonfirmasi: '✅ Dikonfirmasi',
+      selesai: '🎉 Selesai',
+      dibatalkan: '❌ Dibatalkan',
+    };
+
+    if (b.no_wa && ['dikonfirmasi', 'selesai', 'dibatalkan'].includes(newStatus)) {
+      const msg = `Halo ${b.nama},\n\nStatus booking servis Anda telah diperbarui:\n📋 Status: *${statusLabels[newStatus] || newStatus}*\n📅 Jadwal: ${formatDate(b.tanggal)} ${b.jam}\n🏍️ Plat: ${b.plat_motor}\n\nTerima kasih! 🙏`;
+      sendWhatsApp(b.no_wa, msg);
+    }
+  };
+
+  const handleExport = () => {
+    const data = filtered.map(b => ({
+      'Nama': b.nama,
+      'No. WhatsApp': b.no_wa,
+      'Plat Motor': b.plat_motor,
+      'Keluhan': b.keluhan,
+      'Tanggal': b.tanggal,
+      'Jam': b.jam,
+      'Status': b.status,
+    }));
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Booking');
+    XLSX.writeFile(wb, `booking_servis_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    toast({ title: 'Berhasil', description: 'Data booking berhasil diexport' });
+  };
+
   const statusColor: Record<string, string> = {
     menunggu: 'bg-warning/10 text-warning',
     dikonfirmasi: 'bg-info/10 text-info',
@@ -105,7 +146,7 @@ export default function BookingPage() {
         </div>
 
         <div className="lg:col-span-2 space-y-3">
-          {/* Search & Filter */}
+          {/* Search & Filter & Export */}
           <div className="flex items-center gap-2 flex-wrap">
             <div className="relative flex-1 min-w-[180px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -123,6 +164,9 @@ export default function BookingPage() {
                 <SelectItem value="dibatalkan">Dibatalkan</SelectItem>
               </SelectContent>
             </Select>
+            <Button variant="outline" size="sm" onClick={handleExport} disabled={filtered.length === 0}>
+              <Download className="w-4 h-4 mr-1" /> Export
+            </Button>
           </div>
 
           {filtered.length === 0 ? (
@@ -165,16 +209,16 @@ export default function BookingPage() {
                             </DropdownMenuItem>
                             {b.status === 'menunggu' && (
                               <>
-                                <DropdownMenuItem onClick={() => updateStatus(b.id, 'dikonfirmasi')}>
+                                <DropdownMenuItem onClick={() => handleStatusChange(b, 'dikonfirmasi')}>
                                   <Check className="w-4 h-4 mr-2" /> Konfirmasi
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => updateStatus(b.id, 'dibatalkan')}>
+                                <DropdownMenuItem onClick={() => handleStatusChange(b, 'dibatalkan')}>
                                   <X className="w-4 h-4 mr-2" /> Batalkan
                                 </DropdownMenuItem>
                               </>
                             )}
                             {b.status === 'dikonfirmasi' && (
-                              <DropdownMenuItem onClick={() => updateStatus(b.id, 'selesai')}>
+                              <DropdownMenuItem onClick={() => handleStatusChange(b, 'selesai')}>
                                 <Check className="w-4 h-4 mr-2" /> Selesai
                               </DropdownMenuItem>
                             )}
