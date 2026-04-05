@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/hooks/useTheme';
 import { Crown, FlaskConical, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import NotificationBell from '@/components/NotificationBell';
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   const { isDemoUser, trialDaysLeft } = useAuth();
@@ -20,6 +21,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             <SidebarTrigger className="mr-3" />
             <span className="text-sm font-medium text-muted-foreground">Sistem Kasir Bengkel Motor</span>
             <div className="ml-auto flex items-center gap-2">
+              <NotificationBell />
               <Button
                 variant="ghost"
                 size="icon"
