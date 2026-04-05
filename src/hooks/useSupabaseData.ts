@@ -265,6 +265,12 @@ export function useBooking() {
     return !error;
   };
 
+  const update = async (id: string, b: Partial<Booking>) => {
+    const { error } = await db.booking().update(b as any).eq('id', id);
+    if (!error) await refresh();
+    return !error;
+  };
+
   const updateStatus = async (id: string, status: string) => {
     const { error } = await db.booking().update({ status } as any).eq('id', id);
     if (!error) await refresh();
@@ -277,7 +283,7 @@ export function useBooking() {
     return !error;
   };
 
-  return { bookings: data, loading, refresh, add, updateStatus, remove };
+  return { bookings: data, loading, refresh, add, update, updateStatus, remove };
 }
 
 // Pembelian
