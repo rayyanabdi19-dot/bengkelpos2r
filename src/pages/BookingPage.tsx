@@ -5,12 +5,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
-import { CalendarCheck, Check, X, Loader2 } from 'lucide-react';
+import { CalendarCheck, Check, X, Loader2, MoreHorizontal, Trash2 } from 'lucide-react';
 
 export default function BookingPage() {
   const { toast } = useToast();
-  const { bookings, loading, add, updateStatus } = useBooking();
+  const { bookings, loading, add, updateStatus, remove } = useBooking();
   const [form, setForm] = useState({ nama: '', no_wa: '', plat_motor: '', keluhan: '', tanggal: '', jam: '' });
   const [saving, setSaving] = useState(false);
 
@@ -32,6 +34,11 @@ export default function BookingPage() {
     dikonfirmasi: 'bg-info/10 text-info',
     selesai: 'bg-success/10 text-success',
     dibatalkan: 'bg-destructive/10 text-destructive',
+  };
+
+  const handleDelete = async (id: string) => {
+    await remove(id);
+    toast({ title: 'Berhasil', description: 'Booking dihapus' });
   };
 
   if (loading) {
@@ -64,29 +71,69 @@ export default function BookingPage() {
           </form>
         </div>
 
-        <div className="lg:col-span-2 space-y-3">
-          {bookings.length === 0 && <p className="text-muted-foreground text-sm">Belum ada booking.</p>}
-          {bookings.map(b => (
-            <div key={b.id} className="stat-card">
-              <div className="flex justify-between items-start mb-2">
-                <div>
-                  <h4 className="font-semibold">{b.nama}</h4>
-                  <p className="text-xs text-muted-foreground">{b.no_wa} • {b.plat_motor}</p>
-                </div>
-                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusColor[b.status]}`}>{b.status}</span>
-              </div>
-              <p className="text-sm text-muted-foreground mb-2">{b.keluhan}</p>
-              <div className="flex justify-between items-center">
-                <span className="text-sm">{formatDate(b.tanggal)} • {b.jam}</span>
-                {b.status === 'menunggu' && (
-                  <div className="flex gap-1">
-                    <Button size="sm" variant="outline" onClick={() => updateStatus(b.id, 'dikonfirmasi')}><Check className="w-3.5 h-3.5 mr-1" /> Konfirmasi</Button>
-                    <Button size="sm" variant="ghost" onClick={() => updateStatus(b.id, 'dibatalkan')}><X className="w-3.5 h-3.5" /></Button>
-                  </div>
-                )}
-              </div>
+        <div className="lg:col-span-2">
+          {bookings.length === 0 ? (
+            <p className="text-muted-foreground text-sm">Belum ada booking.</p>
+          ) : (
+            <div className="rounded-lg border border-border overflow-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nama</TableHead>
+                    <TableHead>No. WA</TableHead>
+                    <TableHead>Plat</TableHead>
+                    <TableHead>Keluhan</TableHead>
+                    <TableHead>Jadwal</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Aksi</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {bookings.map(b => (
+                    <TableRow key={b.id}>
+                      <TableCell className="font-medium">{b.nama}</TableCell>
+                      <TableCell className="text-xs">{b.no_wa}</TableCell>
+                      <TableCell className="text-xs">{b.plat_motor}</TableCell>
+                      <TableCell className="text-xs max-w-[150px] truncate">{b.keluhan}</TableCell>
+                      <TableCell className="text-xs whitespace-nowrap">{formatDate(b.tanggal)} {b.jam}</TableCell>
+                      <TableCell>
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusColor[b.status]}`}>{b.status}</span>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <MoreHorizontal className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            {b.status === 'menunggu' && (
+                              <>
+                                <DropdownMenuItem onClick={() => updateStatus(b.id, 'dikonfirmasi')}>
+                                  <Check className="w-4 h-4 mr-2" /> Konfirmasi
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => updateStatus(b.id, 'dibatalkan')}>
+                                  <X className="w-4 h-4 mr-2" /> Batalkan
+                                </DropdownMenuItem>
+                              </>
+                            )}
+                            {b.status === 'dikonfirmasi' && (
+                              <DropdownMenuItem onClick={() => updateStatus(b.id, 'selesai')}>
+                                <Check className="w-4 h-4 mr-2" /> Selesai
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(b.id)}>
+                              <Trash2 className="w-4 h-4 mr-2" /> Hapus
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
-          ))}
+          )}
         </div>
       </div>
     </div>
