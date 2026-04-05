@@ -271,7 +271,13 @@ export function useBooking() {
     return !error;
   };
 
-  return { bookings: data, loading, refresh, add, updateStatus };
+  const remove = async (id: string) => {
+    const { error } = await db.booking().delete().eq('id', id);
+    if (!error) await refresh();
+    return !error;
+  };
+
+  return { bookings: data, loading, refresh, add, updateStatus, remove };
 }
 
 // Pembelian
