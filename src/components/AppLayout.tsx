@@ -21,6 +21,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             <SidebarTrigger className="mr-3" />
             <span className="text-sm font-medium text-muted-foreground">Sistem Kasir Bengkel Motor</span>
             <div className="ml-auto flex items-center gap-2">
+              <NotificationBell />
               <Button
                 variant="ghost"
                 size="icon"
